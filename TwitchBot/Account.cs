@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace TwitchBot
 {
-    public class TwitchAccount
+    /*public class TwitchAccount
     {
         public static TwitchAccount Current = new TwitchAccount();
         public string login, token, moderToken, timeoutSHA, deleteSHA;
@@ -43,5 +43,5 @@ namespace TwitchBot
                 formatter.Serialize(fs, Current);
             }
         }
-    }
+    }*/
 }

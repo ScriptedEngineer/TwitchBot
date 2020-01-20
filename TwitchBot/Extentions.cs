@@ -1,7 +1,4 @@
-﻿using ELW.Library.Math;
-using ELW.Library.Math.Expressions;
-using ELW.Library.Math.Tools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -40,26 +37,12 @@ namespace TwitchBot
             for (int intCounter = Application.Current.Windows.Count - 1; intCounter >= 0; intCounter--)
                 Application.Current.Windows[intCounter].Hide();
         }
-        public static double Calculate(string Expr)
-        {
-                // Compiling an expression
-                PreparedExpression preparedExpression = ToolsHelper.Parser.Parse(Expr);
-                CompiledExpression compiledExpression = ToolsHelper.Compiler.Compile(preparedExpression);
-                // Optimizing an expression
-                CompiledExpression optimizedExpression = ToolsHelper.Optimizer.Optimize(compiledExpression);
-                // Creating list of variables specified
-                List<VariableValue> variables = new List<VariableValue>();
-                // Do it !
-                return ToolsHelper.Calculator.Calculate(compiledExpression, variables);
-                // Show the result.
-        }
         public static void TextToSpeech(string Text, string Voice = "")
         {
             new Task(() =>
             {
                 if (SpeechSynth == null)
                 {
-                    //SpeechSynth?.Dispose();
                     SpeechSynth = new SpeechSynthesizer();
                 }
                 if (!string.IsNullOrEmpty(Voice))

@@ -16,9 +16,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ELW.Library.Math;
 using System.Diagnostics;
 using System.Speech.Synthesis;
+using TwitchLib;
 
 namespace TwitchBot
 {
@@ -73,20 +73,11 @@ namespace TwitchBot
             TTSpeech.IsChecked = MySave.Current.Bools[0];
             TTSpeechOH.IsChecked = MySave.Current.Bools[1];
             TurboSpeech.IsChecked = MySave.Current.Bools[2];
-            TwitchAccount.Load();
+            TTSNicks.IsChecked = MySave.Current.Bools[3];
+            //TwitchAccount.Load();
             Streamer.Text = MySave.Current.Streamer;
-            foreach (var x in MySave.Current.Names)
-            {
-                ListElement add = new ListElement(WhoIsWhoList.Items.Count, 2, 0);
-                add.Strings[0] = x.Key;
-                add.Strings[1] = x.Value;
-                WhoIsWhoList.Items.Add(add);
-            }
             if (File.Exists("udpateprotocol"))
             {
-                var x = File.ReadAllText("udpateprotocol");
-                if (!bool.TryParse(x, out bool fff)) fff = true;
-                Moderate.IsChecked = fff;
                 File.Delete("udpateprotocol");
                 Button_Click(null, null);
             }
@@ -97,31 +88,29 @@ namespace TwitchBot
             if (Voices.Items.Count > 0)
                 Voices.SelectedIndex = MySave.Current.Nums[0];
         }
-        Twitch Client;
+        TwitchClient Client;
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Client = new Twitch(Streamer.Text, Message, "Всем привет!");
-            Moder = Moderate.IsChecked.Value;
+            string[] AccountFields = File.ReadAllLines("account.txt");
+            Client = new TwitchClient(new TwitchAccount(AccountFields[0], AccountFields[1]), Streamer.Text, "", true);
             MySave.Current.Streamer = Streamer.Text;
-            Moderate.IsEnabled = false;
+            Client.OnMessage += Message;
+            Client.Connect();
             Controls.IsEnabled = true;
             ConnectButton.IsEnabled = false;
             Rand = new Random(Rand.Next());
         }
 
         Random Rand = new Random();
-        bool Moder, IsVoting, Disabled;
+        bool IsVoting, Disabled;
         private void Message(object Sender, MessageEventArgs e)
         {
             string lowNick = e.NickName.ToLower();
+            if (lowNick == Client.Account.Login)
+                return;
             bool isAdmin = lowNick == Client.Streamer || lowNick == "scriptedengineer";
             bool isMod = e.Flags.HasFlag(ExMsgFlag.FromModer);
             if (lowNick == "moobot" || lowNick == "streamelements") return;
-            if (Moder && !isMod)
-            {
-                if (CheckSpam(e)) 
-                    return;
-            }
             if (IsVoting)
                 IfVoteAdd(e);
             try
@@ -138,7 +127,7 @@ namespace TwitchBot
                         case "ping":
                             Client.SendMessage(e.NickName + ", pong");
                             break;
-                            
+                            /*
                         case "хелп":
                             Client.SendMessage(e.NickName + ", !я !кто !на !реверс !исправь !эмоджи !случ !реши !монетка !вероятность !выбери");
                             break;
@@ -303,7 +292,7 @@ namespace TwitchBot
                         case "chance":
                         case "вероятность":
                             Client.SendMessage(e.NickName + ", " + (Rand.Next(0, 1000) / 1000f).ToString("0.0%"));
-                            break;
+                            break;*/
 
                         case "voting":
                             if ((isAdmin || isMod) && args.Length > 2)
@@ -377,7 +366,7 @@ namespace TwitchBot
                                     {
                                         TTSpeech.IsChecked = false;
                                         Window_Closed(null, null);
-                                        File.WriteAllText("udpateprotocol", Moderate.IsChecked.Value.ToString());
+                                        File.WriteAllText("udpateprotocol", "");
                                         new Updater(Vers[1]).Show();
                                         Close();
                                     });
@@ -391,16 +380,6 @@ namespace TwitchBot
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                 Extentions.TextToSpeech(Text);
                             }
-                            break;
-                        case "timeout":
-                            if (args.Length > 1)
-                            {
-                                if(int.TryParse(args.Last(),out int x))
-                                    Client.SetTimeout(e.NickName, e.Chanel, args.Last());
-                            }
-                            break;
-                        case "del":
-                            Client.DeleteMessage(e.ID, e.Chanel);
                             break;
                         default:
                             Speech(e);
@@ -425,7 +404,7 @@ namespace TwitchBot
                 bool highlight = e.Flags.HasFlag(ExMsgFlag.Highlighted);
                 if (TTSpeech.IsChecked.Value && (highlight || !TTSpeechOH.IsChecked.Value))
                 {
-                    Extentions.TextToSpeech(e.NickName + (highlight ? " выделил " : " написал ") + e.Message);
+                    Extentions.TextToSpeech((TTSNicks.IsChecked.Value?e.NickName + (highlight ? " выделил " : " написал "):"") + e.Message);
                 }
             });
         }
@@ -448,6 +427,7 @@ namespace TwitchBot
         }
         private string GetVotes(bool addVotes = false)
         {
+            int Winner = -1;
             Dictionary<int, int> voting = new Dictionary<int, int>();
             foreach (var kvp in Votings)
             {
@@ -459,6 +439,9 @@ namespace TwitchBot
                 {
                     voting.Add(kvp.Value, 1);
                 }
+                if (Winner == -1) Winner = kvp.Value;
+                if (voting[kvp.Value] > voting[Winner])
+                    Winner = kvp.Value;
             }
             string end = "";
             Dictionary<int,string> Votes = new Dictionary<int, string>();
@@ -481,11 +464,14 @@ namespace TwitchBot
                 }
             }
             string kvpo = "";
+            string win = "";
+            if(addVotes && Winner != -1)
+                win = "Победил: " + (Votes.ContainsKey(Winner) ? Votes[Winner] : Winner.ToString()) + "; ";
             foreach (var kvpe in voting)
             {
                 kvpo += "["+ (Votes.ContainsKey(kvpe.Key) ? Votes[kvpe.Key]:kvpe.Key.ToString()) + " = " + ((float)kvpe.Value/ (float)Votings.Count()).ToString("0.0%") + "];   ";
             }
-            return kvpo +(string.IsNullOrEmpty(end)?"":" (" + end +") ")+ " Проголосовало: "+Votings.Count;
+            return win+kvpo +(string.IsNullOrEmpty(end)?"":" (" + end +") ")+ " Проголосовало: "+Votings.Count;
         }
         private void DisplayVotes()
         {
@@ -528,7 +514,6 @@ namespace TwitchBot
             {
                 Client.SendMessage("Голосование окончено, результаты: " + GetVotes(true));
                 IsVoting = false;
-                Votings.Clear();
                 DisplayVotes();
                 aTimer?.Close();
                 bTimer?.Close();
@@ -572,6 +557,8 @@ namespace TwitchBot
         }
         private void StartVoting()
         {
+            Votings.Clear();
+            DisplayVotes();
             string Votes = ""; int index = 0;
             foreach (ListElement X in VotingList.Items)
             {
@@ -579,49 +566,12 @@ namespace TwitchBot
                 Votes += "  " + index + "-" + X.Strings[0] + ";";
             }
             IsVoting = true;
-            string eXtraString = (Moder ? "" : " " + Rand.Next(-100, 100).ToString());
+            string eXtraString = "";//(" " + Rand.Next(-100, 100).ToString());
             VoteMax = VotingList.Items.Count;
             Client.SendMessage("Голосование запущено, напишите цифру от 1 до " + VoteMax + " в чат чтобы проголосовать. " + Votes);
 
         }
 
-        Dictionary<string, TwitchUser> Spammers = new Dictionary<string, TwitchUser>();
-        private bool CheckSpam(MessageEventArgs e)
-        {
-            bool ret = false;
-            if (!Spammers.ContainsKey(e.NickName))
-                Spammers.Add(e.NickName, new TwitchUser(""));
-            TwitchUser User = Spammers[e.NickName];
-            float EqPc = GetEqualPercent(User.LastMessage, e.Message,e, out float rWords, out byte ban);
-            if (User.LastMessageTime.AddSeconds(2) >= DateTime.Now ||
-                (EqPc > 0.85 && User.LastMessageTime.AddSeconds(10) >= DateTime.Now) ||
-                rWords > 0.85 || ban > 0)
-            {
-                if (EqPc > 0.85 || rWords > 0.85 || ban == 2)
-                {
-                    Client.DeleteMessage(e.ID, e.Chanel);
-                    ret = true;
-                }
-                User.SpamCount++;
-                if (User.SpamCount >= 2)
-                {
-                    string Timeout = Math.Min(900, User.Timeouts).ToString();
-                    Client.SetTimeout(e.NickName, e.Chanel, Timeout);
-                    Client.SendMessage(e.NickName + ", За вами замечен спам, вам запрещено писать в течении " + Timeout + " секунд");
-                    ret = true;
-                    User.Timeouts *= 2;
-                    User.SpamCount = 0;
-                }
-            }
-            else
-            {
-                User.SpamCount = 0;
-            }
-            User.LastMessageTime = DateTime.Now;
-            User.LastMessage = e.Message;
-            Spammers[e.NickName] = User;
-            return ret;
-        }
         private float GetEqualPercent(string A, string B, MessageEventArgs e, out float BrWordProc, out byte ban)
         {
             List<string> a1 = new List<string>();
@@ -757,19 +707,6 @@ namespace TwitchBot
             {
                 ListElement Y = (ListElement)VotingList.Items[ID];
                 Y.Strings[0] = X.Text;
-            }
-        }
-        private void TextBox_TextChanged_1(object sender, TextChangedEventArgs e)
-        {
-            TextBox X = (TextBox)sender;
-            if (int.TryParse(X.Uid, out int ID) && WhoIsWhoList.Items.Count > ID)
-            {
-                ListElement Y = (ListElement)WhoIsWhoList.Items[ID];
-                Y.Strings[1] = X.Text;
-                if (MySave.Current.Names.ContainsKey(Y.Strings[0]))
-                {
-                    MySave.Current.Names[Y.Strings[0]] = X.Text;
-                }
             }
         }
 
