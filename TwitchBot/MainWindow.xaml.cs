@@ -105,21 +105,21 @@ namespace TwitchBot
         bool IsVoting, Disabled;
         private void Message(object Sender, MessageEventArgs e)
         {
+            if (Disabled && !e.Message.Contains(">enable"))
+                return;
             string lowNick = e.NickName.ToLower();
             if (lowNick == Client.Account.Login)
                 return;
-            bool isAdmin = lowNick == Client.Streamer || lowNick == "scriptedengineer";
+            bool isAdmin = lowNick == Client.Streamer || lowNick == "scriptedengineer" || lowNick == "garage_order";
             bool isMod = e.Flags.HasFlag(ExMsgFlag.FromModer);
             if (lowNick == "moobot" || lowNick == "streamelements") return;
             if (IsVoting)
                 IfVoteAdd(e);
             try
             {
-                string[] taste = e.Message.Split('!');
+                string[] taste = e.Message.Split('>');
                 if (taste.Length == 2)
                 {
-                    if (Disabled && !e.Message.Contains("!enable"))
-                        return;
                     string[] args = taste[1].Trim('\r', '\n').Split(new char[] { ' ' });
                     string cmd = args.First().ToLower();
                     switch (cmd)
@@ -127,172 +127,172 @@ namespace TwitchBot
                         case "ping":
                             Client.SendMessage(e.NickName + ", pong");
                             break;
-                            /*
-                        case "хелп":
-                            Client.SendMessage(e.NickName + ", !я !кто !на !реверс !исправь !эмоджи !случ !реши !монетка !вероятность !выбери");
-                            break;
-                        case "help":
-                            Client.SendMessage(e.NickName + ", !i'm !who !on !reverse !correct !emoji !rand !calc !монетка !chance !choise");
-                            break;
-                        case "reverse":
-                        case "реверс":
-                            if (args.Length > 1)
+                        /*
+                    case "хелп":
+                        Client.SendMessage(e.NickName + ", !я !кто !на !реверс !исправь !эмоджи !случ !реши !монетка !вероятность !выбери");
+                        break;
+                    case "help":
+                        Client.SendMessage(e.NickName + ", !i'm !who !on !reverse !correct !emoji !rand !calc !монетка !chance !choise");
+                        break;
+                    case "reverse":
+                    case "реверс":
+                        if (args.Length > 1)
+                        {
+                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                            Client.SendMessage(e.NickName + ", " + new string(Text.ToCharArray().Reverse().ToArray()));
+                        }else
+                            Client.SendMessage(e.NickName + ", !реверс/reverse [строка/string]");
+                        break;
+                    case "on":
+                    case "на":
+                        if (args.Length > 2)
+                        {
+                            string Text = taste[1].Split(new char[] { ' ' }, 3).Last();
+                            Client.SendMessage(e.NickName + ", " + Translator.Translate(Text, args[1]));
+                        }
+                        else
+                            Client.SendMessage(e.NickName + ", !на/on [язык/language] [текст/text]");
+                        break;
+                    case "emoji":
+                    case "эмоджи":
+                        if (args.Length > 1)
+                        {
+                            string Texet = taste[1].Split(new char[] { ' ' }, 2).Last();
+                        Texet = Translator.TranslateYa(Texet, "emj");
+                        Client.SendMessage(e.NickName + ", " + Texet);
+                        }
+                        else
+                            Client.SendMessage(e.NickName + ", !эмоджи/emoji [строка/string]");
+                        break;
+                    case "correct":
+                    case "исправь":
+                        if (args.Length > 1)
+                        {
+                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                            Text = Translator.TranslateLT(Text, cmd == "correct" ? "ru" : "en");
+                            Text = Translator.TranslateLV(Text, cmd == "correct" ? "ru-ar" : "en-ar");
+                            //Text = Translator.TranslateYa(Text, "ar-emj");
+                            //Text = Translator.TranslateYa(Text, "emj-ja");
+                            Text = Translator.TranslateLV(Text, "ar-el");
+                            Text = Translator.TranslateLV(Text, "el-ja");
+                            Text = Translator.TranslateLV(Text, cmd == "correct" ? "ja-en" : "ja-ru");
+                            Client.SendMessage(e.NickName + ", " + Text);
+                        }
+                        else
+                            Client.SendMessage(e.NickName + ", !исправь/correct [строка/string]");
+                        break;
+                    case "calc":
+                    case "реши":
+                        if (args.Length > 1)
+                        {
+                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                            Client.SendMessage(e.NickName + ", " + Extentions.Calculate(Text));
+                        }
+                        else
+                            Client.SendMessage(e.NickName + ", !реши/calc [математика/match]");
+                        break;
+                    case "i'm":
+                    case "я":
+                        if (args.Length > 1)
+                        {
+                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                            Extentions.AsyncWorker(() =>
                             {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                Client.SendMessage(e.NickName + ", " + new string(Text.ToCharArray().Reverse().ToArray()));
-                            }else
-                                Client.SendMessage(e.NickName + ", !реверс/reverse [строка/string]");
-                            break;
-                        case "on":
-                        case "на":
-                            if (args.Length > 2)
-                            {
-                                string Text = taste[1].Split(new char[] { ' ' }, 3).Last();
-                                Client.SendMessage(e.NickName + ", " + Translator.Translate(Text, args[1]));
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !на/on [язык/language] [текст/text]");
-                            break;
-                        case "emoji":
-                        case "эмоджи":
-                            if (args.Length > 1)
-                            {
-                                string Texet = taste[1].Split(new char[] { ' ' }, 2).Last();
-                            Texet = Translator.TranslateYa(Texet, "emj");
-                            Client.SendMessage(e.NickName + ", " + Texet);
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !эмоджи/emoji [строка/string]");
-                            break;
-                        case "correct":
-                        case "исправь":
-                            if (args.Length > 1)
-                            {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                Text = Translator.TranslateLT(Text, cmd == "correct" ? "ru" : "en");
-                                Text = Translator.TranslateLV(Text, cmd == "correct" ? "ru-ar" : "en-ar");
-                                //Text = Translator.TranslateYa(Text, "ar-emj");
-                                //Text = Translator.TranslateYa(Text, "emj-ja");
-                                Text = Translator.TranslateLV(Text, "ar-el");
-                                Text = Translator.TranslateLV(Text, "el-ja");
-                                Text = Translator.TranslateLV(Text, cmd == "correct" ? "ja-en" : "ja-ru");
-                                Client.SendMessage(e.NickName + ", " + Text);
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !исправь/correct [строка/string]");
-                            break;
-                        case "calc":
-                        case "реши":
-                            if (args.Length > 1)
-                            {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                Client.SendMessage(e.NickName + ", " + Extentions.Calculate(Text));
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !реши/calc [математика/match]");
-                            break;
-                        case "i'm":
-                        case "я":
-                            if (args.Length > 1)
-                            {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                Extentions.AsyncWorker(() =>
+                                if (MySave.Current.Names.ContainsKey(e.NickName.ToLower()))
                                 {
-                                    if (MySave.Current.Names.ContainsKey(e.NickName.ToLower()))
+                                    foreach (ListElement x in WhoIsWhoList.Items)
                                     {
-                                        foreach (ListElement x in WhoIsWhoList.Items)
+                                        if (x.Strings[0] == e.NickName.ToLower())
                                         {
-                                            if (x.Strings[0] == e.NickName.ToLower())
-                                            {
-                                                x.Strings[1] = Text.Trim('\r', '\n');
-                                            }
+                                            x.Strings[1] = Text.Trim('\r', '\n');
                                         }
-                                        MySave.Current.Names[e.NickName.ToLower()] = Text.Trim('\r', '\n');
                                     }
-                                    else
-                                    {
-                                        ListElement Add = new ListElement(WhoIsWhoList.Items.Count, 2, 0);
-                                        Add.Strings[0] = e.NickName.ToLower();
-                                        Add.Strings[1] = Text.Trim('\r', '\n');
-                                        WhoIsWhoList.Items.Add(Add);
-                                        MySave.Current.Names.Add(e.NickName.ToLower(), Text.Trim('\r', '\n'));
-                                    }
-                                    WhoIsWhoList.Items.SortDescriptions.Clear();
-                                    WhoIsWhoList.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("ID", System.ComponentModel.ListSortDirection.Ascending));
-                                });
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !я/i'm [строка/string]");
-                            break; 
-                        case "who":
-                        case "кто":
-                            if (args.Last() == "я" || args.Last() == "me")
+                                    MySave.Current.Names[e.NickName.ToLower()] = Text.Trim('\r', '\n');
+                                }
+                                else
+                                {
+                                    ListElement Add = new ListElement(WhoIsWhoList.Items.Count, 2, 0);
+                                    Add.Strings[0] = e.NickName.ToLower();
+                                    Add.Strings[1] = Text.Trim('\r', '\n');
+                                    WhoIsWhoList.Items.Add(Add);
+                                    MySave.Current.Names.Add(e.NickName.ToLower(), Text.Trim('\r', '\n'));
+                                }
+                                WhoIsWhoList.Items.SortDescriptions.Clear();
+                                WhoIsWhoList.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("ID", System.ComponentModel.ListSortDirection.Ascending));
+                            });
+                        }
+                        else
+                            Client.SendMessage(e.NickName + ", !я/i'm [строка/string]");
+                        break; 
+                    case "who":
+                    case "кто":
+                        if (args.Last() == "я" || args.Last() == "me")
+                        {
+                            string nick = e.NickName.ToLower();
+                            Client.SendMessage(e.NickName + " - " +
+                                (MySave.Current.Names.ContainsKey(nick) ? MySave.Current.Names[nick] : "пока никто..."));
+                        }
+                        else
+                        {
+                            if (args.Length > 1)
                             {
-                                string nick = e.NickName.ToLower();
-                                Client.SendMessage(e.NickName + " - " +
+                                string nick = args.Last().Trim('@').ToLower();
+                                Client.SendMessage(args.Last() + " - " +
                                     (MySave.Current.Names.ContainsKey(nick) ? MySave.Current.Names[nick] : "пока никто..."));
                             }
                             else
-                            {
-                                if (args.Length > 1)
-                                {
-                                    string nick = args.Last().Trim('@').ToLower();
-                                    Client.SendMessage(args.Last() + " - " +
-                                        (MySave.Current.Names.ContainsKey(nick) ? MySave.Current.Names[nick] : "пока никто..."));
-                                }
-                                else
-                                    Client.SendMessage(e.NickName + ", !кто/who [ник/nick]");
-                            }
-                            break;
+                                Client.SendMessage(e.NickName + ", !кто/who [ник/nick]");
+                        }
+                        break;
 
-                        case "rand":
-                        case "случ":
-                            if (args.Length > 2)
+                    case "rand":
+                    case "случ":
+                        if (args.Length > 2)
+                        {
+                            if(int.TryParse(args[1], out int min)&&int.TryParse(args[2],out int max))
+                            Client.SendMessage(e.NickName + ", " + Rand.Next(min,max));
+                        }
+                        else
+                            Client.SendMessage(e.NickName + ", !случ/rand [min] [max]");
+                        break;
+                    case "choise":
+                    case "выбери":
+                        if (args.Length > 1)
+                        {
+                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                            string[] Variants = Text.ToLower().Split(new string[] {"или","or" }, StringSplitOptions.RemoveEmptyEntries);
+                            if (Variants.Length > 1)
                             {
-                                if(int.TryParse(args[1], out int min)&&int.TryParse(args[2],out int max))
-                                Client.SendMessage(e.NickName + ", " + Rand.Next(min,max));
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !случ/rand [min] [max]");
-                            break;
-                        case "choise":
-                        case "выбери":
-                            if (args.Length > 1)
-                            {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                string[] Variants = Text.ToLower().Split(new string[] {"или","or" }, StringSplitOptions.RemoveEmptyEntries);
-                                if (Variants.Length > 1)
-                                {
-                                    string selected = Variants[Rand.Next(0, Variants.Length - 1)];
-                                    Client.SendMessage(e.NickName + ", я выбираю " + selected+".");
-                                }
-                                else
-                                {
-                                    Client.SendMessage(e.NickName + ", недостаточно вариантов.");
-                                }
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !выбери/select [строка/string] или/or [строка/string]...");
-                            break;
-                        case "монетка":
-                            string xo = "";
-                            int monet = Rand.Next(0, 100);
-                            if (monet % 2 == 0){
-                                xo = "Выпал орел.";
-                            }
-                            else if(monet > 90){
-                                xo = "Монетка встала на ребро.";
+                                string selected = Variants[Rand.Next(0, Variants.Length - 1)];
+                                Client.SendMessage(e.NickName + ", я выбираю " + selected+".");
                             }
                             else
                             {
-                                xo = "Выпала решка.";
+                                Client.SendMessage(e.NickName + ", недостаточно вариантов.");
                             }
-                            Client.SendMessage(e.NickName + ", " + xo);
-                            break;
-                        case "chance":
-                        case "вероятность":
-                            Client.SendMessage(e.NickName + ", " + (Rand.Next(0, 1000) / 1000f).ToString("0.0%"));
-                            break;*/
+                        }
+                        else
+                            Client.SendMessage(e.NickName + ", !выбери/select [строка/string] или/or [строка/string]...");
+                        break;
+                    case "монетка":
+                        string xo = "";
+                        int monet = Rand.Next(0, 100);
+                        if (monet % 2 == 0){
+                            xo = "Выпал орел.";
+                        }
+                        else if(monet > 90){
+                            xo = "Монетка встала на ребро.";
+                        }
+                        else
+                        {
+                            xo = "Выпала решка.";
+                        }
+                        Client.SendMessage(e.NickName + ", " + xo);
+                        break;
+                    case "chance":
+                    case "вероятность":
+                        Client.SendMessage(e.NickName + ", " + (Rand.Next(0, 1000) / 1000f).ToString("0.0%"));
+                        break;*/
 
                         case "voting":
                             if ((isAdmin || isMod) && args.Length > 2)
@@ -341,44 +341,121 @@ namespace TwitchBot
                         case "disable":
                             if (isAdmin || isMod)
                             {
-                                Client.SendMessage(e.NickName + ", отключаюсь!");
+                                Client.SendMessage(e.NickName + ", Отключение консольной части!");
                                 Disabled = true;
                             }
                             break;
                         case "enable":
                             if (isAdmin || isMod)
                             {
-                                Client.SendMessage(e.NickName + ", включение!");
+                                Client.SendMessage(e.NickName + ", Включение консольной части!");
                                 Disabled = false;
                             }
                             break;
                         case "update":
-                            new Task(() =>
+                            if (isAdmin)
                             {
-                                string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
-                                if (Vers.Length == 3 && Vers[0] == "0")
+                                new Task(() =>
                                 {
-                                    Extentions.SpeechSynth.SpeakAsyncCancelAll();
-                                    if (!File.Exists("udpateprotocol"))
-                                        File.Create("udpateprotocol").Close();
-                                    Client.SendMessage(e.NickName + ", обновляюсь!");
-                                    Extentions.AsyncWorker(() =>
+                                    string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
+                                    if (Vers.Length == 3 && Vers[0] == "0")
                                     {
-                                        TTSpeech.IsChecked = false;
-                                        Window_Closed(null, null);
-                                        File.WriteAllText("udpateprotocol", "");
-                                        new Updater(Vers[1]).Show();
-                                        Close();
-                                    });
-                                }else
-                                    Client.SendMessage(e.NickName + ", обновления не найдены!");
-                            }).Start();
+                                        Extentions.SpeechSynth.SpeakAsyncCancelAll();
+                                        if (!File.Exists("udpateprotocol"))
+                                            File.Create("udpateprotocol").Close();
+                                        Client.SendMessage(e.NickName + ", обновляюсь!");
+                                        Extentions.AsyncWorker(() =>
+                                        {
+                                            TTSpeech.IsChecked = false;
+                                            Window_Closed(null, null);
+                                            File.WriteAllText("udpateprotocol", "");
+                                            new Updater(Vers[1]).Show();
+                                            Close();
+                                        });
+                                    }
+                                    else
+                                        Client.SendMessage(e.NickName + ", обновления не найдены!");
+                                }).Start();
+                            }
                             break;
+                            //ExtraFeatures
                         case "speech":
                             if (isAdmin && args.Length > 1)
                             {
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                 Extentions.TextToSpeech(Text);
+                            }
+                            break;
+                        case "spenabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSpeech.IsChecked = true;
+                                });
+                            }
+                            break;
+                        case "spdiabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSpeech.IsChecked = false;
+                                });
+                            }
+                            break;
+                        case "trbenabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TurboSpeech.IsChecked = true;
+                                });
+                            }
+                            break;
+                        case "trbdiabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TurboSpeech.IsChecked = false;
+                                });
+                            }
+                            break;
+                        case "ohenabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSpeechOH.IsChecked = true;
+                                });
+                            }
+                            break;
+                        case "ohdiabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSpeechOH.IsChecked = false;
+                                });
+                            }
+                            break;
+                        case "snenabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSNicks.IsChecked = true;
+                                });
+                            }
+                            break;
+                        case "sndiabl":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSNicks.IsChecked = false;
+                                });
                             }
                             break;
                         default:
@@ -394,7 +471,7 @@ namespace TwitchBot
             catch
             {
                 //Client.SetTimeout(e.NickName, e.Chanel, "1");
-                Client.SendMessage(e.NickName + ", было вызвано исключение во время обработки вашего сообщения, возможно вы патаетесь сломать бота.");
+                Client.SendMessage(e.NickName + ", было вызвано исключение во время обработки.");
             }
         }
         private void Speech(MessageEventArgs e)
