@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchBot"
         mc:Ignorable="d"
-        Title="TwitchBot" Height="440" Width="350" MinWidth="340" MinHeight="440" Closed="Window_Closed" WindowStartupLocation="CenterScreen">
+        Title="TwitchBot" Height="440" Width="350" MinWidth="340" MinHeight="440" Closed="Window_Closed" WindowStartupLocation="CenterScreen" Closing="Window_Closing" StateChanged="Window_StateChanged">
     <Grid>
         <TextBox x:Name="Streamer" Height="23" Margin="10,10,90,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <Button x:Name="ConnectButton" Content="Подключить" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="75" Click="Button_Click" Height="23"/>

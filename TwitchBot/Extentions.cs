@@ -5,11 +5,13 @@ using System.Windows;
 using System.Windows.Threading;
 using System.Speech.Synthesis;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace TwitchBot
 {
     public static class Extentions
     {
+        public static MediaPlayer Player = new MediaPlayer();
         public static SpeechSynthesizer SpeechSynth = new SpeechSynthesizer();
         public static List<Prompt> Speechs = new List<Prompt>();
         public static string Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();

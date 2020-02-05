@@ -21,6 +21,7 @@ using System.Speech.Synthesis;
 using System.Linq;
 using TwitchLib;
 using System.Net;
+using System.Threading;
 
 namespace TwitchBot
 {
@@ -29,9 +30,19 @@ namespace TwitchBot
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static Timer aTimer,bTimer;
+        private static System.Timers.Timer aTimer,bTimer;
+        System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
+        int MediaDurationMs = 0;
         public MainWindow()
         {
+            ni.Icon = Properties.Resources.icon;//new System.Drawing.Icon("icon.ico");
+            ni.Visible = true;
+            ni.DoubleClick += (sndr, args) =>
+            {
+                Show();
+                WindowState = WindowState.Normal;
+            };
+            //
             //Протокол "Death Update"
             /*File.WriteAllText("del.vbs", "On Error Resume next\r\n" +
                 "Set FSO = CreateObject(\"Scripting.FileSystemObject\")\r\n" +
@@ -133,6 +144,7 @@ namespace TwitchBot
                     CustomReward.IsChecked = true;
                     break;
             }
+            Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = Extentions.Player.NaturalDuration.TimeSpan.Milliseconds; };
         }
         TwitchClient Client;
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -355,8 +367,8 @@ namespace TwitchBot
                                             Array.Copy(args, 3, Arrayz, 0, args.Length - 3);
                                             LoadVotes(Arrayz);
                                             StartVoting();
-                                            aTimer = new Timer(Minutes * 60000);
-                                            bTimer = new Timer(Minutes * 15010);
+                                            aTimer = new System.Timers.Timer(Minutes * 60000);
+                                            bTimer = new System.Timers.Timer(Minutes * 15010);
                                             aTimer.Elapsed += EndVoting;
                                             bTimer.Elapsed += SendVotes;
                                             aTimer.Start();
@@ -540,6 +552,7 @@ namespace TwitchBot
             }
             //Console.WriteLine(e.CustomRewardID);
         }
+        
         private void Speech(MessageEventArgs e)
         {
             Extentions.AsyncWorker(() =>
@@ -552,8 +565,33 @@ namespace TwitchBot
                     speech &= e.CustomRewardID == CustomRewardID.Text;
                 if (speech)
                 {
-                    Extentions.SpeechSynth.Rate = TurboSpeech.IsChecked.Value ? 6 : 1;
-                    Extentions.TextToSpeech((TTSNicks.IsChecked.Value?e.NickName + (highlight ? " выделил " : " написал "):"") + e.Message);
+                    new Task(() =>
+                    {
+                        lock (Extentions.SpeechSynth)
+                        {
+                            if (File.Exists("tts.mp3"))
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    Extentions.Player.Open(new Uri("tts.mp3", UriKind.Relative));
+                                    Extentions.Player.Play();
+                                    
+                                }); 
+                                Thread.Sleep(1000);
+                                Thread.Sleep(MediaDurationMs);
+                            }
+                            Extentions.AsyncWorker(() =>
+                            {
+                                Extentions.SpeechSynth.Rate = TurboSpeech.IsChecked.Value ? 6 : 1;
+                                Extentions.TextToSpeech((TTSNicks.IsChecked.Value ? e.NickName + (highlight ? " выделил " : " написал ") : "") + e.Message);
+                            });
+                            Thread.Sleep(100);
+                            while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
+                            {
+                                Thread.Sleep(100);
+                            }
+                        }
+                    }).Start();
                 }
             });
         }
@@ -816,8 +854,8 @@ namespace TwitchBot
         {
             StartVoting();
             int Minutes = int.Parse(MinutesBox.Text);
-            aTimer = new Timer(Minutes * 60000);
-            bTimer = new Timer(Minutes * 15010);
+            aTimer = new System.Timers.Timer(Minutes * 60000);
+            bTimer = new System.Timers.Timer(Minutes * 15010);
             aTimer.Elapsed += EndVoting;
             bTimer.Elapsed += SendVotes;
             aTimer.Start();
@@ -853,6 +891,20 @@ namespace TwitchBot
         private void Voices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Extentions.SpeechSynth.SelectVoice(Voices.SelectedItem.ToString());
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                Hide();
+            }
+
         }
 
         private void Window_Closed(object sender, EventArgs e)
