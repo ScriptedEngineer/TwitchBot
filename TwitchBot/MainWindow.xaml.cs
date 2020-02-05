@@ -33,8 +33,10 @@ namespace TwitchBot
         private static System.Timers.Timer aTimer,bTimer;
         System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
         int MediaDurationMs = 0;
+        Thread SpeechTask;
         public MainWindow()
         {
+            string[] argsv = Environment.GetCommandLineArgs();
             ni.Icon = Properties.Resources.icon;//new System.Drawing.Icon("icon.ico");
             ni.Visible = true;
             ni.DoubleClick += (sndr, args) =>
@@ -42,7 +44,6 @@ namespace TwitchBot
                 Show();
                 WindowState = WindowState.Normal;
             };
-            //
             //Протокол "Death Update"
             /*File.WriteAllText("del.vbs", "On Error Resume next\r\n" +
                 "Set FSO = CreateObject(\"Scripting.FileSystemObject\")\r\n" +
@@ -116,11 +117,12 @@ namespace TwitchBot
             MySave.Load();
             TTSpeech.IsChecked = MySave.Current.Bools[0];
             TTSpeechOH.IsChecked = MySave.Current.Bools[1];
-            TurboSpeech.IsChecked = MySave.Current.Bools[2];
+            TTSNotifyUse.IsChecked = MySave.Current.Bools[2];
             TTSNicks.IsChecked = MySave.Current.Bools[3];
             //TwitchAccount.Load();
             Streamer.Text = MySave.Current.Streamer;
             CustomRewardID.Text = MySave.Current.TTSCRID;
+            TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
             if (File.Exists("udpateprotocol"))
             {
                 File.Delete("udpateprotocol");
@@ -132,6 +134,9 @@ namespace TwitchBot
             }
             if (Voices.Items.Count > 0)
                 Voices.SelectedIndex = MySave.Current.Nums[0];
+            int num = MySave.Current.Nums[2];
+            SynthSpeed.Value = num;
+            SpeedLabel.Content = $"Скорость ({num})";
             switch (MySave.Current.Nums[1])
             {
                 case 0:
@@ -144,7 +149,14 @@ namespace TwitchBot
                     CustomReward.IsChecked = true;
                     break;
             }
-            Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = Extentions.Player.NaturalDuration.TimeSpan.Milliseconds; };
+            Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = (int)Extentions.Player.NaturalDuration.TimeSpan.TotalMilliseconds; };
+            if(argsv.Length > 1)
+                switch (argsv[1])
+                {
+                    case "autoconnect":
+                        Button_Click(null, null);
+                        break;
+                }
         }
         TwitchClient Client;
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -462,21 +474,15 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "tts.turbo.enable":
+                        case "tts.speed.set":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
                                 {
-                                    TurboSpeech.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.turbo.disable":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TurboSpeech.IsChecked = false;
+                                    if (int.TryParse(args[1], out int num))
+                                    {
+                                        SynthSpeed.Value = num;
+                                    }
                                 });
                             }
                             break;
@@ -565,24 +571,30 @@ namespace TwitchBot
                     speech &= e.CustomRewardID == CustomRewardID.Text;
                 if (speech)
                 {
+                    bool TTSNotify = TTSNotifyUse.IsChecked.Value;
                     new Task(() =>
                     {
                         lock (Extentions.SpeechSynth)
                         {
-                            if (File.Exists("tts.mp3"))
+                            Extentions.AsyncWorker(() =>
+                            {
+                                if (!TTSpeech.IsChecked.Value)
+                                return;
+                            });
+                            SpeechTask = Thread.CurrentThread;
+                            if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
                             {
                                 Extentions.AsyncWorker(() =>
                                 {
-                                    Extentions.Player.Open(new Uri("tts.mp3", UriKind.Relative));
+                                    Extentions.Player.Open(new Uri(MySave.Current.TTSNTFL, UriKind.Absolute));
                                     Extentions.Player.Play();
-                                    
-                                }); 
-                                Thread.Sleep(1000);
+
+                                });
+                                Thread.Sleep(1200);
                                 Thread.Sleep(MediaDurationMs);
                             }
                             Extentions.AsyncWorker(() =>
                             {
-                                Extentions.SpeechSynth.Rate = TurboSpeech.IsChecked.Value ? 6 : 1;
                                 Extentions.TextToSpeech((TTSNicks.IsChecked.Value ? e.NickName + (highlight ? " выделил " : " написал ") : "") + e.Message);
                             });
                             Thread.Sleep(100);
@@ -592,6 +604,7 @@ namespace TwitchBot
                             }
                         }
                     }).Start();
+                    
                 }
             });
         }
@@ -881,8 +894,9 @@ namespace TwitchBot
         {
             if (!TTSpeech.IsChecked.Value)
             {
-                
+                Extentions.Player.Stop();
                 Extentions.SpeechSynth.SpeakAsyncCancelAll();
+                SpeechTask?.Abort();
                 //Extentions.SpeechSynth.Pause();
                 //Extentions.SpeechSynth.Dispose();
             }
@@ -907,11 +921,33 @@ namespace TwitchBot
 
         }
 
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            int num = (int)Math.Max(Math.Min(SynthSpeed.Value,10),-10);
+            Extentions.SpeechSynth.Rate = num;
+            SynthSpeed.Value = num;
+            SpeedLabel.Content = $"Скорость ({num})";
+            MySave.Current.Nums[2] = num;
+        }
+
+        private void Button_Click_6(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.OpenFileDialog Dial = new System.Windows.Forms.OpenFileDialog();
+            Dial.Filter = "Аудиофайл(*.mp3)|*.mp3";
+            if (Dial.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string file = Dial.FileName;
+                MySave.Current.TTSNTFL = file;
+                TTSNotifyLabel.Content = System.IO.Path.GetFileName(file);
+            }
+        }
+
         private void Window_Closed(object sender, EventArgs e)
         {
             MySave.Current.Bools[0] = TTSpeech.IsChecked.Value;
             MySave.Current.Bools[1] = TTSpeechOH.IsChecked.Value;
-            MySave.Current.Bools[2] = TurboSpeech.IsChecked.Value;
+            MySave.Current.Bools[2] = TTSNotifyUse.IsChecked.Value;
+            MySave.Current.Bools[3] = TTSNicks.IsChecked.Value;
             MySave.Current.Nums[0] = Voices.SelectedIndex;
             MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value?1:(CustomReward.IsChecked.Value?2:-1));
             MySave.Current.TTSCRID = CustomRewardID.Text;

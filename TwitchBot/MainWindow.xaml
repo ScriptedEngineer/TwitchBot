@@ -69,16 +69,20 @@
             </TabItem>
             <TabItem Header="Чат">
                 <Grid Background="#FFE5E5E5">
-                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Top" Height="103"/>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Top" Height="144"/>
                     <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White"/>
                     <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="TurboSpeech" Content="Турбо" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top"/>
-                    <ComboBox x:Name="Voices" VerticalAlignment="Top" Margin="10,70,0,0" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141"/>
-                    <Label Content="Голос:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="77,54,0,0" Width="57"/>
+                    <ComboBox x:Name="Voices" VerticalAlignment="Top" Margin="10,66,0,0" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141"/>
+                    <Label Content="Голос:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,50,0,0" Width="57"/>
                     <CheckBox x:Name="TTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" IsChecked="True"/>
                     <TextBox x:Name="CustomRewardID" Height="23" Margin="156,70,10,0" TextWrapping="NoWrap" VerticalAlignment="Top"/>
                     <RadioButton x:Name="CustomReward" Content="Только товар:" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top"/>
                     <RadioButton x:Name="AllChat" Content="Весь чат" HorizontalAlignment="Left" Margin="156,10,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                    <Slider x:Name="SynthSpeed" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top" Width="141" Minimum="-10" ValueChanged="Slider_ValueChanged"/>
+                    <Label x:Name="SpeedLabel" Content="Скорость (0)" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,93,0,0" Width="134"/>
+                    <Button Content="..." HorizontalAlignment="Right" Margin="0,119,10,0" VerticalAlignment="Top" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Click="Button_Click_6"/>
+                    <Label x:Name="TTSNotifyLabel" Content="tts.mp3" Margin="156,118,39,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center"/>
+                    <CheckBox x:Name="TTSNotifyUse" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="156,98,0,0" VerticalAlignment="Top" IsChecked="True"/>
                 </Grid>
             </TabItem>
         </TabControl>

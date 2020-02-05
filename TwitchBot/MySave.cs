@@ -13,14 +13,16 @@ namespace TwitchBot
         public static MySave Current = new MySave();
         public string Streamer { get; set; }
         public string TTSCRID { get; set; }
+        public string TTSNTFL { get; set; }
         private static Random Rand = new Random();
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }
         private MySave()
         {
             Bools = new bool[4];
-            Nums = new int[2];
+            Nums = new int[3];
             Nums[0] = 0;
+            TTSNTFL = $"{Path.GetDirectoryName(Extentions.AppFile)}/tts.mp3";
         }
         public static void Load()
         {
@@ -40,16 +42,16 @@ namespace TwitchBot
                     Current = new MySave();
                     Save();
                 }
-                if (Current.Nums.Length != 2)
+                if (Current.Nums.Length < 3)
                 {
                     int[] nms = Current.Nums;
-                    Array.Resize<int>(ref nms, 2);
+                    Array.Resize<int>(ref nms, 3);
                     Current.Nums = nms;
                 }
-                if (Current.Nums.Length != 2)
+                if (Current.Bools.Length < 4)
                 {
                     bool[] nms = Current.Bools;
-                    Array.Resize<bool>(ref nms, 2);
+                    Array.Resize<bool>(ref nms, 4);
                     Current.Bools = nms;
                 }
             }
