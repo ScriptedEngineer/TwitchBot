@@ -121,6 +121,18 @@ namespace TwitchBot
             }
             if (Voices.Items.Count > 0)
                 Voices.SelectedIndex = MySave.Current.Nums[0];
+            switch (MySave.Current.Nums[1])
+            {
+                case 0:
+                    AllChat.IsChecked = true;
+                    break;
+                case 1:
+                    TTSpeechOH.IsChecked = true;
+                    break;
+                case 2:
+                    CustomReward.IsChecked = true;
+                    break;
+            }
         }
         TwitchClient Client;
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -849,6 +861,7 @@ namespace TwitchBot
             MySave.Current.Bools[1] = TTSpeechOH.IsChecked.Value;
             MySave.Current.Bools[2] = TurboSpeech.IsChecked.Value;
             MySave.Current.Nums[0] = Voices.SelectedIndex;
+            MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value?1:(CustomReward.IsChecked.Value?2:-1));
             MySave.Current.TTSCRID = CustomRewardID.Text;
             MySave.Save();
         }

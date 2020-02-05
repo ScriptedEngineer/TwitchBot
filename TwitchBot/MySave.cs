@@ -19,7 +19,7 @@ namespace TwitchBot
         private MySave()
         {
             Bools = new bool[4];
-            Nums = new int[1];
+            Nums = new int[2];
             Nums[0] = 0;
         }
         public static void Load()
@@ -39,6 +39,18 @@ namespace TwitchBot
                     File.Copy("save.xml", "save_errored"+ Rand.Next()+ ".xml");
                     Current = new MySave();
                     Save();
+                }
+                if (Current.Nums.Length != 2)
+                {
+                    int[] nms = Current.Nums;
+                    Array.Resize<int>(ref nms, 2);
+                    Current.Nums = nms;
+                }
+                if (Current.Nums.Length != 2)
+                {
+                    bool[] nms = Current.Bools;
+                    Array.Resize<bool>(ref nms, 2);
+                    Current.Bools = nms;
                 }
             }
         }
