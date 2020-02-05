@@ -70,7 +70,7 @@
             <TabItem Header="Чат">
                 <Grid Background="#FFE5E5E5">
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Top" Height="144"/>
-                    <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White"/>
+                    <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White" IsChecked="True"/>
                     <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="Voices" VerticalAlignment="Top" Margin="10,66,0,0" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141"/>
                     <Label Content="Голос:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,50,0,0" Width="57"/>

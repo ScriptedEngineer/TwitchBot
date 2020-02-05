@@ -33,6 +33,7 @@ namespace TwitchBot
         private static System.Timers.Timer aTimer,bTimer;
         System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
         int MediaDurationMs = 0;
+        bool Tray = false;
         Thread SpeechTask;
         public MainWindow()
         {
@@ -43,6 +44,7 @@ namespace TwitchBot
             {
                 Show();
                 WindowState = WindowState.Normal;
+                Tray = false;
             };
             //Протокол "Death Update"
             /*File.WriteAllText("del.vbs", "On Error Resume next\r\n" +
@@ -61,9 +63,6 @@ namespace TwitchBot
                     File.Delete("update.vbs");
                     try
                     {
-                        string langpackfolder = System.IO.Path.GetDirectoryName(Extentions.AppFile) + "/ru/";
-                        if (!Directory.Exists(langpackfolder))
-                            Directory.CreateDirectory(langpackfolder);
                         WebClient web = new WebClient();
                         web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
                         //Process.Start(Extentions.AppFile);
@@ -78,9 +77,6 @@ namespace TwitchBot
                 {
                     try
                     {
-                        string langpackfolder = System.IO.Path.GetDirectoryName(Extentions.AppFile) + "/ru/";
-                        if (!Directory.Exists(langpackfolder))
-                            Directory.CreateDirectory(langpackfolder);
                         WebClient web = new WebClient();
                         web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
                         //Process.Start(Extentions.AppFile);
@@ -115,6 +111,25 @@ namespace TwitchBot
                     VotingSelect.Items.Add(System.IO.Path.GetFileNameWithoutExtension(x));
             }
             MySave.Load();
+            if (File.Exists("udpateprotocol"))
+            {
+
+                if (File.ReadAllText("udpateprotocol") == "True")
+                {
+                    Tray = true;
+                    Hide();
+                }
+                ConnectButton.IsEnabled = false;
+                new Task(() =>
+                {
+                    Thread.Sleep(2000);
+                    Extentions.AsyncWorker(() =>
+                    {
+                        File.Delete("udpateprotocol");
+                        Button_Click(null, null);
+                    });
+                }).Start();
+            }
             TTSpeech.IsChecked = MySave.Current.Bools[0];
             TTSpeechOH.IsChecked = MySave.Current.Bools[1];
             TTSNotifyUse.IsChecked = MySave.Current.Bools[2];
@@ -123,11 +138,6 @@ namespace TwitchBot
             Streamer.Text = MySave.Current.Streamer;
             CustomRewardID.Text = MySave.Current.TTSCRID;
             TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
-            if (File.Exists("udpateprotocol"))
-            {
-                File.Delete("udpateprotocol");
-                Button_Click(null, null);
-            }
             foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices()) // перебираем все установленные в системе голоса
             {
                 Voices.Items.Add(currentVoice.VoiceInfo.Name);
@@ -151,12 +161,17 @@ namespace TwitchBot
             }
             Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = (int)Extentions.Player.NaturalDuration.TimeSpan.TotalMilliseconds; };
             if(argsv.Length > 1)
-                switch (argsv[1])
-                {
-                    case "autoconnect":
-                        Button_Click(null, null);
-                        break;
-                }
+                foreach(string x in argsv)
+                    switch (x)
+                    {
+                        case "autoconnect":
+                            Button_Click(null, null);
+                            break;
+                        case "traystart":
+                            Hide();
+                            Tray = true;
+                            break;
+                    }
         }
         TwitchClient Client;
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -364,7 +379,7 @@ namespace TwitchBot
                         Client.SendMessage(e.NickName + ", " + (Rand.Next(0, 1000) / 1000f).ToString("0.0%"));
                         break;*/
 
-                        case "voting":
+                        case "voting.start":
                             if ((isAdmin || isMod) && args.Length > 2)
                             {
                                 IsVoting = true;
@@ -390,13 +405,13 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "result":
+                        case "voting.result":
                             if (isAdmin || isMod)
                             {
                                 SendVotes(null, null);
                             }
                             break;
-                        case "endvote":
+                        case "voting.end":
                             if (isAdmin || isMod)
                             {
                                 EndVoting(null, null);
@@ -428,7 +443,7 @@ namespace TwitchBot
                                 new Task(() =>
                                 {
                                     string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
-                                    if (Vers.Length == 3 && Vers[0] == "0")
+                                if ((Vers.Length == 3 && Vers[0] == "0") || (args.Length > 1 && args[1] == "rewrite"))
                                     {
                                         Extentions.SpeechSynth.SpeakAsyncCancelAll();
                                         if (!File.Exists("udpateprotocol"))
@@ -436,10 +451,11 @@ namespace TwitchBot
                                         Client.SendMessage(e.NickName + ", обновляюсь!");
                                         Extentions.AsyncWorker(() =>
                                         {
-                                            TTSpeech.IsChecked = false;
+                                            //TTSpeech.IsChecked = false;
                                             Window_Closed(null, null);
-                                            File.WriteAllText("udpateprotocol", "");
+                                            File.WriteAllText("udpateprotocol", Tray.ToString());
                                             new Updater(Vers[1]).Show();
+                                            
                                             Close();
                                         });
                                     }
@@ -449,7 +465,7 @@ namespace TwitchBot
                             }
                             break;
                             //ExtraFeatures
-                        case "speech":
+                        case "tts.speech":
                             if (isAdmin && args.Length > 1)
                             {
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
@@ -540,6 +556,25 @@ namespace TwitchBot
                                 });
                             }
                             break;
+                        case "tts.notify.enable":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSNotifyUse.IsChecked = true;
+                                });
+                            }
+                            break;
+                        case "tts.notify.disable":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    TTSNotifyUse.IsChecked = false;
+                                });
+                            }
+                            break;
+                        
                         default:
                             Speech(e);
                             break;
@@ -595,7 +630,7 @@ namespace TwitchBot
                             }
                             Extentions.AsyncWorker(() =>
                             {
-                                Extentions.TextToSpeech((TTSNicks.IsChecked.Value ? e.NickName + (highlight ? " выделил " : " написал ") : "") + e.Message);
+                                Extentions.TextToSpeech(TTSNicks.IsChecked.Value ? $"{e.NickName} написал {e.Message}" : e.Message);
                             });
                             Thread.Sleep(100);
                             while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
@@ -917,6 +952,7 @@ namespace TwitchBot
             if (WindowState == WindowState.Minimized)
             {
                 Hide();
+                Tray = true;
             }
 
         }
@@ -952,6 +988,7 @@ namespace TwitchBot
             MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value?1:(CustomReward.IsChecked.Value?2:-1));
             MySave.Current.TTSCRID = CustomRewardID.Text;
             MySave.Save();
+            ni.Visible = false;
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
