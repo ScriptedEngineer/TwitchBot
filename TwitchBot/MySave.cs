@@ -12,6 +12,7 @@ namespace TwitchBot
     {
         public static MySave Current = new MySave();
         public string Streamer { get; set; }
+        public string TTSCRID { get; set; }
         private static Random Rand = new Random();
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }

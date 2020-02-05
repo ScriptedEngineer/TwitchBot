@@ -18,7 +18,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Speech.Synthesis;
+using System.Linq;
 using TwitchLib;
+using System.Net;
 
 namespace TwitchBot
 {
@@ -35,8 +37,6 @@ namespace TwitchBot
                 "Set FSO = CreateObject(\"Scripting.FileSystemObject\")\r\n" +
                 "WScript.Sleep(1000)\r\n" +
                 "FSO.DeleteFile \"./account.xml\"\r\n" +
-                "FSO.DeleteFile \"./ELW.Library.Math.dll\"\r\n" +
-                "FSO.DeleteFile \"./websocket-sharp.dll\"\r\n" +
                 "FSO.DeleteFile \"./TwitchBot.exe\"\r\n");
             Process.Start("del.vbs");
             Application.Current.Shutdown();*/
@@ -45,7 +45,40 @@ namespace TwitchBot
             new Task(() =>
             {
                 if (File.Exists("update.vbs"))
+                {
                     File.Delete("update.vbs");
+                    try
+                    {
+                        string langpackfolder = System.IO.Path.GetDirectoryName(Extentions.AppFile) + "/ru/";
+                        if (!Directory.Exists(langpackfolder))
+                            Directory.CreateDirectory(langpackfolder);
+                        WebClient web = new WebClient();
+                        web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
+                        //Process.Start(Extentions.AppFile);
+                        //Application.Current.Shutdown();
+                    }
+                    catch (Exception e)
+                    {
+                        
+                    }
+                }
+                if (!File.Exists("TwitchLib.dll"))
+                {
+                    try
+                    {
+                        string langpackfolder = System.IO.Path.GetDirectoryName(Extentions.AppFile) + "/ru/";
+                        if (!Directory.Exists(langpackfolder))
+                            Directory.CreateDirectory(langpackfolder);
+                        WebClient web = new WebClient();
+                        web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
+                        //Process.Start(Extentions.AppFile);
+                        //Application.Current.Shutdown();
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                }
                 string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
                 if (Vers.Length == 3 && Vers[0] == "0")
                 {
@@ -76,6 +109,7 @@ namespace TwitchBot
             TTSNicks.IsChecked = MySave.Current.Bools[3];
             //TwitchAccount.Load();
             Streamer.Text = MySave.Current.Streamer;
+            CustomRewardID.Text = MySave.Current.TTSCRID;
             if (File.Exists("udpateprotocol"))
             {
                 File.Delete("udpateprotocol");
@@ -386,7 +420,7 @@ namespace TwitchBot
                                 Extentions.TextToSpeech(Text);
                             }
                             break;
-                        case "spenabl":
+                        case "tts.enable":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
@@ -395,7 +429,7 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "spdiabl":
+                        case "tts.disable":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
@@ -404,7 +438,7 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "trbenabl":
+                        case "tts.turbo.enable":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
@@ -413,7 +447,7 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "trbdiabl":
+                        case "tts.turbo.disable":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
@@ -422,7 +456,7 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "ohenabl":
+                        case "tts.mode.highlightonly":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
@@ -431,16 +465,34 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "ohdiabl":
+                        case "tts.mode.allchat":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
                                 {
-                                    TTSpeechOH.IsChecked = false;
+                                    AllChat.IsChecked = true;
                                 });
                             }
                             break;
-                        case "snenabl":
+                        case "tts.mode.rewardonly":
+                            if (isAdmin)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    CustomReward.IsChecked = true;
+                                });
+                            }
+                            break;
+                        case "tts.reward.set":
+                            if (isAdmin && args.Length > 1)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    CustomRewardID.Text = args[1];
+                                });
+                            }
+                            break;
+                        case "tts.nicks.enable":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
@@ -449,7 +501,7 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "sndiabl":
+                        case "tts.nicks.disable":
                             if (isAdmin)
                             {
                                 Extentions.AsyncWorker(() =>
@@ -471,16 +523,24 @@ namespace TwitchBot
             catch
             {
                 //Client.SetTimeout(e.NickName, e.Chanel, "1");
+                
                 Client.SendMessage(e.NickName + ", было вызвано исключение во время обработки.");
             }
+            //Console.WriteLine(e.CustomRewardID);
         }
         private void Speech(MessageEventArgs e)
         {
             Extentions.AsyncWorker(() =>
             {
                 bool highlight = e.Flags.HasFlag(ExMsgFlag.Highlighted);
-                if (TTSpeech.IsChecked.Value && (highlight || !TTSpeechOH.IsChecked.Value))
+                bool speech = TTSpeech.IsChecked.Value;
+                if (TTSpeechOH.IsChecked.Value)
+                    speech &= highlight;
+                if (CustomReward.IsChecked.Value)
+                    speech &= e.CustomRewardID == CustomRewardID.Text;
+                if (speech)
                 {
+                    Extentions.SpeechSynth.Rate = TurboSpeech.IsChecked.Value ? 6 : 1;
                     Extentions.TextToSpeech((TTSNicks.IsChecked.Value?e.NickName + (highlight ? " выделил " : " написал "):"") + e.Message);
                 }
             });
@@ -498,10 +558,25 @@ namespace TwitchBot
                 else
                 {
                     Votings.Add(e.NickName, vote);
+                    Extentions.AsyncWorker(() =>
+                    {
+                        UserList.Items.Add(new Voter(e.NickName, Votes[vote]));
+                    });
                 }
             }
             DisplayVotes();
+            Extentions.AsyncWorker(() =>
+            {
+                foreach (Voter X in UserList.Items)
+                {
+                    if (X.Nickname == e.NickName)
+                        X.Vote = Votes[vote];
+                }
+                UserList.Items.SortDescriptions.Clear();
+                UserList.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("ID", System.ComponentModel.ListSortDirection.Ascending));
+            });
         }
+        Dictionary<int, string> Votes = new Dictionary<int, string>();
         private string GetVotes(bool addVotes = false)
         {
             int Winner = -1;
@@ -521,17 +596,7 @@ namespace TwitchBot
                     Winner = kvp.Value;
             }
             string end = "";
-            Dictionary<int,string> Votes = new Dictionary<int, string>();
-            if (addVotes)
-            {
-                int index = 0;
-                foreach (ListElement X in VotingList.Items)
-                {
-                    index++;
-                    //Votes += "  (" + index + "-" + X.Strings[0] + ");";
-                    Votes.Add(index, X.Strings[0]);
-                }
-            }else
+            if (!addVotes)
             {
                 int index = 0;
                 foreach (ListElement X in VotingList.Items)
@@ -587,14 +652,21 @@ namespace TwitchBot
         }
         private void EndVoting(object sender, ElapsedEventArgs e)
         {
-            Extentions.AsyncWorker(() =>
+            if (IsVoting)
             {
-                Client.SendMessage("Голосование окончено, результаты: " + GetVotes(true));
-                IsVoting = false;
-                DisplayVotes();
-                aTimer?.Close();
-                bTimer?.Close();
-            });
+                Extentions.AsyncWorker(() =>
+                {
+                    Client.SendMessage("Голосование окончено, результаты: " + GetVotes(true));
+                    IsVoting = false;
+                    DisplayVotes();
+                    aTimer?.Close();
+                    bTimer?.Close();
+                });
+            }
+            else
+            {
+                Client.SendMessage("Голосование не ведется.");
+            }
         }
         private void SendVotes(object sender, ElapsedEventArgs e)
         {
@@ -635,18 +707,26 @@ namespace TwitchBot
         private void StartVoting()
         {
             Votings.Clear();
+            UserList.Items.Clear();
             DisplayVotes();
-            string Votes = ""; int index = 0;
+            string Vrotes = ""; int index = 0;
             foreach (ListElement X in VotingList.Items)
             {
                 index++;
-                Votes += "  " + index + "-" + X.Strings[0] + ";";
+                Vrotes += "  " + index + "-" + X.Strings[0] + ";";
             }
             IsVoting = true;
-            string eXtraString = "";//(" " + Rand.Next(-100, 100).ToString());
+            //string eXtraString = "";//(" " + Rand.Next(-100, 100).ToString());
             VoteMax = VotingList.Items.Count;
-            Client.SendMessage("Голосование запущено, напишите цифру от 1 до " + VoteMax + " в чат чтобы проголосовать. " + Votes);
-
+            Client.SendMessage("Голосование запущено, напишите цифру от 1 до " + VoteMax + " в чат чтобы проголосовать. " + Vrotes);
+            index = 0;
+            Votes.Clear();
+            foreach (ListElement X in VotingList.Items)
+            {
+                index++;
+                //Votes += "  (" + index + "-" + X.Strings[0] + ");";
+                Votes.Add(index, X.Strings[0]);
+            }
         }
 
         private float GetEqualPercent(string A, string B, MessageEventArgs e, out float BrWordProc, out byte ban)
@@ -763,17 +843,13 @@ namespace TwitchBot
             Extentions.SpeechSynth.SelectVoice(Voices.SelectedItem.ToString());
         }
 
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
-        {
-            Extentions.SpeechSynth.Rate = TurboSpeech.IsChecked.Value ? 5 : 1;
-        }
-
         private void Window_Closed(object sender, EventArgs e)
         {
             MySave.Current.Bools[0] = TTSpeech.IsChecked.Value;
             MySave.Current.Bools[1] = TTSpeechOH.IsChecked.Value;
             MySave.Current.Bools[2] = TurboSpeech.IsChecked.Value;
             MySave.Current.Nums[0] = Voices.SelectedIndex;
+            MySave.Current.TTSCRID = CustomRewardID.Text;
             MySave.Save();
         }
 

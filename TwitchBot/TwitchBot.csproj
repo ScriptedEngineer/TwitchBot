@@ -75,6 +75,7 @@
     <Compile Include="Extentions.cs" />
     <Compile Include="ListElement.cs" />
     <Compile Include="MySave.cs" />
+    <Compile Include="Voter.cs" />
     <Compile Include="Updater.xaml.cs">
       <DependentUpon>Updater.xaml</DependentUpon>
     </Compile>
