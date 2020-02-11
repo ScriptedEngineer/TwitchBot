@@ -50,10 +50,11 @@ namespace TwitchBot
                 if (!string.IsNullOrEmpty(Voice))
                     SpeechSynth.SelectVoice(Voice);
                 SpeechSynth.Volume = 100;
-                SpeechSynth.Speak(Text);
+                SpeechSynth.SpeakAsync(Text);
             }).Start();
         }
     }
+
     public enum ApiServerAct
     {
         CheckVersion,

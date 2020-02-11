@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Xml.Serialization;
 
 namespace TwitchBot
@@ -17,10 +18,12 @@ namespace TwitchBot
         private static Random Rand = new Random();
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }
+        public KeyModifier HotkeyModifier = KeyModifier.Alt;
+        public Key Hotkey = Key.F1;
         private MySave()
         {
-            Bools = new bool[4];
-            Nums = new int[3];
+            Bools = new bool[5];
+            Nums = new int[4];
             Nums[0] = 0;
             TTSNTFL = $"{Path.GetDirectoryName(Extentions.AppFile)}/tts.mp3";
         }
@@ -42,16 +45,16 @@ namespace TwitchBot
                     Current = new MySave();
                     Save();
                 }
-                if (Current.Nums.Length < 3)
+                if (Current.Nums.Length < 4)
                 {
                     int[] nms = Current.Nums;
-                    Array.Resize<int>(ref nms, 3);
+                    Array.Resize<int>(ref nms, 4);
                     Current.Nums = nms;
                 }
-                if (Current.Bools.Length < 4)
+                if (Current.Bools.Length < 5)
                 {
                     bool[] nms = Current.Bools;
-                    Array.Resize<bool>(ref nms, 4);
+                    Array.Resize<bool>(ref nms, 5);
                     Current.Bools = nms;
                 }
             }
