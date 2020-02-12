@@ -1,11 +1,12 @@
-﻿<Window x:Class="TwitchBot.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchBot"
+        xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="TwitchBot.MainWindow"
         mc:Ignorable="d"
-        Title="TwitchBot" Height="440" Width="350" MinWidth="340" MinHeight="440" Closed="Window_Closed" WindowStartupLocation="CenterScreen" Closing="Window_Closing" StateChanged="Window_StateChanged">
+        Title="TwitchBot" Height="440" Width="350" MinWidth="340" MinHeight="440" Closed="Window_Closed" WindowStartupLocation="CenterScreen" Closing="Window_Closing" StateChanged="Window_StateChanged" MaxWidth="360" MaxHeight="450">
     <Grid>
         <TextBox x:Name="Streamer" Height="23" Margin="10,10,90,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <Button x:Name="ConnectButton" Content="Подключить" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="75" Click="Button_Click" Height="23"/>
@@ -55,7 +56,7 @@
                     <Label Content="Минут: " HorizontalAlignment="Right" Margin="0,0,116,35" VerticalAlignment="Bottom" Padding="0"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Голосовавшие">
+            <TabItem Header="Голоса">
                 <Grid Background="#FFE5E5E5">
                     <ListView x:Name="UserList" Margin="1,1,0,0">
                         <ListView.View>
@@ -67,28 +68,47 @@
                     </ListView>
                 </Grid>
             </TabItem>
-            <TabItem Header="Чат">
+            <TabItem Header="TTS">
                 <Grid Background="#FFE5E5E5">
-                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Top" Height="191"/>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black"/>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="0,0,0,92"/>
                     <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White" IsChecked="True"/>
                     <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top" IsChecked="True"/>
-                    <ComboBox x:Name="Voices" VerticalAlignment="Top" Margin="10,66,0,0" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141"/>
-                    <Label Content="Голос:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,50,0,0" Width="57"/>
+                    <ComboBox x:Name="Voices" VerticalAlignment="Bottom" Margin="10,0,0,126" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141">
+
+                    </ComboBox>
+                    <Label Content="Голос:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,148" Width="57"/>
                     <CheckBox x:Name="TTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" IsChecked="True"/>
                     <TextBox x:Name="CustomRewardID" Height="23" Margin="156,70,10,0" TextWrapping="NoWrap" VerticalAlignment="Top"/>
                     <RadioButton x:Name="CustomReward" Content="Только товар:" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top"/>
                     <RadioButton x:Name="AllChat" Content="Весь чат" HorizontalAlignment="Left" Margin="156,10,0,0" VerticalAlignment="Top" IsChecked="True"/>
-                    <Slider x:Name="SynthSpeed" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top" Width="141" Minimum="-10" ValueChanged="Slider_ValueChanged"/>
-                    <Label x:Name="SpeedLabel" Content="Скорость (0)" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,93,0,0" Width="134"/>
-                    <Button Content="..." HorizontalAlignment="Right" Margin="0,119,10,0" VerticalAlignment="Top" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Click="Button_Click_6"/>
-                    <Label x:Name="TTSNotifyLabel" Content="tts.mp3" Margin="156,118,39,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="TTSNotifyUse" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="156,98,0,0" VerticalAlignment="Top" IsChecked="True"/>
-                    <TextBox x:Name="MaxSymbols" HorizontalAlignment="Left" Height="20" Margin="130,134,0,0" TextWrapping="Wrap" Text="480" VerticalAlignment="Top" Width="42" TextChanged="TextBox_TextChanged_1"/>
-                    <Label x:Name="SpeedLabel_Copy" Content="Максимум символов" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,132,0,0"/>
-                    <RadioButton x:Name="DontTTS" Content="Не озвучивать" HorizontalAlignment="Left" Margin="10,148,0,0" VerticalAlignment="Top" GroupName="MaxSymbols" IsChecked="True"/>
-                    <RadioButton x:Name="SMaxTTS" Content="Максимальная скорость" HorizontalAlignment="Left" Margin="10,163,0,0" VerticalAlignment="Top" GroupName="MaxSymbols" IsChecked="True"/>
-                    <TextBox x:Name="HotKey" Height="20" Margin="191,158,10,0" TextWrapping="NoWrap" IsReadOnly="True" VerticalAlignment="Top" KeyDown="TextBox_KeyDown" KeyUp="TextBox_KeyUp"/>
-                    <Label x:Name="SpeedLabel_Copy1" Content="Стоп кнопка:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="191,142,0,0"/>
+                    <Slider x:Name="SynthSpeed" Margin="156,0,10,126" VerticalAlignment="Bottom" Minimum="-10" ValueChanged="Slider_ValueChanged"/>
+                    <Label x:Name="SpeedLabel" Content="Скорость (0)" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="156,0,0,145" Width="134"/>
+                    <Button Content="..." HorizontalAlignment="Right" Margin="0,0,10,97" VerticalAlignment="Bottom" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Click="Button_Click_6"/>
+                    <Label x:Name="TTSNotifyLabel" Content="tts.mp3" Margin="127,0,39,97" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center"/>
+                    <CheckBox x:Name="TTSNotifyUse" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="10,0,0,97" VerticalAlignment="Bottom" IsChecked="True" RenderTransformOrigin="0.5,0.5">
+                        <CheckBox.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleY="1" ScaleX="1"/>
+                                <SkewTransform AngleY="0" AngleX="0"/>
+                                <RotateTransform Angle="0"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </CheckBox.RenderTransform>
+                    </CheckBox>
+                    <TextBox x:Name="MaxSymbols" HorizontalAlignment="Left" Height="20" Margin="9,0,0,56" TextWrapping="Wrap" Text="480" VerticalAlignment="Bottom" Width="42" TextChanged="TextBox_TextChanged_1"/>
+                    <Label x:Name="SpeedLabel_Copy" Content="Максимум символов" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,76"/>
+                    <RadioButton x:Name="DontTTS" Content="Не озвучивать" HorizontalAlignment="Left" Margin="10,0,0,25" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True"/>
+                    <RadioButton x:Name="SMaxTTS" Content="Максимальная скорость" HorizontalAlignment="Left" Margin="9,0,0,10" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True"/>
+                    <TextBox x:Name="HotKey" Height="20" Margin="191,0,10,56" TextWrapping="NoWrap" IsReadOnly="True" VerticalAlignment="Bottom" KeyDown="TextBox_KeyDown" KeyUp="TextBox_KeyUp"/>
+                    <Label x:Name="SpeedLabel_Copy1" Content="Стоп кнопка:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,76"/>
+                    <Label x:Name="SpeedLabel_Copy2" Content="При превышении:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,40"/>
+                    <Button x:Name="RewardTrap" Content="Начать ловить товар" Margin="156,98,10,0" VerticalAlignment="Top" Click="RewardTrap_Click"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Товары">
+                <Grid Background="#FFE5E5E5">
+                    <Label Content="Не готово" FontSize="48" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                 </Grid>
             </TabItem>
         </TabControl>

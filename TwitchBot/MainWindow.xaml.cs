@@ -139,7 +139,7 @@ namespace TwitchBot
             Streamer.Text = MySave.Current.Streamer;
             CustomRewardID.Text = MySave.Current.TTSCRID;
             TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
-            foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices()) // перебираем все установленные в системе голоса
+            foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices(Thread.CurrentThread.CurrentCulture)) // перебираем все установленные в системе голоса
             {
                 Voices.Items.Add(currentVoice.VoiceInfo.Name);
             }
@@ -709,6 +709,10 @@ namespace TwitchBot
             {
                 Client.SendMessage(e.NickName + ", было вызвано исключение во время обработки.");
             }
+            if (!string.IsNullOrEmpty(e.CustomRewardID))
+            {
+                RewardTrapHatch.Invoke(this,e.CustomRewardID);
+            }
             //Console.WriteLine(e.CustomRewardID);
         }
         int TTSrate;
@@ -804,7 +808,7 @@ namespace TwitchBot
             {
                 foreach (Voter X in UserList.Items)
                 {
-                    if (X.Nickname == e.NickName)
+                    if (X.Nickname == e.NickName && Votes.ContainsKey(vote))
                         X.Vote = Votes[vote];
                 }
                 UserList.Items.SortDescriptions.Clear();
@@ -1186,6 +1190,31 @@ namespace TwitchBot
         {
             if (e.Key == Key.LeftShift || e.Key == Key.RightShift) keyMode = 2;
             if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) keyMode = 1;
+        }
+
+        EventHandler<string> RewardTrapHatch; 
+
+        private void RewardTrap_Click(object sender, RoutedEventArgs e)
+        {
+            if (RewardTrap.Content.ToString() == "Отмена")
+            {
+                RewardTrap.Content = "Начать ловить товар";
+                RewardTrapHatch -= TTSRewardTrap;
+            }
+            else
+            {
+                RewardTrap.Content = "Отмена";
+                RewardTrapHatch += TTSRewardTrap;
+            }
+        }
+        private void TTSRewardTrap(object sender, string e)
+        {
+            Extentions.AsyncWorker(() =>
+            {
+                CustomRewardID.Text = e;
+                RewardTrap.Content = "Начать ловить товар";
+                RewardTrapHatch -= TTSRewardTrap;
+            });
         }
 
         private void Window_Closed(object sender, EventArgs e)
