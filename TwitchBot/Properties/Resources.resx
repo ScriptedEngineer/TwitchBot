@@ -121,4 +121,59 @@
   <data name="icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ServerMain" xml:space="preserve">
+    <value>&lt;html style="background-color: transparent;"&gt;
+&lt;head&gt;
+&lt;title&gt;Twitch Bot Alerts&lt;/title&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+let socket = new WebSocket("ws://localhost:8181/alert");
+socket.onmessage = function(event) {
+if(event.data.includes('Close| : |All')){
+$('.active').removeClass('active');
+}
+else{
+$('.alert').addClass('active');
+  var datdhi = event.data.split('| : |',2);
+  $('.nick').html(datdhi[0]); 
+  $('.message').html(datdhi[1]); 
+
+  }  
+};
+&lt;/script&gt;
+&lt;style type="text/css"&gt;
+
+.text{
+font-family:'Amastic'; 
+vertical-align: middle;
+text-shadow: 1px 1px 2px black; 
+overflow-wrap: break-word;
+-webkit-text-stroke-width: .1px;
+-webkit-text-stroke-color: black;
+}
+.alert{
+  margin: 0;
+  position: relative;
+  top: -100%;
+  margin-top: 5px;
+  transition: top 1s linear;
+}
+
+.active{
+  top: 10px;
+}
+
+&lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body style="margin: 0px; background-color: transparent;" data-whatinput="mouse"&gt;
+   
+&lt;div class="alert"&gt;
+&lt;h1 class="text nick" style="color:#FFA800;" align=center&gt;&lt;/h1&gt;
+&lt;h3 class="text message" style="color:#D0D0D0;" align=center&gt;&lt;/h3&gt;
+&lt;/div&gt;
+
+&lt;/body&gt;&lt;/html&gt;</value>
+  </data>
 </root>

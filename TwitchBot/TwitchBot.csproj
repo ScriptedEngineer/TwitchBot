@@ -71,15 +71,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Account.cs" />
-    <Compile Include="Extentions.cs" />
-    <Compile Include="ListElement.cs" />
-    <Compile Include="MySave.cs" />
-    <Compile Include="Voter.cs" />
+    <Compile Include="Classes\Extentions.cs" />
+    <Compile Include="Classes\ListElement.cs" />
+    <Compile Include="Classes\MySave.cs" />
+    <Compile Include="Classes\RewardEvent.cs" />
+    <Compile Include="Classes\ScriptLanguage.cs" />
+    <Compile Include="Classes\UserInput.cs" />
+    <Compile Include="Classes\Voter.cs" />
+    <Compile Include="Classes\WebServer.cs" />
+    <Compile Include="Classes\WebSockServ.cs" />
+    <Compile Include="Classes\WinApi.cs" />
     <Compile Include="Updater.xaml.cs">
       <DependentUpon>Updater.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WinHotkey.cs" />
+    <Compile Include="Classes\WinHotkey.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

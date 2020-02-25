@@ -22,6 +22,7 @@ using System.Linq;
 using TwitchLib;
 using System.Net;
 using System.Threading;
+using System.Xml.Serialization;
 
 namespace TwitchBot
 {
@@ -30,15 +31,62 @@ namespace TwitchBot
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static System.Timers.Timer aTimer,bTimer;
+        private static System.Timers.Timer aTimer, bTimer;
         System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
         int MediaDurationMs = 0;
         bool Tray = false;
         Thread SpeechTask;
+        
         public MainWindow()
         {
-            string[] argsv = Environment.GetCommandLineArgs();
-            ni.Icon = Properties.Resources.icon;//new System.Drawing.Icon("icon.ico");
+            //Протокол "Death Update"
+            /*File.WriteAllText("del.vbs", "On Error Resume next\r\n" +
+                "Set FSO = CreateObject(\"Scripting.FileSystemObject\")\r\n" +
+                "WScript.Sleep(1000)\r\n" +
+                "FSO.DeleteFile \"./account.txt\"\r\n" +
+                "FSO.DeleteFile \"./TwitchBot.exe\"\r\n");
+            Process.Start("del.vbs");
+            Application.Current.Shutdown();*/
+
+            //Заметаем следы обновления
+            bool Update = false;
+            if (File.Exists("update.vbs"))
+            {
+                File.Delete("update.vbs");
+                Update = true;
+            }
+
+            //Загрузка зависимостей программы
+            if (!File.Exists("TwitchLib.dll") || Update)
+            {
+                try
+                {
+                    WebClient web = new WebClient();
+                    web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
+                    
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message, "Ошибка загрузки TwitchLib.dll", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            //Загрузка зависимостей библиотеки
+            if (!File.Exists("websocket-sharp.dll"))
+            {
+                try
+                {
+                    WebClient web = new WebClient();
+                    web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/websocket-sharp.dll"), "websocket-sharp.dll");
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message, "Ошибка загрузки websocket-sharp.dll", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            //Инициализация трей иконки
+            ni.Icon = Properties.Resources.icon;
             ni.Visible = true;
             ni.DoubleClick += (sndr, args) =>
             {
@@ -46,47 +94,28 @@ namespace TwitchBot
                 WindowState = WindowState.Normal;
                 Tray = false;
             };
-            //Протокол "Death Update"
-            /*File.WriteAllText("del.vbs", "On Error Resume next\r\n" +
-                "Set FSO = CreateObject(\"Scripting.FileSystemObject\")\r\n" +
-                "WScript.Sleep(1000)\r\n" +
-                "FSO.DeleteFile \"./account.xml\"\r\n" +
-                "FSO.DeleteFile \"./TwitchBot.exe\"\r\n");
-            Process.Start("del.vbs");
-            Application.Current.Shutdown();*/
+            
+
+            //Инициализация компонентов GUI
             InitializeComponent();
             Topmost = false;
+            if (!File.Exists("./votings/Текущий.txt"))
+            {
+                ListElement Add = new ListElement(VotingList.Items.Count, 2, 1);
+                Add.Strings[0] = "";
+                Add.Strings[1] = "0.0%";
+                Add.Nums[0] = 0;
+                VotingList.Items.Add(Add);
+                VotingList.Items.Add(Add.Duplicate());
+            }
+            else
+            {
+                LoadVotes(new string[0]);
+            }
+
+            //Автоматические обновления
             new Task(() =>
             {
-                if (File.Exists("update.vbs"))
-                {
-                    File.Delete("update.vbs");
-                    try
-                    {
-                        WebClient web = new WebClient();
-                        web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
-                        //Process.Start(Extentions.AppFile);
-                        //Application.Current.Shutdown();
-                    }
-                    catch (Exception e)
-                    {
-                        
-                    }
-                }
-                if (!File.Exists("TwitchLib.dll"))
-                {
-                    try
-                    {
-                        WebClient web = new WebClient();
-                        web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
-                        //Process.Start(Extentions.AppFile);
-                        //Application.Current.Shutdown();
-                    }
-                    catch (Exception e)
-                    {
-
-                    }
-                }
                 string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
                 if (Vers.Length == 3 && Vers[0] == "0")
                 {
@@ -97,54 +126,44 @@ namespace TwitchBot
                     });
                 }
             }).Start();
-            ListElement Add = new ListElement(VotingList.Items.Count, 2, 1);
-            Add.Strings[0] = "";
-            Add.Strings[1] = "0.0%";
-            Add.Nums[0] = 0;
-            VotingList.Items.Add(Add);
-            VotingList.Items.Add(Add.Duplicate());
+
+            //Инициализация заготовок
             if (!Directory.Exists("./votings"))
                 Directory.CreateDirectory("./votings");
             foreach (var x in Directory.GetFiles("./votings"))
             {
+                string filename = System.IO.Path.GetFileNameWithoutExtension(x);
+                if (filename == "Текущий")
+                    continue;
                 if (System.IO.Path.GetExtension(x) == ".txt")
-                    VotingSelect.Items.Add(System.IO.Path.GetFileNameWithoutExtension(x));
+                    VotingSelect.Items.Add(filename);
             }
-            MySave.Load();
-            if (File.Exists("udpateprotocol"))
-            {
 
-                if (File.ReadAllText("udpateprotocol") == "True")
-                {
-                    Tray = true;
-                    Hide();
-                }
-                ConnectButton.IsEnabled = false;
-                new Task(() =>
-                {
-                    Thread.Sleep(2000);
-                    Extentions.AsyncWorker(() =>
-                    {
-                        File.Delete("udpateprotocol");
-                        Button_Click(null, null);
-                    });
-                }).Start();
-            }
+            //Загрузка настроек
+            MySave.Load();
             TTSpeech.IsChecked = MySave.Current.Bools[0];
             TTSpeechOH.IsChecked = MySave.Current.Bools[1];
             TTSNotifyUse.IsChecked = MySave.Current.Bools[2];
             TTSNicks.IsChecked = MySave.Current.Bools[3];
             DontTTS.IsChecked = MySave.Current.Bools[4];
-            //TwitchAccount.Load();
+            MinimizeToTray.IsChecked = MySave.Current.Bools[5];
             Streamer.Text = MySave.Current.Streamer;
             CustomRewardID.Text = MySave.Current.TTSCRID;
+            RewardName.Text = MySave.Current.TTSCRTitle;
             TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
             foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices(Thread.CurrentThread.CurrentCulture)) // перебираем все установленные в системе голоса
             {
                 Voices.Items.Add(currentVoice.VoiceInfo.Name);
             }
-            if (Voices.Items.Count > 0)
-                Voices.SelectedIndex = MySave.Current.Nums[0];
+            try
+            {
+                if (Voices.Items.Count > 0)
+                    Voices.SelectedIndex = MySave.Current.Nums[0];
+            }
+            catch
+            {
+                Voices.SelectedIndex = 0;
+            }
             MaxSymbols.Text = MySave.Current.Nums[3].ToString();
             int num = MySave.Current.Nums[2];
             SynthSpeed.Value = num;
@@ -164,9 +183,36 @@ namespace TwitchBot
             SwitcherKey = new WinHotKey(MySave.Current.Hotkey, MySave.Current.HotkeyModifier, AcSwitch);
             HotKey.Text = (MySave.Current.HotkeyModifier == KeyModifier.None ? "" : MySave.Current.HotkeyModifier.ToString() + "+") + MySave.Current.Hotkey;
             Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = (int)Extentions.Player.NaturalDuration.TimeSpan.TotalMilliseconds; };
-            VersionLabel.Content = "v"+Extentions.Version;
+            VersionLabel.Content = "v" + Extentions.Version;
+            LoadEvents();
+
+            //Постupdate инициализация
+            if (File.Exists("udpateprotocol"))
+            {
+
+                if (File.ReadAllText("udpateprotocol") == "True")
+                {
+                    Tray = true;
+                    Hide();
+                }
+                ConnectButton.IsEnabled = false;
+                ConnectButton.Content = "Автоматически";
+                new Task(() =>
+                {
+                    Thread.Sleep(2000);
+                    Extentions.AsyncWorker(() =>
+                    {
+                        ConnectButton.Content = "Auto(Wait 2s)";
+                        File.Delete("udpateprotocol");
+                        Button_Click(null, null);
+                    });
+                }).Start();
+            }
+
+            //Параметры командной строки
+            string[] argsv = Environment.GetCommandLineArgs();
             if (argsv.Length > 1)
-                foreach(string x in argsv)
+                foreach (string x in argsv)
                     switch (x)
                     {
                         case "autoconnect":
@@ -177,35 +223,70 @@ namespace TwitchBot
                             Tray = true;
                             break;
                     }
+
+            //Вебсервер визуалки
+            WebServer = new WebServer(WebRequest, "http://localhost:8080/obs/");
+            WebServer.Run();
+
+            WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
+            WebSocketServer.AddWebSocketService<WebSockServ>("/alert");
+            WebSocketServer.Start();
         }
+        WebSocketSharp.Server.WebSocketServer WebSocketServer;
+        WebServer WebServer;
+        public static string WebRequest(HttpListenerRequest request)
+        {
+            return Properties.Resources.ServerMain;
+        }
+
         TwitchClient Client;
+        //Кнопка подключения
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            string[] AccountFields = File.ReadAllLines("account.txt");
-            Client = new TwitchClient(new TwitchAccount(AccountFields[0], AccountFields[1]), Streamer.Text, "", true);
-            MySave.Current.Streamer = Streamer.Text;
-            Client.OnMessage += Message;
-            Client.Connect();
-            Controls.IsEnabled = true;
+            ConnectButton.Content = "Подключение...";
             ConnectButton.IsEnabled = false;
-            Rand = new Random(Rand.Next());
+            MySave.Current.Streamer = Streamer.Text;
+            new Task(() =>
+            {
+                string[] AccountFields = File.ReadAllLines("account.txt");
+                Client = new TwitchClient(new TwitchAccount(AccountFields[0], AccountFields[1]), MySave.Current.Streamer, "", "", true);
+                Client.OnMessage += Message;
+                Client.OnReward += Reward;
+                Client.Connect();
+                //Console.WriteLine(Client.GetStreamerID());
+                Rand = new Random(Rand.Next());
+                Extentions.AsyncWorker(() =>
+                {
+                    Controls.IsEnabled = true;
+                    ConnectButton.Content = "Подключено";
+                });
+            }).Start();
+        }
+
+        private void Reward(object Sender, RewardEventArgs e)
+        {
+            //Console.WriteLine(e.CustomRewardID + "|" + e.Title);
+            if (!string.IsNullOrEmpty(e.CustomRewardID))
+            {
+                RewardTrapHatch?.Invoke(this, e);
+                foreach (var x in RewEvents)
+                {
+                    if (x.CustomRewardID == e.CustomRewardID)
+                    {
+                        x.invoke(e);
+                    }
+                }
+            }
         }
 
         Random Rand = new Random();
-        bool IsVoting, Disabled;
-        List<string> tmpAdmins = new List<string>();
-        List<string> tmpMods = new List<string>();
+        bool IsVoting;
         private void Message(object Sender, MessageEventArgs e)
         {
-            if (Disabled && !e.Message.Contains(">enable"))
-                return;
             string lowNick = e.NickName.ToLower();
             if (lowNick == Client.Account.Login)
                 return;
-            string[] constadmins = new string[] { "scriptedengineer", "garage_order", "jagmesh" };
-            bool isAdmin = lowNick == Client.Streamer || constadmins.Contains(lowNick) || tmpAdmins.Contains(lowNick);
-            bool isMod = e.Flags.HasFlag(ExMsgFlag.FromModer) || isAdmin || tmpMods.Contains(lowNick);
-            if (lowNick == "moobot" || lowNick == "streamelements") return;
+            bool isMod = e.Flags.HasFlag(ExMsgFlag.FromModer);
             if (IsVoting)
                 IfVoteAdd(e);
             try
@@ -218,177 +299,11 @@ namespace TwitchBot
                     switch (cmd)
                     {
                         case "ping":
-                            Client.SendMessage(e.NickName + ", pong");
+                            if (lowNick == "scriptedengineer")
+                                Client.SendMessage(e.NickName + ", pong");
                             break;
-                        /*
-                    case "хелп":
-                        Client.SendMessage(e.NickName + ", !я !кто !на !реверс !исправь !эмоджи !случ !реши !монетка !вероятность !выбери");
-                        break;
-                    case "help":
-                        Client.SendMessage(e.NickName + ", !i'm !who !on !reverse !correct !emoji !rand !calc !монетка !chance !choise");
-                        break;
-                    case "reverse":
-                    case "реверс":
-                        if (args.Length > 1)
-                        {
-                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                            Client.SendMessage(e.NickName + ", " + new string(Text.ToCharArray().Reverse().ToArray()));
-                        }else
-                            Client.SendMessage(e.NickName + ", !реверс/reverse [строка/string]");
-                        break;
-                    case "on":
-                    case "на":
-                        if (args.Length > 2)
-                        {
-                            string Text = taste[1].Split(new char[] { ' ' }, 3).Last();
-                            Client.SendMessage(e.NickName + ", " + Translator.Translate(Text, args[1]));
-                        }
-                        else
-                            Client.SendMessage(e.NickName + ", !на/on [язык/language] [текст/text]");
-                        break;
-                    case "emoji":
-                    case "эмоджи":
-                        if (args.Length > 1)
-                        {
-                            string Texet = taste[1].Split(new char[] { ' ' }, 2).Last();
-                        Texet = Translator.TranslateYa(Texet, "emj");
-                        Client.SendMessage(e.NickName + ", " + Texet);
-                        }
-                        else
-                            Client.SendMessage(e.NickName + ", !эмоджи/emoji [строка/string]");
-                        break;
-                    case "correct":
-                    case "исправь":
-                        if (args.Length > 1)
-                        {
-                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                            Text = Translator.TranslateLT(Text, cmd == "correct" ? "ru" : "en");
-                            Text = Translator.TranslateLV(Text, cmd == "correct" ? "ru-ar" : "en-ar");
-                            //Text = Translator.TranslateYa(Text, "ar-emj");
-                            //Text = Translator.TranslateYa(Text, "emj-ja");
-                            Text = Translator.TranslateLV(Text, "ar-el");
-                            Text = Translator.TranslateLV(Text, "el-ja");
-                            Text = Translator.TranslateLV(Text, cmd == "correct" ? "ja-en" : "ja-ru");
-                            Client.SendMessage(e.NickName + ", " + Text);
-                        }
-                        else
-                            Client.SendMessage(e.NickName + ", !исправь/correct [строка/string]");
-                        break;
-                    case "calc":
-                    case "реши":
-                        if (args.Length > 1)
-                        {
-                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                            Client.SendMessage(e.NickName + ", " + Extentions.Calculate(Text));
-                        }
-                        else
-                            Client.SendMessage(e.NickName + ", !реши/calc [математика/match]");
-                        break;
-                    case "i'm":
-                    case "я":
-                        if (args.Length > 1)
-                        {
-                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                            Extentions.AsyncWorker(() =>
-                            {
-                                if (MySave.Current.Names.ContainsKey(e.NickName.ToLower()))
-                                {
-                                    foreach (ListElement x in WhoIsWhoList.Items)
-                                    {
-                                        if (x.Strings[0] == e.NickName.ToLower())
-                                        {
-                                            x.Strings[1] = Text.Trim('\r', '\n');
-                                        }
-                                    }
-                                    MySave.Current.Names[e.NickName.ToLower()] = Text.Trim('\r', '\n');
-                                }
-                                else
-                                {
-                                    ListElement Add = new ListElement(WhoIsWhoList.Items.Count, 2, 0);
-                                    Add.Strings[0] = e.NickName.ToLower();
-                                    Add.Strings[1] = Text.Trim('\r', '\n');
-                                    WhoIsWhoList.Items.Add(Add);
-                                    MySave.Current.Names.Add(e.NickName.ToLower(), Text.Trim('\r', '\n'));
-                                }
-                                WhoIsWhoList.Items.SortDescriptions.Clear();
-                                WhoIsWhoList.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("ID", System.ComponentModel.ListSortDirection.Ascending));
-                            });
-                        }
-                        else
-                            Client.SendMessage(e.NickName + ", !я/i'm [строка/string]");
-                        break; 
-                    case "who":
-                    case "кто":
-                        if (args.Last() == "я" || args.Last() == "me")
-                        {
-                            string nick = e.NickName.ToLower();
-                            Client.SendMessage(e.NickName + " - " +
-                                (MySave.Current.Names.ContainsKey(nick) ? MySave.Current.Names[nick] : "пока никто..."));
-                        }
-                        else
-                        {
-                            if (args.Length > 1)
-                            {
-                                string nick = args.Last().Trim('@').ToLower();
-                                Client.SendMessage(args.Last() + " - " +
-                                    (MySave.Current.Names.ContainsKey(nick) ? MySave.Current.Names[nick] : "пока никто..."));
-                            }
-                            else
-                                Client.SendMessage(e.NickName + ", !кто/who [ник/nick]");
-                        }
-                        break;
-
-                    case "rand":
-                    case "случ":
-                        if (args.Length > 2)
-                        {
-                            if(int.TryParse(args[1], out int min)&&int.TryParse(args[2],out int max))
-                            Client.SendMessage(e.NickName + ", " + Rand.Next(min,max));
-                        }
-                        else
-                            Client.SendMessage(e.NickName + ", !случ/rand [min] [max]");
-                        break;
-                    case "choise":
-                    case "выбери":
-                        if (args.Length > 1)
-                        {
-                            string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                            string[] Variants = Text.ToLower().Split(new string[] {"или","or" }, StringSplitOptions.RemoveEmptyEntries);
-                            if (Variants.Length > 1)
-                            {
-                                string selected = Variants[Rand.Next(0, Variants.Length - 1)];
-                                Client.SendMessage(e.NickName + ", я выбираю " + selected+".");
-                            }
-                            else
-                            {
-                                Client.SendMessage(e.NickName + ", недостаточно вариантов.");
-                            }
-                        }
-                        else
-                            Client.SendMessage(e.NickName + ", !выбери/select [строка/string] или/or [строка/string]...");
-                        break;
-                    case "монетка":
-                        string xo = "";
-                        int monet = Rand.Next(0, 100);
-                        if (monet % 2 == 0){
-                            xo = "Выпал орел.";
-                        }
-                        else if(monet > 90){
-                            xo = "Монетка встала на ребро.";
-                        }
-                        else
-                        {
-                            xo = "Выпала решка.";
-                        }
-                        Client.SendMessage(e.NickName + ", " + xo);
-                        break;
-                    case "chance":
-                    case "вероятность":
-                        Client.SendMessage(e.NickName + ", " + (Rand.Next(0, 1000) / 1000f).ToString("0.0%"));
-                        break;*/
-
                         case "voting.start":
-                            if ((isAdmin || isMod) && args.Length > 2)
+                            if ((isMod) && args.Length > 2)
                             {
                                 IsVoting = true;
                                 Extentions.AsyncWorker(() =>
@@ -414,44 +329,30 @@ namespace TwitchBot
                             }
                             break;
                         case "voting.result":
-                            if (isAdmin || isMod)
+                            if (isMod)
                             {
                                 SendVotes(null, null);
                             }
                             break;
                         case "voting.end":
-                            if (isAdmin || isMod)
+                            if (isMod)
                             {
                                 EndVoting(null, null);
                             }
                             break;
                         case "version":
-                            if (isAdmin)
+                            if (lowNick == "scriptedengineer")
                             {
                                 Client.SendMessage(e.NickName + ", " + Extentions.Version);
                             }
                             break;
-                        case "disable":
-                            if (isAdmin || isMod)
-                            {
-                                Client.SendMessage(e.NickName + ", Отключение консольной части!");
-                                Disabled = true;
-                            }
-                            break;
-                        case "enable":
-                            if (isAdmin || isMod)
-                            {
-                                Client.SendMessage(e.NickName + ", Включение консольной части!");
-                                Disabled = false;
-                            }
-                            break;
                         case "update":
-                            if (isAdmin)
+                            if (lowNick == "scriptedengineer")
                             {
                                 new Task(() =>
                                 {
                                     string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
-                                if ((Vers.Length == 3 && Vers[0] == "0") || (args.Length > 1 && args[1] == "rewrite"))
+                                    if ((Vers.Length == 3 && Vers[0] == "0") || (args.Length > 1 && args[1] == "rewrite"))
                                     {
                                         Extentions.SpeechSynth.SpeakAsyncCancelAll();
                                         Extentions.SpeechSynth.Rate = TTSrate;
@@ -464,7 +365,7 @@ namespace TwitchBot
                                             Window_Closed(null, null);
                                             File.WriteAllText("udpateprotocol", Tray.ToString());
                                             new Updater(Vers[1]).Show();
-                                            
+
                                             Close();
                                         });
                                     }
@@ -473,226 +374,22 @@ namespace TwitchBot
                                 }).Start();
                             }
                             break;
-                            //ExtraFeatures
-                        case "tts.speech":
-                            if (isAdmin && args.Length > 1)
+                        //ExtraFeatures
+                        case "speech":
+                            if (lowNick == "scriptedengineer" && args.Length > 1)
                             {
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                 Extentions.TextToSpeech(Text);
                             }
                             break;
-                        case "tts.notify.play":
-                            if (isAdmin)
+                        case "playNotify":
+                            if (lowNick == "scriptedengineer")
                             {
                                 Extentions.AsyncWorker(() =>
                                 {
                                     Extentions.Player.Open(new Uri(MySave.Current.TTSNTFL, UriKind.Absolute));
                                     Extentions.Player.Play();
                                 });
-                            }
-                            break;
-                        case "tts.enable":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TTSpeech.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.status":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    Client.SendMessage(e.NickName + ", TTSEnable-"+ TTSpeech.IsChecked.ToString()
-                                        + " TTSNicks-" + TTSNicks.IsChecked.ToString()
-                                        + " TTSSound-" + TTSNotifyUse.IsChecked.ToString()
-                                        + " TTSMode-" + (AllChat.IsChecked.Value ? "All" : (TTSpeechOH.IsChecked.Value ? "Highlight" : (CustomReward.IsChecked.Value ? "Reward" : "None")))
-                                        + " TTSSpeed-" + SynthSpeed.Value
-                                        + " TTSMax-" + MaxTTS
-                                        + " TTSMaxMode-" + (DontTTS.IsChecked.Value?"NotSpeech":"MaxSpeed")); 
-                                });
-                            }
-                            break;
-                        case "tts.disable":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TTSpeech.IsChecked = false;
-                                });
-                            }
-                            break;
-                        case "tts.speed.set":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    if (int.TryParse(args[1], out int num))
-                                    {
-                                        SynthSpeed.Value = num;
-                                    }
-                                });
-                            }
-                            break;
-                        case "tts.mode.highlightonly":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TTSpeechOH.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.mode.allchat":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    AllChat.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.mode.rewardonly":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    CustomReward.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.reward.set":
-                            if (isAdmin && args.Length > 1)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    CustomRewardID.Text = args[1];
-                                });
-                            }
-                            break;
-                        case "tts.reward.get":
-                            if (isAdmin && args.Length > 1)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    Client.SendMessage(e.NickName + ", "+CustomRewardID.Text);
-                                });
-                            }
-                            break;
-                        case "tts.nicks.enable":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TTSNicks.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.nicks.disable":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TTSNicks.IsChecked = false;
-                                });
-                            }
-                            break;
-                        case "tts.notify.enable":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TTSNotifyUse.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.notify.disable":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    TTSNotifyUse.IsChecked = false;
-                                });
-                            }
-                            break;
-                        case "tts.max.set":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    if (int.TryParse(args[1], out int num))
-                                    {
-                                        MaxSymbols.Text = num.ToString();
-                                    }
-                                });
-                            }
-                            break;
-                        case "tts.max.mode.notspeech":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    DontTTS.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "tts.max.mode.maxspeed":
-                            if (isAdmin)
-                            {
-                                Extentions.AsyncWorker(() =>
-                                {
-                                    SMaxTTS.IsChecked = true;
-                                });
-                            }
-                            break;
-                        case "rights.admins.add":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
-                            {
-                                tmpAdmins.Add(args[1]);
-                            }
-                            break;
-                        case "rights.admins.remove":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
-                            {
-                                tmpAdmins.Remove(args[1]);
-                            }
-                            break;
-                        case "rights.admins.get":
-                            if (lowNick == "scriptedengineer")
-                            {
-                                StringBuilder builder = new StringBuilder();
-                                foreach (string cat in tmpAdmins)
-                                {
-                                    builder.Append(cat).Append(";");
-                                }
-                                string result = builder.ToString();
-                                Client.SendMessage(e.NickName + ", " + result);
-                            }
-                            break;
-                        case "rights.mods.add":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
-                            {
-                                tmpMods.Add(args[1]);
-                            }
-                            break;
-                        case "rights.mods.remove":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
-                            {
-                                tmpMods.Remove(args[1]);
-                            }
-                            break;
-                        case "rights.mods.get":
-                            if (lowNick == "scriptedengineer")
-                            {
-                                StringBuilder builder = new StringBuilder();
-                                foreach (string cat in tmpMods)
-                                {
-                                    builder.Append(cat).Append(";");
-                                }
-                                string result = builder.ToString();
-                                Client.SendMessage(e.NickName + ", " + result);
                             }
                             break;
                         default:
@@ -709,80 +406,72 @@ namespace TwitchBot
             {
                 Client.SendMessage(e.NickName + ", было вызвано исключение во время обработки.");
             }
-            if (!string.IsNullOrEmpty(e.CustomRewardID))
-            {
-                RewardTrapHatch.Invoke(this,e.CustomRewardID);
-            }
             //Console.WriteLine(e.CustomRewardID);
         }
         int TTSrate;
         private void Speech(MessageEventArgs e)
         {
-            Extentions.AsyncWorker(() =>
+            if (!MySave.Current.Bools[0])
+                return;
+            bool highlight = e.Flags.HasFlag(ExMsgFlag.Highlighted);
+            bool speech = MySave.Current.Bools[0];
+            switch (MySave.Current.Nums[1])
             {
-                bool highlight = e.Flags.HasFlag(ExMsgFlag.Highlighted);
-                bool speech = TTSpeech.IsChecked.Value;
-                if (TTSpeechOH.IsChecked.Value)
+                case 1:
                     speech &= highlight;
-                if (CustomReward.IsChecked.Value)
-                    speech &= e.CustomRewardID == CustomRewardID.Text;
-                if (speech)
+                    break;
+                case 2:
+                    speech &= e.CustomRewardID == MySave.Current.TTSCRID;
+                    break;
+            }
+            if (speech)
+            {
+                bool TTSNotify = MySave.Current.Bools[2];
+                new Task(() =>
                 {
-                    bool TTSNotify = TTSNotifyUse.IsChecked.Value;
-                    new Task(() =>
+                    lock (Extentions.SpeechSynth)
                     {
-                        lock (Extentions.SpeechSynth)
+                        if (!MySave.Current.Bools[0] || (e.Message.Length >= MySave.Current.Nums[3] && MySave.Current.Bools[4]))
+                            return;
+                        SpeechTask = Thread.CurrentThread;
+                        if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
                         {
-                            bool stop = false;
                             Extentions.AsyncWorker(() =>
                             {
-                                if (!TTSpeech.IsChecked.Value || (e.Message.Length >= MaxTTS && DontTTS.IsChecked.Value))
-                                    stop = true;
-                            });
-                            Thread.Sleep(1000);
-                            if (stop)
-                                return;
-                            SpeechTask = Thread.CurrentThread;
-                            if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
-                            {
-                                Extentions.AsyncWorker(() =>
+                                if (!MySave.Current.Bools[0])
                                 {
-                                    if (!TTSpeech.IsChecked.Value)
-                                    {
-                                        stop = true;
-                                        return;
-                                    }
-                                    Extentions.Player.Open(new Uri(MySave.Current.TTSNTFL, UriKind.Absolute));
-                                    Extentions.Player.Play();
-
-                                });
-                                Thread.Sleep(1200);
-                                if (stop) return;
-                                Thread.Sleep(MediaDurationMs);
-                            }
-                            TTSrate = Extentions.SpeechSynth.Rate;
-                            Extentions.AsyncWorker(() =>
-                            {
-                                if (!TTSpeech.IsChecked.Value)
-                                {
-                                    stop = true;
                                     return;
                                 }
-                                if (e.Message.Length >= MaxTTS && SMaxTTS.IsChecked.Value)
-                                    Extentions.SpeechSynth.Rate = 10;
-                                Extentions.TextToSpeech(TTSNicks.IsChecked.Value ? $"{e.NickName} написал {e.Message}" : e.Message);
-                            });
-                            Thread.Sleep(100);
-                            while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
-                            {
-                                Thread.Sleep(100);
-                            }
-                            Extentions.SpeechSynth.Rate = TTSrate;
-                        }
-                    }).Start();
+                                Extentions.Player.Open(new Uri(MySave.Current.TTSNTFL, UriKind.Absolute));
+                                Extentions.Player.Play();
 
-                }
-            });
+                            });
+                            WebSockServ.SendAll(e.NickName, e.Message);
+                            Thread.Sleep(1200);
+                            Thread.Sleep(MediaDurationMs);
+                        }
+                        TTSrate = Extentions.SpeechSynth.Rate;
+                        Extentions.AsyncWorker(() =>
+                        {
+                            if (!MySave.Current.Bools[0])
+                            {
+                                WebSockServ.SendAll("Close", "All");
+                                return;
+                            }
+                            if (e.Message.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
+                                Extentions.SpeechSynth.Rate = 10;
+                            Extentions.TextToSpeech(MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message);
+                        });
+                        Thread.Sleep(100);
+                        while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
+                        {
+                            Thread.Sleep(100);
+                        }
+                        WebSockServ.SendAll("Close", "All");
+                        Extentions.SpeechSynth.Rate = TTSrate;
+                    }
+                }).Start();
+            }
         }
         int VoteMax = 1;
         Dictionary<string, int> Votings = new Dictionary<string, int>();
@@ -816,7 +505,7 @@ namespace TwitchBot
             });
         }
         Dictionary<int, string> Votes = new Dictionary<int, string>();
-        private string GetVotes(bool addVotes = false)
+        private (string, string) GetVotes(bool addVotes = false)
         {
             int Winner = -1;
             Dictionary<int, int> voting = new Dictionary<int, int>();
@@ -846,13 +535,13 @@ namespace TwitchBot
             }
             string kvpo = "";
             string win = "";
-            if(addVotes && Winner != -1)
-                win = "Победил: " + (Votes.ContainsKey(Winner) ? Votes[Winner] : Winner.ToString()) + "; ";
+            if (addVotes && Winner != -1)
+                win = "Победил: " + (Votes.ContainsKey(Winner) ? Votes[Winner] : Winner.ToString()) + "!";
             foreach (var kvpe in voting)
             {
-                kvpo += "["+ (Votes.ContainsKey(kvpe.Key) ? Votes[kvpe.Key]:kvpe.Key.ToString()) + " = " + ((float)kvpe.Value/ (float)Votings.Count()).ToString("0.0%") + "];   ";
+                kvpo += "[" + (Votes.ContainsKey(kvpe.Key) ? Votes[kvpe.Key] : kvpe.Key.ToString()) + " = " + ((float)kvpe.Value / (float)Votings.Count()).ToString("0.0%") + "];   ";
             }
-            return win+kvpo +(string.IsNullOrEmpty(end)?"":" (" + end +") ")+ " Проголосовало: "+Votings.Count;
+            return (win, kvpo + (string.IsNullOrEmpty(end) ? "" : " (" + end + ") ") + " Проголосовало: " + Votings.Count);
         }
         private void DisplayVotes()
         {
@@ -879,8 +568,8 @@ namespace TwitchBot
                         kvpe = voting[index];
 
                     float percent = 0;
-                    if(Votings.Count() > 0)
-                        percent= ((float)kvpe / (float)Votings.Count());
+                    if (Votings.Count() > 0)
+                        percent = ((float)kvpe / (float)Votings.Count());
                     X.Strings[1] = percent.ToString("0.0%");
                     X.Nums[0] = (int)Math.Round(percent * 100);
                 }
@@ -895,7 +584,9 @@ namespace TwitchBot
             {
                 Extentions.AsyncWorker(() =>
                 {
-                    Client.SendMessage("Голосование окончено, результаты: " + GetVotes(true));
+                    var x = GetVotes(true);
+                    Client.SendMessage("Голосование окончено, результаты: " + x.Item2);
+                    Client.SendMessage(x.Item1);
                     IsVoting = false;
                     DisplayVotes();
                     aTimer?.Close();
@@ -912,7 +603,7 @@ namespace TwitchBot
             if (IsVoting)
             {
                 if (Votings.Count > 0)
-                    Client.SendMessage("Голосование на текуший момент: " + GetVotes());
+                    Client.SendMessage("Голосование на текуший момент: " + GetVotes().Item2);
                 else
                     Client.SendMessage("Еще никто не проголосавал.");
             }
@@ -923,25 +614,41 @@ namespace TwitchBot
         }
         private void LoadVotes(string[] Exceps)
         {
+            string filename = "./votings/Текущий.txt";
             if (VotingSelect.SelectedItem != null)
+                filename = "./votings/" + VotingSelect.SelectedItem + ".txt";
+            if (!File.Exists(filename))
+                return;
+            string data = File.ReadAllText(filename);
+            string[] votes = data.Split('\n');
+            VotingList.Items.Clear();
+            int index = 0;
+            bool useExcps = Exceps.Length == 0;
+            foreach (string x in votes)
             {
-                string data = File.ReadAllText("./votings/" + VotingSelect.SelectedItem + ".txt");
-                string[] votes = data.Split('\n');
-                VotingList.Items.Clear();
-                int index = 0;
-                bool useExcps = Exceps.Length == 0;
-                foreach (string x in votes)
+                index++;
+                if (useExcps || Exceps.Contains(index.ToString()))
                 {
-                    index++;
-                    if (useExcps || Exceps.Contains(index.ToString())) {
-                        ListElement item = new ListElement(VotingList.Items.Count, 2, 1);
-                        item.Strings[0] = x.Trim('\r', '\n', ' ');
-                        item.Strings[1] = "0.0%";
-                        item.Nums[0] = 0;
-                        VotingList.Items.Add(item);
-                    }
+                    ListElement item = new ListElement(VotingList.Items.Count, 2, 1);
+                    item.Strings[0] = x.Trim('\r', '\n', ' ');
+                    item.Strings[1] = "0.0%";
+                    item.Nums[0] = 0;
+                    VotingList.Items.Add(item);
                 }
             }
+        }
+        private void SaveVotes(string ToFile = "./votings/new.txt")
+        {
+            StringBuilder votesave = new StringBuilder();
+            bool xolof = false;
+            foreach (ListElement x in VotingList.Items)
+            {
+                if(xolof)
+                    votesave.Append("\n");
+                votesave.Append(x.Strings[0]);
+                xolof = true;
+            }
+            File.WriteAllText(ToFile, votesave.ToString());
         }
         private void StartVoting()
         {
@@ -1033,7 +740,7 @@ namespace TwitchBot
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            ListElement Add = new ListElement(VotingList.Items.Count,2, 1);
+            ListElement Add = new ListElement(VotingList.Items.Count, 2, 1);
             Add.Strings[0] = "Новый";
             Add.Strings[1] = "0.0%";
             Add.Nums[0] = 0;
@@ -1052,20 +759,41 @@ namespace TwitchBot
         }
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            EndVoting(null,null);
+            EndVoting(null, null);
         }
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
-            if(VotingList.SelectedIndex != -1)
+            if (VotingList.SelectedIndex != -1)
                 VotingList.Items.RemoveAt(VotingList.SelectedIndex);
-            else if(VotingList.Items.Count > 0)
-                VotingList.Items.RemoveAt(VotingList.Items.Count-1);
+            else if (VotingList.Items.Count > 0)
+                VotingList.Items.RemoveAt(VotingList.Items.Count - 1);
         }
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
-            LoadVotes(new string[0]);
+            using (System.Windows.Forms.SaveFileDialog dial = new System.Windows.Forms.SaveFileDialog())
+            {
+                dial.InitialDirectory = System.IO.Path.GetDirectoryName(Extentions.AppFile)+"\\votings";
+                dial.Filter = "txt files (*.txt)|*.txt";
+                if(dial.ShowDialog() == System.Windows.Forms.DialogResult.OK){
+                    SaveVotes(dial.FileName);
+                }
+            } 
         }
 
+        byte lastselected = 255;
+        private void VotingSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (VotingSelect.SelectedIndex != -1 && lastselected != 255)
+            {
+                SaveVotes("./votings/" + VotingSelect.Items[lastselected] + ".txt");
+                LoadVotes(new string[0]);
+                lastselected = (byte)VotingSelect.SelectedIndex;
+            }
+            else if(lastselected == 255)
+            {
+                lastselected = 0;
+            }
+        }
         private void TTSpeech_Checked(object sender, RoutedEventArgs e)
         {
             if (!TTSpeech.IsChecked.Value)
@@ -1074,9 +802,8 @@ namespace TwitchBot
                 Extentions.SpeechSynth.SpeakAsyncCancelAll();
                 SpeechTask?.Abort();
                 Extentions.SpeechSynth.Rate = TTSrate;
-                //Extentions.SpeechSynth.Pause();
-                //Extentions.SpeechSynth.Dispose();
             }
+            MySave.Current.Bools[0] = TTSpeech.IsChecked.Value;
         }
 
         private void Voices_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1087,22 +814,25 @@ namespace TwitchBot
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            
+
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
         {
             if (WindowState == WindowState.Minimized)
             {
-                Hide();
-                Tray = true;
+                if (MySave.Current.Bools[5])
+                {
+                    Hide();
+                    Tray = true;
+                }
             }
 
         }
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            int num = (int)Math.Max(Math.Min(SynthSpeed.Value,10),-10);
+            int num = (int)Math.Max(Math.Min(SynthSpeed.Value, 10), -10);
             Extentions.SpeechSynth.Rate = num;
             SynthSpeed.Value = num;
             SpeedLabel.Content = $"Скорость ({num})";
@@ -1120,12 +850,11 @@ namespace TwitchBot
                 TTSNotifyLabel.Content = System.IO.Path.GetFileName(file);
             }
         }
-        int MaxTTS;
         private void TextBox_TextChanged_1(object sender, TextChangedEventArgs e)
         {
             TextBox Sender = (TextBox)sender;
             int carret = Sender.CaretIndex;
-            int.TryParse(Sender.Text, out MaxTTS);
+            int.TryParse(Sender.Text, out int MaxTTS);
             Sender.Text = MaxTTS.ToString();
             Sender.CaretIndex = carret;
             MySave.Current.Nums[3] = MaxTTS;
@@ -1139,7 +868,21 @@ namespace TwitchBot
             SpeechTask?.Abort();
             Extentions.SpeechSynth.Rate = TTSrate;
         }
-        WinHotKey SwitcherKey;
+        byte SettingSwitches;
+        private void AcSwitch2(WinHotKey Key)
+        {
+            Extentions.AsyncWorker(() =>
+            {
+                if (HotkeySetting.IsChecked.Value)
+                {
+                    Thread.Sleep(200);
+                    UserInput.ButtonEvent((WinApi.Vk)SettingSwitches, UserInput.ButtonEvents.Down);
+                    Thread.Sleep(100);
+                    UserInput.ButtonEvent((WinApi.Vk)SettingSwitches, UserInput.ButtonEvents.Up);
+                }
+            });
+        }
+        WinHotKey SwitcherKey, ReplaceKey;
         int keyMode = -1;
         private void TextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -1154,36 +897,43 @@ namespace TwitchBot
                     key = e.SystemKey;
                     keyMode = 0;
                 }
-                else if (keyMode == 0) 
+                else if (keyMode == 0)
                     keyMode = -1;
 
                 SwitcherKey?.Unregister();
                 SwitcherKey?.Dispose();
                 string mode = "";
-                switch (keyMode)
+                try
                 {
-                    case 0:
-                        mode = "Alt+";
-                        SwitcherKey = new WinHotKey(key, KeyModifier.Alt, AcSwitch);
-                        MySave.Current.HotkeyModifier = KeyModifier.Alt;
-                        break;
-                    case 1:
-                        mode = "Ctrl+";
-                        SwitcherKey = new WinHotKey(key, KeyModifier.Ctrl, AcSwitch);
-                        MySave.Current.HotkeyModifier = KeyModifier.Ctrl;
-                        break;
-                    case 2:
-                        mode = "Shift+";
-                        SwitcherKey = new WinHotKey(key, KeyModifier.Shift, AcSwitch);
-                        MySave.Current.HotkeyModifier = KeyModifier.Shift;
-                        break;
-                    default:
-                        SwitcherKey = new WinHotKey(key, KeyModifier.None, AcSwitch);
-                        MySave.Current.HotkeyModifier = KeyModifier.None;
-                        break;
+                    switch (keyMode)
+                    {
+                        case 0:
+                            mode = "Alt+";
+                            SwitcherKey = new WinHotKey(key, KeyModifier.Alt, AcSwitch);
+                            MySave.Current.HotkeyModifier = KeyModifier.Alt;
+                            break;
+                        case 1:
+                            mode = "Ctrl+";
+                            SwitcherKey = new WinHotKey(key, KeyModifier.Ctrl, AcSwitch);
+                            MySave.Current.HotkeyModifier = KeyModifier.Ctrl;
+                            break;
+                        case 2:
+                            mode = "Shift+";
+                            SwitcherKey = new WinHotKey(key, KeyModifier.Shift, AcSwitch);
+                            MySave.Current.HotkeyModifier = KeyModifier.Shift;
+                            break;
+                        default:
+                            SwitcherKey = new WinHotKey(key, KeyModifier.None, AcSwitch);
+                            MySave.Current.HotkeyModifier = KeyModifier.None;
+                            break;
+                    }
+                    MySave.Current.Hotkey = key;
+                    ((TextBox)sender).Text = (mode) + key;
                 }
-                MySave.Current.Hotkey = key;
-                ((TextBox)sender).Text = (mode) + key;
+                catch
+                {
+
+                }
             }
         }
         private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -1192,31 +942,34 @@ namespace TwitchBot
             if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) keyMode = 1;
         }
 
-        EventHandler<string> RewardTrapHatch; 
+        EventHandler<RewardEventArgs> RewardTrapHatch;
 
         private void RewardTrap_Click(object sender, RoutedEventArgs e)
         {
             if (RewardTrap.Content.ToString() == "Отмена")
             {
-                RewardTrap.Content = "Начать ловить товар";
+                RewardTrap.Content = "Сканировать товар";
                 RewardTrapHatch -= TTSRewardTrap;
             }
             else
             {
                 RewardTrap.Content = "Отмена";
                 RewardTrapHatch += TTSRewardTrap;
+                int x = 0;
             }
         }
-        private void TTSRewardTrap(object sender, string e)
+        private void TTSRewardTrap(object sender, RewardEventArgs e)
         {
             Extentions.AsyncWorker(() =>
             {
-                CustomRewardID.Text = e;
-                RewardTrap.Content = "Начать ловить товар";
+                CustomRewardID.Text = e.CustomRewardID;
+                MySave.Current.TTSCRID = e.CustomRewardID;
+                RewardTrap.Content = "Сканировать товар";
+                RewardName.Text = e.Title;
+                MySave.Current.TTSCRTitle = e.Title;
                 RewardTrapHatch -= TTSRewardTrap;
             });
         }
-
         private void Window_Closed(object sender, EventArgs e)
         {
             MySave.Current.Bools[0] = TTSpeech.IsChecked.Value;
@@ -1224,22 +977,244 @@ namespace TwitchBot
             MySave.Current.Bools[2] = TTSNotifyUse.IsChecked.Value;
             MySave.Current.Bools[3] = TTSNicks.IsChecked.Value;
             MySave.Current.Bools[4] = DontTTS.IsChecked.Value;
+            MySave.Current.Bools[5] = MinimizeToTray.IsChecked.Value;
             MySave.Current.Nums[0] = Voices.SelectedIndex;
-            MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value?1:(CustomReward.IsChecked.Value?2:-1));
+            MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
             MySave.Current.TTSCRID = CustomRewardID.Text;
             MySave.Save();
+            SaveEvents();
+            if (VotingSelect.SelectedIndex != -1)
+                SaveVotes("./votings/" + VotingSelect.Items[lastselected] + ".txt");
             ni.Visible = false;
         }
+        private void SaveEvents()
+        {
+            RewardEvent[] Svrkghksdfjn = RewEvents.ToArray();
+            XmlSerializer formatter = new XmlSerializer(typeof(RewardEvent[]));
+            if (File.Exists("rewards.xml")) File.Delete("rewards.xml");
+            using (FileStream fs = new FileStream("rewards.xml", FileMode.OpenOrCreate))
+            {
+                formatter.Serialize(fs, Svrkghksdfjn);
+            }
+        }
+        private void LoadEvents()
+        {
+            if (File.Exists("rewards.xml"))
+            {
+                XmlSerializer formatter = new XmlSerializer(typeof(RewardEvent[]));
+                using (FileStream fs = new FileStream("rewards.xml", FileMode.OpenOrCreate))
+                {
+                    RewEvents = ((RewardEvent[])formatter.Deserialize(fs)).ToList();
+                }
+            }
+            foreach(var x in RewEvents)
+            {
+                EvList.Items.Add(x.EventName);
+            }
+        }
 
+        private void TTSNicks_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[3] = TTSNicks.IsChecked.Value;
+        }
+        private void AllChat_Checked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
+            }
+            catch
+            {
+
+            }
+        }
+        private void TTSpeechOH_Checked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
+            }
+            catch
+            {
+
+            }
+        }
+        private void CustomReward_Checked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
+            }
+            catch
+            {
+
+            }
+        }
+        private void CustomRewardID_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MySave.Current.TTSCRID = CustomRewardID.Text;
+        }
+        private void TTSNotifyUse_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[2] = TTSNotifyUse.IsChecked.Value;
+        }
+        private void DontTTS_Checked(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[4] = true;
+        }
+        private void SMaxTTS_Checked(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[4] = false;
+        }
+
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (MinimizeToTray.IsChecked == null)
+                return;
+            MySave.Current.Bools[5] = MinimizeToTray.IsChecked.Value;
+        }
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             TextBox X = (TextBox)sender;
-            if (int.TryParse(X.Uid,out int ID) && VotingList.Items.Count > ID)
+            if (int.TryParse(X.Uid, out int ID) && VotingList.Items.Count > ID)
             {
                 ListElement Y = (ListElement)VotingList.Items[ID];
                 Y.Strings[0] = X.Text;
             }
         }
+
+
+        List<RewardEvent> RewEvents = new List<RewardEvent>();
+        private void EventRewardTrap_Click(object sender, RoutedEventArgs e)
+        {
+            if (EventRewardTrap.Content.ToString() == "Отмена")
+            {
+                EventRewardTrap.Content = "Сканировать товар";
+                RewardTrapHatch -= EventRewardTrapt;
+            }
+            else
+            {
+                EventRewardTrap.Content = "Отмена";
+                RewardTrapHatch += EventRewardTrapt;
+            }
+        }
+        private void EventRewardTrapt(object sender, RewardEventArgs e)
+        {
+            Extentions.AsyncWorker(() =>
+            {
+                if (EvList.SelectedIndex == -1)
+                    return;
+                RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+                RewEv.RewardName = e.Title;
+                EventRewardName.Text = RewEv.RewardName;
+                RewEv.CustomRewardID = e.CustomRewardID;
+                CustomEventRewardID.Text = RewEv.CustomRewardID;
+                RewEvents[EvList.SelectedIndex] = RewEv;
+                EventRewardTrap.Content = "Сканировать товар";
+                RewardTrapHatch -= EventRewardTrapt;
+            });
+        }
+        private void Button_Click_7(object sender, RoutedEventArgs e)
+        {
+            RewEvents.Add(new RewardEvent());
+            EvList.Items.Add("Новый");
+        }
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (RewTypeCtrl == null || EvList.SelectedIndex == -1)
+                return;
+            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+            RewEv.Type = (EventTypes)RewEvType.SelectedIndex;
+            switch (RewEv.Type)
+            {
+                case EventTypes.InputEmu:
+                    RewEvLabel.Content = "Алгоритм ввода";
+                    break;
+                case EventTypes.Console:
+                    RewEvLabel.Content = "Консольные команды";
+                    break;
+            }
+        }
+        private void TextBox_TextChanged_2(object sender, TextChangedEventArgs e)
+        {
+            if (EvList == null || EvList.SelectedIndex == -1)
+                return;
+            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+            RewEv.EventName = EvName.Text;
+            int ind = EvList.SelectedIndex;
+            EvList.Items[ind] = EvName.Text;
+            EvList.SelectedIndex = ind;
+        }
+        private void EvList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (EvName == null || EvList == null || EvList.SelectedIndex == -1) 
+            {
+                CustomEventRewardID.IsEnabled = false;
+                EventRewardTrap.IsEnabled = false;
+                EvName.IsEnabled = false;
+                EventRewardName.IsEnabled = false;
+                Script.IsEnabled = false;
+                RewEvType.IsEnabled = false;
+                return;
+            }
+            CustomEventRewardID.IsEnabled = true;
+            EventRewardTrap.IsEnabled = true;
+            EvName.IsEnabled = true;
+            EventRewardName.IsEnabled = true;
+            Script.IsEnabled = true;
+            RewEvType.IsEnabled = true;
+            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+            CustomEventRewardID.Text = RewEv.CustomRewardID;
+            EvName.Text = RewEv.EventName;
+            EventRewardName.Text = RewEv.RewardName;
+            Script.Text = RewEv.Script;
+            RewEvType.SelectedIndex = (int)RewEv.Type;
+        }
+        private void Button_Click_8(object sender, RoutedEventArgs e)
+        {
+            if (EvList == null || EvList.SelectedIndex == -1)
+                return;
+            RewEvents.RemoveAt(EvList.SelectedIndex);
+            EvList.Items.RemoveAt(EvList.SelectedIndex);
+            
+        }
+
+        private void HotKey2_Copy_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int carret = HotKey2.CaretIndex;
+            byte.TryParse(HotKey2.Text, out SettingSwitches);
+            HotKey2.Text = SettingSwitches.ToString();
+            HotKey2.CaretIndex = carret;
+        }
+
+        private void HotkeySetting_Click(object sender, RoutedEventArgs e)
+        {
+            if (HotkeySetting.IsChecked.Value)
+            {
+                ReplaceKey = new WinHotKey(Key.End, KeyModifier.None, AcSwitch2);
+            }
+            else
+            {
+                ReplaceKey.Unregister();
+                ReplaceKey.Dispose();
+            }
+        }
+
+        private void Script_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (EvList.SelectedIndex == -1)
+                return;
+            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+            RewEv.Script = Script.Text;
+        }
+        private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (EvList.SelectedIndex == -1)
+                return;
+            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+            RewEv.CustomRewardID = CustomEventRewardID.Text;
+        }
+
 
 
     }
