@@ -21,9 +21,9 @@ namespace TwitchBot
                 Send("Pong");
         }
 
-        public static void SendAll(string NickName, string Message)
+        public static void SendAll(string Event,string Data = "")
         {
-            Connection?.Sessions.Broadcast(String.Format("{0}| : |{1}", NickName, Message));
+            Connection?.Sessions.Broadcast(String.Format("{0}|{1}", Event, Data));
         }
     }
 

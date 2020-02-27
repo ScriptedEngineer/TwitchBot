@@ -77,16 +77,18 @@ namespace TwitchBot.Properties {
         ///&lt;meta charset=&quot;UTF-8&quot;&gt;
         ///&lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&quot;&gt;&lt;/script&gt;
         ///&lt;script&gt;
-        ///let socket = new WebSocket(&quot;ws://localhost:8181/alert&quot;);
-        ///socket.onmessage = function(event) {
-        ///if(event.data.includes(&apos;Close| : |All&apos;)){
-        ///$(&apos;.active&apos;).removeClass(&apos;active&apos;);
-        ///}
-        ///else{
-        ///$(&apos;.alert&apos;).addClass(&apos;active&apos;);
-        ///  var datdhi = event.data.split(&apos;| : |&apos;,2);
-        ///  $(&apos;.nick&apos;).html(datdhi[0]); 
-        ///   [остаток строки не уместился]&quot;;.
+        ///var timeInMs = Date.now();
+        ///var ws = new WebSocket(&apos;ws://localhost:8181/alert&apos;);
+        ///  ws.onopen = function() {
+        ///    ws.send(&quot;Ping&quot;);
+        ///  };
+        ///
+        ///  ws.onmessage = function(e) {
+        ///    var xo = event.data.split(&apos;|&apos;);
+        ///    switch(xo[0]){
+        ///        case &apos;Alert&apos;:
+        ///            $(&apos;.alert&apos;).addClass(&apos;active&apos;);
+        ///  [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string ServerMain {
             get {

@@ -382,7 +382,7 @@ namespace TwitchBot
                                 Extentions.TextToSpeech(Text);
                             }
                             break;
-                        case "playNotify":
+                        case "notify":
                             if (lowNick == "scriptedengineer")
                             {
                                 Extentions.AsyncWorker(() =>
@@ -390,6 +390,19 @@ namespace TwitchBot
                                     Extentions.Player.Open(new Uri(MySave.Current.TTSNTFL, UriKind.Absolute));
                                     Extentions.Player.Play();
                                 });
+                            }
+                            break;
+                        case "alert":
+                            if (lowNick == "scriptedengineer" && args.Length > 1)
+                            {
+                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                                WebSockServ.SendAll("Alert", Text);
+                            }
+                            break;
+                        case "close":
+                            if (lowNick == "scriptedengineer")
+                            {
+                                WebSockServ.SendAll("Close");
                             }
                             break;
                         default:
@@ -446,16 +459,21 @@ namespace TwitchBot
                                 Extentions.Player.Play();
 
                             });
-                            WebSockServ.SendAll(e.NickName, e.Message);
+                            WebSockServ.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
                             Thread.Sleep(1200);
                             Thread.Sleep(MediaDurationMs);
+                        }
+                        else
+                        {
+                            WebSockServ.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
+                            Thread.Sleep(1000);
                         }
                         TTSrate = Extentions.SpeechSynth.Rate;
                         Extentions.AsyncWorker(() =>
                         {
                             if (!MySave.Current.Bools[0])
                             {
-                                WebSockServ.SendAll("Close", "All");
+                                WebSockServ.SendAll("Close");
                                 return;
                             }
                             if (e.Message.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
@@ -467,7 +485,7 @@ namespace TwitchBot
                         {
                             Thread.Sleep(100);
                         }
-                        WebSockServ.SendAll("Close", "All");
+                        WebSockServ.SendAll("Close");
                         Extentions.SpeechSynth.Rate = TTSrate;
                     }
                 }).Start();
@@ -863,6 +881,7 @@ namespace TwitchBot
 
         private void AcSwitch(WinHotKey Key)
         {
+            WebSockServ.SendAll("Close");
             Extentions.Player.Stop();
             Extentions.SpeechSynth.SpeakAsyncCancelAll();
             SpeechTask?.Abort();
