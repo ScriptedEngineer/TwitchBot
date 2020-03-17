@@ -225,18 +225,41 @@ namespace TwitchBot
                     }
 
             //Вебсервер визуалки
-            WebServer = new WebServer(WebRequest, "http://localhost:8080/obs/");
+            WebServer = new WebServer(WebRequest, "http://localhost:8190/");
             WebServer.Run();
 
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
             WebSocketServer.AddWebSocketService<WebSockServ>("/alert");
             WebSocketServer.Start();
+            if (!File.Exists("account.txt"))
+            {
+                Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read");
+                while (!File.Exists("account.txt"))
+                {
+                    Thread.Sleep(500);
+                }
+            }
         }
         WebSocketSharp.Server.WebSocketServer WebSocketServer;
         WebServer WebServer;
         public static string WebRequest(HttpListenerRequest request)
         {
-            return Properties.Resources.ServerMain;
+            switch (request.RawUrl.Split('?').First().Trim('/'))
+            {
+                case "obs":
+                    return Properties.Resources.ServerMain;
+                case "control":
+                    return "NO";
+                case "twitchcode":
+                    return "<script>location.replace('http://localhost:8190/twithctoken?' + window.location.href.split('#')[1]);</script>";
+                case "twithctoken":
+                    string token = request.QueryString.Get("access_token");
+                    string login = TwitchAccount.GetLogin(token);
+                    File.WriteAllLines("account.txt", new string[] { login, token });
+                    return "<script>location.replace('https://wsxz.ru');</script>";
+                default:
+                    return "Not found";
+            }            
         }
 
         TwitchClient Client;
