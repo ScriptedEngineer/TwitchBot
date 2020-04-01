@@ -7,25 +7,33 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Xml.Serialization;
 
+
 namespace TwitchBot
 {
     public class MySave
     {
+        const int BL = 7;
+        const int NL = 5;
+
         public static MySave Current = new MySave();
         public string Streamer { get; set; }
         public string TTSCRID { get; set; }
         public string TTSNTFL { get; set; }
         public string TTSCRTitle { get; set; }
+        public string BadWords { get; set; }
+        public string Censor { get; set; }
         private static Random Rand = new Random();
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }
+        public string[] Strings { get; set; }
         public KeyModifier HotkeyModifier = KeyModifier.Alt;
         public Key Hotkey = Key.F1;
         private MySave()
         {
-            Bools = new bool[6];
-            Nums = new int[4];
+            Bools = new bool[BL];
+            Nums = new int[NL];
             Nums[0] = 0;
+            Nums[4] = 100;
             //TTSNTFL = $"{Path.GetDirectoryName(Extentions.AppFile)}/tts.mp3";
         }
         public static void Load()
@@ -46,16 +54,16 @@ namespace TwitchBot
                     Current = new MySave();
                     Save();
                 }
-                if (Current.Nums.Length < 4)
+                if (Current.Nums.Length < NL)
                 {
                     int[] nms = Current.Nums;
-                    Array.Resize<int>(ref nms, 4);
+                    Array.Resize<int>(ref nms, NL);
                     Current.Nums = nms;
                 }
-                if (Current.Bools.Length < 6)
+                if (Current.Bools.Length < BL)
                 {
                     bool[] nms = Current.Bools;
-                    Array.Resize<bool>(ref nms, 6);
+                    Array.Resize<bool>(ref nms, BL);
                     Current.Bools = nms;
                 }
             }

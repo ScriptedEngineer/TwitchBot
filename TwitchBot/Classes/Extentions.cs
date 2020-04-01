@@ -49,7 +49,7 @@ namespace TwitchBot
                 }
                 if (!string.IsNullOrEmpty(Voice))
                     SpeechSynth.SelectVoice(Voice);
-                SpeechSynth.Volume = 100;
+                //SpeechSynth.Volume = 100;
                 SpeechSynth.SpeakAsync(Text);
             }).Start();
         }

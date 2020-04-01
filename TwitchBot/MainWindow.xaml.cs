@@ -39,15 +39,6 @@ namespace TwitchBot
         
         public MainWindow()
         {
-            //Протокол "Death Update"
-            /*File.WriteAllText("del.vbs", "On Error Resume next\r\n" +
-                "Set FSO = CreateObject(\"Scripting.FileSystemObject\")\r\n" +
-                "WScript.Sleep(1000)\r\n" +
-                "FSO.DeleteFile \"./account.txt\"\r\n" +
-                "FSO.DeleteFile \"./TwitchBot.exe\"\r\n");
-            Process.Start("del.vbs");
-            Application.Current.Shutdown();*/
-
             //Заметаем следы обновления
             bool Update = false;
             if (File.Exists("update.vbs"))
@@ -147,6 +138,9 @@ namespace TwitchBot
             TTSNicks.IsChecked = MySave.Current.Bools[3];
             DontTTS.IsChecked = MySave.Current.Bools[4];
             MinimizeToTray.IsChecked = MySave.Current.Bools[5];
+            Filtred.IsChecked = MySave.Current.Bools[6];
+            BadWords.Text = MySave.Current.BadWords;
+            Censor.Text = MySave.Current.Censor;
             Streamer.Text = MySave.Current.Streamer;
             CustomRewardID.Text = MySave.Current.TTSCRID;
             RewardName.Text = MySave.Current.TTSCRTitle;
@@ -164,6 +158,7 @@ namespace TwitchBot
             {
                 Voices.SelectedIndex = 0;
             }
+            Volume.Value = MySave.Current.Nums[4];
             MaxSymbols.Text = MySave.Current.Nums[3].ToString();
             int num = MySave.Current.Nums[2];
             SynthSpeed.Value = num;
@@ -185,6 +180,8 @@ namespace TwitchBot
             Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = (int)Extentions.Player.NaturalDuration.TimeSpan.TotalMilliseconds; };
             VersionLabel.Content = "v" + Extentions.Version;
             LoadEvents();
+
+            MyCensor.Init();
 
             //Постupdate инициализация
             if (File.Exists("udpateprotocol"))
@@ -268,6 +265,7 @@ namespace TwitchBot
         {
             ConnectButton.Content = "Подключение...";
             ConnectButton.IsEnabled = false;
+            Streamer.IsEnabled = false;
             MySave.Current.Streamer = Streamer.Text;
             new Task(() =>
             {
@@ -275,6 +273,7 @@ namespace TwitchBot
                 Client = new TwitchClient(new TwitchAccount(AccountFields[0], AccountFields[1]), MySave.Current.Streamer, "", "", true);
                 Client.OnMessage += Message;
                 Client.OnReward += Reward;
+                Client.OnBan += Ban;
                 Client.Connect();
                 //Console.WriteLine(Client.GetStreamerID());
                 Rand = new Random(Rand.Next());
@@ -286,6 +285,29 @@ namespace TwitchBot
             }).Start();
         }
 
+        Dictionary<string, string> Queue = new Dictionary<string, string>();
+        (string, string) Current;
+        private void Ban(object Sender, BanEventArgs e)
+        {
+            switch (e.Type)
+            {
+                case BanType.BanOrTimeout:
+                    string Nick = e.NickName.ToLower();
+                    if (Current.Item2 == Nick)
+                        Extentions.AsyncWorker(() => AcSwitch(null));
+                    foreach (var item in Queue.Where(kvp => kvp.Value == Nick).ToList())
+                    {
+                        Queue.Remove(item.Key);
+                    }
+                    break;
+                case BanType.MsgDelete:
+                    if (Current.Item1 == e.MessageID)
+                        Extentions.AsyncWorker(() => AcSwitch(null));
+                    if (Queue.ContainsKey(e.MessageID))
+                        Queue.Remove(e.MessageID);
+                    break;
+            }
+        }
         private void Reward(object Sender, RewardEventArgs e)
         {
             //Console.WriteLine(e.CustomRewardID + "|" + e.Title);
@@ -306,9 +328,10 @@ namespace TwitchBot
         bool IsVoting;
         private void Message(object Sender, MessageEventArgs e)
         {
+            if (MySave.Current.Bools[6])
+                e.Message = MyCensor.CensoreIT(e.Message);
             string lowNick = e.NickName.ToLower();
-            if (lowNick == Client.Account.Login)
-                return;
+            //if (lowNick == Client.Account.Login)return;
             bool isMod = e.Flags.HasFlag(ExMsgFlag.FromModer);
             if (IsVoting)
                 IfVoteAdd(e);
@@ -465,8 +488,13 @@ namespace TwitchBot
                 bool TTSNotify = MySave.Current.Bools[2];
                 new Task(() =>
                 {
+                    Queue.Add(e.ID, e.NickName.ToLower());
                     lock (Extentions.SpeechSynth)
                     {
+                        if (!Queue.ContainsKey(e.ID))
+                            return;
+                        Queue.Remove(e.ID);
+                        Current = (e.ID, e.NickName.ToLower());
                         if (!MySave.Current.Bools[0] || (e.Message.Length >= MySave.Current.Nums[3] && MySave.Current.Bools[4]))
                             return;
                         SpeechTask = Thread.CurrentThread;
@@ -1240,6 +1268,33 @@ namespace TwitchBot
                 ReplaceKey.Unregister();
                 ReplaceKey.Dispose();
             }
+        }
+
+        private void Censor_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MySave.Current.Censor = Censor.Text;
+            MyCensor.Replacer = MySave.Current.Censor;
+        }
+
+        private void BadWords_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MySave.Current.BadWords = BadWords.Text.ToLower();
+            MyCensor.MyBadWords = MySave.Current.BadWords.Split(' ').ToList();
+            MyCensor.MyBadWords.Sort((x, y) => x.Length > y.Length ? -1 : (x.Length == y.Length ? 0 : 1));
+        }
+
+        private void Filtred_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[6] = Filtred.IsChecked.Value;
+        }
+
+        private void Volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            int num = (int)Math.Max(Math.Min(Volume.Value, 100), 0);
+            Extentions.SpeechSynth.Volume = num;
+            Volume.Value = num;
+            VolumeLabel.Content = $"Громкость ({num})";
+            MySave.Current.Nums[4] = num;
         }
 
         private void Script_TextChanged(object sender, TextChangedEventArgs e)

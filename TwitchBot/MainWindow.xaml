@@ -107,6 +107,13 @@
                     <Label x:Name="SpeedLabel_Copy2" Content="При превышении:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,40"/>
                     <Button x:Name="RewardTrap" Content="Сканировать товар" Margin="156,93,10,0" VerticalAlignment="Top" Click="RewardTrap_Click"/>
                     <TextBlock x:Name="RewardName" Margin="156,113,10,166" TextWrapping="Wrap" Text="Определено пользователем" Height="48" Width="150" FontSize="10"/>
+                    <TextBox x:Name="BadWords" HorizontalAlignment="Left" Height="20" Margin="9,0,0,205" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="141" TextChanged="BadWords_TextChanged"/>
+                    <Label Content="Фильр(через пробел):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,225" Width="141"/>
+                    <TextBox x:Name="Censor" HorizontalAlignment="Left" Height="20" Margin="10,0,0,169" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="141" Text="." TextChanged="Censor_TextChanged"/>
+                    <Label Content="Заменить на:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,189" Width="120"/>
+                    <CheckBox x:Name="Filtred" Content="Фильровать слова" HorizontalAlignment="Left" Margin="10,0,0,242" VerticalAlignment="Bottom" Click="Filtred_Click"/>
+                    <Label x:Name="VolumeLabel" Content="Громкость" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,28" Width="115"/>
+                    <Slider x:Name="Volume" Margin="191,0,10,10" VerticalAlignment="Bottom" ValueChanged="Volume_ValueChanged" Maximum="100" Value="100"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Товары">

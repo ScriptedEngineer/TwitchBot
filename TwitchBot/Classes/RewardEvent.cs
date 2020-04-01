@@ -26,8 +26,17 @@ namespace TwitchBot
             lock (CustomRewardID)
             {
                 string scripd = Script;
-                if (scripd.Contains("%TEXT%"))
-                    scripd = scripd.Replace("%TEXT%", e.Text);
+                if (scripd.Contains("%"))
+                {
+                    if (scripd.Contains("%TEXT%"))
+                        scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", ""));
+                    if (scripd.Contains("%NICK%"))
+                        scripd = scripd.Replace("%NICK%", e.NickName.Replace("\n", ""));
+                    if (scripd.Contains("%TITLE%"))
+                        scripd = scripd.Replace("%TITLE%", e.Title.Replace("\n", ""));
+                    if (scripd.Contains("%TEXT%"))
+                        scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", ""));
+                }
                 switch (Type)
                 {
                     case EventTypes.InputEmu:

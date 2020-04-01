@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using System.Drawing;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace TwitchBot
 {
@@ -117,6 +118,14 @@ namespace TwitchBot
                             case "Off":
                                 WinApi.SetEnableScreen(false);
                                 break;
+                        }
+                        break;
+                    case "Speech":
+                        {
+                            lock (Extentions.SpeechSynth)
+                            {
+                                Extentions.TextToSpeech(Regex.Replace(command, "^Speech ", " "));
+                            }
                         }
                         break;
                     case "Wait":
