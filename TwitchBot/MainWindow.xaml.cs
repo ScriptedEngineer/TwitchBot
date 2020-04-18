@@ -364,7 +364,7 @@ namespace TwitchBot
                                             LoadVotes(Arrayz);
                                             StartVoting();
                                             aTimer = new System.Timers.Timer(Minutes * 60000);
-                                            bTimer = new System.Timers.Timer(Minutes * 15010);
+                                            bTimer = new System.Timers.Timer(Minutes * 15000);
                                             aTimer.Elapsed += EndVoting;
                                             bTimer.Elapsed += SendVotes;
                                             aTimer.Start();
@@ -676,7 +676,7 @@ namespace TwitchBot
                 else
                     Client.SendMessage("Еще никто не проголосавал.");
             }
-            else
+            else if(sender == null)
             {
                 Client.SendMessage("Голосование не ведется.");
             }
