@@ -127,7 +127,7 @@
                         <TabItem Header="ConsoleAndKeyboardEvent" Height="0" Width="0" >
                             <Grid Background="#FFE5E5E5">
                                 <Label x:Name="RewEvLabel" Content="Алгоритм ввода" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="2,2,0,0"/>
-                                <TextBox x:Name="Script" Margin="0,18,0,0" TextWrapping="Wrap" TextChanged="Script_TextChanged" IsEnabled="False"/>
+                                <TextBox x:Name="Script" Margin="0,18,0,0" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="Script_TextChanged" IsEnabled="False"/>
                             </Grid>
                         </TabItem>
                     </TabControl>

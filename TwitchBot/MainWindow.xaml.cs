@@ -592,25 +592,26 @@ namespace TwitchBot
                 if (voting[kvp.Value] > voting[Winner])
                     Winner = kvp.Value;
             }
+            
             string end = "";
-            if (!addVotes)
+            int index = 0;
+            foreach (ListElement X in VotingList.Items)
             {
-                int index = 0;
-                foreach (ListElement X in VotingList.Items)
-                {
-                    index++;
-                    end += index + "-" + X.Strings[0] + ";  ";
-                }
+                index++;
+                var kvpe = 0;
+                if (voting.ContainsKey(index))
+                    kvpe = voting[index];
+                end += "[" + (addVotes? "":"("+index + ")") + X.Strings[0] + "=" + (kvpe == 0?0:(float)kvpe / (float)Votings.Count()).ToString("0.0%") + "]; ";
             }
-            string kvpo = "";
+            //string kvpo = "";
             string win = "";
             if (addVotes && Winner != -1)
                 win = "Победил: " + (Votes.ContainsKey(Winner) ? Votes[Winner] : Winner.ToString()) + "!";
-            foreach (var kvpe in voting)
+            /*foreach (var kvpe in voting)
             {
                 kvpo += "[" + (Votes.ContainsKey(kvpe.Key) ? Votes[kvpe.Key] : kvpe.Key.ToString()) + " = " + ((float)kvpe.Value / (float)Votings.Count()).ToString("0.0%") + "];   ";
-            }
-            return (win, kvpo + (string.IsNullOrEmpty(end) ? "" : " (" + end + ") ") + " Проголосовало: " + Votings.Count);
+            }*/
+            return (win, (string.IsNullOrEmpty(end) ? "" : end) + " Проголосовало: " + Votings.Count);
         }
         private void DisplayVotes()
         {
@@ -651,15 +652,15 @@ namespace TwitchBot
         {
             if (IsVoting)
             {
+                IsVoting = false;
                 Extentions.AsyncWorker(() =>
                 {
+                    aTimer?.Close();
+                    bTimer?.Close();
                     var x = GetVotes(true);
                     Client.SendMessage("Голосование окончено, результаты: " + x.Item2);
                     Client.SendMessage(x.Item1);
-                    IsVoting = false;
-                    DisplayVotes();
-                    aTimer?.Close();
-                    bTimer?.Close();
+                    //DisplayVotes();
                 });
             }
             else

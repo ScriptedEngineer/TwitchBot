@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Just do it")]
 [assembly: AssemblyProduct("TwitchBot")]
-[assembly: AssemblyCopyright("Copyleft 🄯 ScriptedEngineer 2019")]
+[assembly: AssemblyCopyright("Copyleft 🄯 ScriptedEngineer 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // Можно задать все значения или принять номера сборки и редакции по умолчанию 
 // используя "*", как показано ниже:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.1.2.1")]
-[assembly: AssemblyFileVersion("0.1.2.1")]
+[assembly: AssemblyVersion("0.1.2.3")]
+[assembly: AssemblyFileVersion("0.1.2.3")]
