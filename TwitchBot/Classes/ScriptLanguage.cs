@@ -130,7 +130,7 @@ namespace TwitchBot
                         break;
                     case "Wait":
                         {
-                            if (byte.TryParse(param[1], out byte Kb))
+                            if (int.TryParse(param[1], out int Kb))
                                 Thread.Sleep(Kb);
                         }
                         break;
