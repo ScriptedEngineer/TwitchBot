@@ -122,16 +122,61 @@ namespace TwitchBot
                         }
                         break;
                     case "Speech":
+                        lock (Extentions.SpeechSynth)
                         {
-                            lock (Extentions.SpeechSynth)
-                            {
-                                Extentions.TextToSpeech(Regex.Replace(command, "^Speech ", " "));
-                            }
+                            Extentions.TextToSpeech(Regex.Replace(command, "^Speech ", " "));
                         }
                         break;
                     case "CMD":
                         {
-                            RunConsole(Regex.Replace(command, "^CMD ", " "));
+                            RunConsole(Regex.Replace(command, "^CMD ", ""));
+                        }
+                        break;
+                    case "Play":
+                        lock (Extentions.SpeechSynth)
+                        {
+                            Extentions.AsyncWorker(() =>
+                            {
+                                Extentions.Player.Open(new Uri(Regex.Replace(command, "^Play ", " "), UriKind.Absolute));
+                                Extentions.Player.Play();
+                            });
+                            Thread.Sleep(1200);
+                            Thread.Sleep(MainWindow.CurrentW.MediaDurationMs);
+                        }
+                        break;
+                    case "OBS":
+                        switch (param[1])
+                        {
+                            case "Source":
+                                switch (param[2])
+                                {
+                                    case "On":
+                                        OBSWebSock.SetSourceEnabled(Regex.Replace(command, "^OBS Source On ", "").Trim(), true);
+                                        break;
+                                    case "Off":
+                                        OBSWebSock.SetSourceEnabled(Regex.Replace(command, "^OBS Source Off ", "").Trim(), false);
+                                        break;
+                                    case "Rotation":
+                                        {
+                                            string[] rc = Regex.Replace(command, "^OBS Source Rotation ", "").Trim().Split('.');
+                                            if (rc.Length >= 2)
+                                                OBSWebSock.SetSourceRotation(rc[0].Trim(), rc[1].Trim());
+                                        }
+                                        break;
+                                    case "Position":
+                                        {
+                                            string[] rc = Regex.Replace(command, "^OBS Source Position ", "").Trim().Split('.');
+                                            if (rc.Length >= 3)
+                                                OBSWebSock.SetSourcePosition(rc[0].Trim(), rc[1].Trim(), rc[2].Trim());
+                                        }
+                                        break;
+                                }
+                                break;
+                            case "Scene":
+                                {
+                                    OBSWebSock.SetScene(Regex.Replace(command, "^OBS Scene ", "").Trim());
+                                }
+                                break;
                         }
                         break;
                     case "Wait":

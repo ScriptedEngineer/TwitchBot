@@ -12,7 +12,7 @@ namespace TwitchBot
 {
     public class MySave
     {
-        const int BL = 7;
+        const int BL = 8;
         const int NL = 5;
 
         public static MySave Current = new MySave();
@@ -22,6 +22,8 @@ namespace TwitchBot
         public string TTSCRTitle { get; set; }
         public string BadWords { get; set; }
         public string Censor { get; set; }
+        public string OBSWSPort { get; set; }
+        public string OBSWSPass { get; set; }
         private static Random Rand = new Random();
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }
@@ -34,6 +36,7 @@ namespace TwitchBot
             Nums = new int[NL];
             Nums[0] = 0;
             Nums[4] = 100;
+            OBSWSPort = "4444";
             //TTSNTFL = $"{Path.GetDirectoryName(Extentions.AppFile)}/tts.mp3";
         }
         public static void Load()

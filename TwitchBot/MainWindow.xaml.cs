@@ -33,12 +33,14 @@ namespace TwitchBot
     {
         private static System.Timers.Timer aTimer, bTimer;
         System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
-        int MediaDurationMs = 0;
+        public int MediaDurationMs = 0;
         bool Tray = false;
         Thread SpeechTask;
-        
+        OBSWebSock OBSRemote;
+        static public MainWindow CurrentW;
         public MainWindow()
         {
+            CurrentW = this;
             //Заметаем следы обновления
             bool Update = false;
             if (File.Exists("update.vbs"))
@@ -139,11 +141,14 @@ namespace TwitchBot
             DontTTS.IsChecked = MySave.Current.Bools[4];
             MinimizeToTray.IsChecked = MySave.Current.Bools[5];
             Filtred.IsChecked = MySave.Current.Bools[6];
+            OBSRemEn.IsChecked = MySave.Current.Bools[7];
             BadWords.Text = MySave.Current.BadWords;
             Censor.Text = MySave.Current.Censor;
             Streamer.Text = MySave.Current.Streamer;
             CustomRewardID.Text = MySave.Current.TTSCRID;
             RewardName.Text = MySave.Current.TTSCRTitle;
+            OBS_port.Text = MySave.Current.OBSWSPort;
+            OBSRmPass.Password = MySave.Current.OBSWSPass;
             TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
             foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices(Thread.CurrentThread.CurrentCulture)) // перебираем все установленные в системе голоса
             {
@@ -221,13 +226,16 @@ namespace TwitchBot
                             break;
                     }
 
-            //Вебсервер визуалки
+            //Web сервер визуалки
             WebServer = new WebServer(WebRequest, "http://localhost:8190/");
             WebServer.Run();
 
+            //WebSocket сервер визуалки
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
             WebSocketServer.AddWebSocketService<WebSockServ>("/alert");
             WebSocketServer.Start();
+
+            //Авторизация
             if (!File.Exists("account.txt"))
             {
                 Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read");
@@ -235,6 +243,15 @@ namespace TwitchBot
                 {
                     Thread.Sleep(500);
                 }
+            }
+
+            //Подключениее к OBS WebSocket
+            if (MySave.Current.Bools[7])
+            {
+                new Task(() =>
+                {
+                    OBSRemote = new OBSWebSock();
+                }).Start();
             }
         }
         WebSocketSharp.Server.WebSocketServer WebSocketServer;
@@ -1277,6 +1294,23 @@ namespace TwitchBot
             Volume.Value = num;
             VolumeLabel.Content = $"Громкость ({num})";
             MySave.Current.Nums[4] = num;
+        }
+
+        private void OBSRemEn_Click(object sender, RoutedEventArgs e)
+        {
+            if (OBSRemEn.IsChecked == null)
+                return;
+            MySave.Current.Bools[7] = OBSRemEn.IsChecked.Value;
+        }
+
+        private void OBS_port_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MySave.Current.OBSWSPort = OBS_port.Text;
+        }
+
+        private void OBSRmPass_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.OBSWSPass = OBSRmPass.Password;
         }
 
         private void Script_TextChanged(object sender, TextChangedEventArgs e)
