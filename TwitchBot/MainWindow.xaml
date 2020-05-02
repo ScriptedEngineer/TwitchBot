@@ -123,18 +123,14 @@
                     <TextBox x:Name="CustomEventRewardID" Height="23" Margin="156,41,10,0" TextWrapping="NoWrap" VerticalAlignment="Top" TextChanged="CustomEventRewardID_TextChanged" IsEnabled="False"/>
                     <Button x:Name="EventRewardTrap" Content="Сканировать товар" Margin="156,64,10,0" VerticalAlignment="Top" Click="EventRewardTrap_Click"/>
                     <TextBlock x:Name="EventRewardName" Margin="156,84,10,195" TextWrapping="Wrap" Text="Определено пользователем" Height="48" FontSize="10"/>
-                    <TabControl x:Name="RewTypeCtrl" Margin="156,159,10,10">
+                    <TabControl x:Name="RewTypeCtrl" Margin="156,137,10,10">
                         <TabItem Header="ConsoleAndKeyboardEvent" Height="0" Width="0" >
                             <Grid Background="#FFE5E5E5">
-                                <Label x:Name="RewEvLabel" Content="Алгоритм ввода" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="2,2,0,0"/>
+                                <Label x:Name="RewEvLabel" Content="Алгоритм выполнения" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="2,2,0,0"/>
                                 <TextBox x:Name="Script" Margin="0,18,0,0" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="Script_TextChanged" IsEnabled="False"/>
                             </Grid>
                         </TabItem>
                     </TabControl>
-                    <ComboBox x:Name="RewEvType" Margin="156,137,10,0" VerticalAlignment="Top" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="0" IsEnabled="False">
-                        <ComboBoxItem Content="Эмуляция ввода"/>
-                        <ComboBoxItem Content="Командная строка"/>
-                    </ComboBox>
                     <TextBox x:Name="EvName" Height="23" Margin="156,13,10,0" TextWrapping="Wrap" Text="Новое событие" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_2" IsEnabled="False"/>
                     <Button Content="Удалить" HorizontalAlignment="Left" Margin="91,0,0,10" VerticalAlignment="Bottom" Width="60" Click="Button_Click_8"/>
                 </Grid>

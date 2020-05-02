@@ -75,6 +75,7 @@
     <Compile Include="Classes\ListElement.cs" />
     <Compile Include="Classes\MyCensor.cs" />
     <Compile Include="Classes\MySave.cs" />
+    <Compile Include="Classes\OBSWebSock.cs" />
     <Compile Include="Classes\RewardEvent.cs" />
     <Compile Include="Classes\ScriptLanguage.cs" />
     <Compile Include="Classes\UserInput.cs" />

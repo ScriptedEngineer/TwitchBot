@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using System.Drawing;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace TwitchBot
 {
@@ -128,6 +129,11 @@ namespace TwitchBot
                             }
                         }
                         break;
+                    case "CMD":
+                        {
+                            RunConsole(Regex.Replace(command, "^CMD ", " "));
+                        }
+                        break;
                     case "Wait":
                         {
                             if (int.TryParse(param[1], out int Kb))
@@ -141,6 +147,22 @@ namespace TwitchBot
                 Console.WriteLine(e.Message);
             }
             return index;
+        }
+
+        private static void RunConsole(string scripd)
+        {
+            Process cmd = new Process();
+            cmd.StartInfo.FileName = "cmd.exe";
+            cmd.StartInfo.RedirectStandardInput = true;
+            cmd.StartInfo.RedirectStandardOutput = true;
+            cmd.StartInfo.CreateNoWindow = true;
+            cmd.StartInfo.UseShellExecute = false;
+            cmd.Start();
+
+            cmd.StandardInput.WriteLine(scripd);
+            cmd.StandardInput.Flush();
+            cmd.StandardInput.Close();
+            cmd.WaitForExit();
         }
     }
 }

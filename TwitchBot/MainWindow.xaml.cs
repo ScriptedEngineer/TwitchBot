@@ -1190,22 +1190,6 @@ namespace TwitchBot
             RewEvents.Add(new RewardEvent());
             EvList.Items.Add("Новый");
         }
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (RewTypeCtrl == null || EvList.SelectedIndex == -1)
-                return;
-            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
-            RewEv.Type = (EventTypes)RewEvType.SelectedIndex;
-            switch (RewEv.Type)
-            {
-                case EventTypes.InputEmu:
-                    RewEvLabel.Content = "Алгоритм ввода";
-                    break;
-                case EventTypes.Console:
-                    RewEvLabel.Content = "Консольные команды";
-                    break;
-            }
-        }
         private void TextBox_TextChanged_2(object sender, TextChangedEventArgs e)
         {
             if (EvList == null || EvList.SelectedIndex == -1)
@@ -1225,7 +1209,6 @@ namespace TwitchBot
                 EvName.IsEnabled = false;
                 EventRewardName.IsEnabled = false;
                 Script.IsEnabled = false;
-                RewEvType.IsEnabled = false;
                 return;
             }
             CustomEventRewardID.IsEnabled = true;
@@ -1233,13 +1216,11 @@ namespace TwitchBot
             EvName.IsEnabled = true;
             EventRewardName.IsEnabled = true;
             Script.IsEnabled = true;
-            RewEvType.IsEnabled = true;
             RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
             CustomEventRewardID.Text = RewEv.CustomRewardID;
             EvName.Text = RewEv.EventName;
             EventRewardName.Text = RewEv.RewardName;
             Script.Text = RewEv.Script;
-            RewEvType.SelectedIndex = (int)RewEv.Type;
         }
         private void Button_Click_8(object sender, RoutedEventArgs e)
         {
