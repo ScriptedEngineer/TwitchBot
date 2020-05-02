@@ -94,6 +94,14 @@ namespace TwitchBot
             WSock.Send(@"{""request-type"":"""+ Type + @"""," + parameters + @"""message-id"":""" + MSGID + @"""}");
         }
 
+        public static void ReAuth()
+        {
+            if (!WSock.IsAlive)
+                return;
+            MSGID++;
+            WSock.Send(@"{""request-type"":""GetAuthRequired"",""message-id"":""" + MSGID + @"""}");
+        }
+
         private void WSock_OnOpen(object sender, EventArgs e)
         {
             MSGID++;
@@ -101,6 +109,8 @@ namespace TwitchBot
         }
         private void WSock_OnClose(object sender, CloseEventArgs e)
         {
+            Extentions.AsyncWorker(() =>
+                           MainWindow.CurrentW.OBSRstatus.Content = "Соединение с OBS было разорвано");
             while (!(WSock != null && WSock.IsAlive))
             {
                 WSock = new WebSocket($"ws://localhost:{MySave.Current.OBSWSPort}/");
@@ -126,13 +136,32 @@ namespace TwitchBot
                         string saltedhashedpass = Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(MySave.Current.OBSWSPass + salt)));
                         string finaly = Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(saltedhashedpass + challenge)));
                         MSGID++;
-                        WSock.Send(@"{""request-type"":""Authenticate"",""auth"":""" + finaly + @""",""message-id"":""" + MSGID + @"""}");
+                        WSock.Send(@"{""request-type"":""Authenticate"",""auth"":""" + finaly + @""",""message-id"":""-1""}");
                     }
                 }
                 MSGID++;
                 WSock.Send(@"{""request-type"":""SetHeartbeat"",""enable"":false,""message-id"":""" + MSGID + @"""}");
                 Console.WriteLine(xds.ToString());
 
+            }
+            else
+            {
+                Match sdgk = Regex.Match(e.Data, @"\""error\""\:\s\""([^""]*)\""");
+                if (sdgk.Success)
+                {
+                    Extentions.AsyncWorker(() =>
+                    MainWindow.CurrentW.OBSRstatus.Content = "Проблема с OBS("+ sdgk.Groups[1]?.Value+ ")");
+                }
+                else
+                {
+                    Match sdgk2 = Regex.Match(e.Data, @"\""message-id\""\:\s\""([^""]*)\""");
+                    Match sdgk1 = Regex.Match(e.Data, @"\""status\""\:\s\""([^""]*)\""");
+                    if (sdgk2.Groups[1]?.Value == "-1" && sdgk1.Groups[1]?.Value == "ok")
+                    {
+                        Extentions.AsyncWorker(() =>
+                           MainWindow.CurrentW.OBSRstatus.Content = "OBS Подключен");
+                    }
+                }
             }
             /*else
             {

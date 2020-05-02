@@ -1311,6 +1311,19 @@ namespace TwitchBot
         private void OBSRmPass_PasswordChanged(object sender, RoutedEventArgs e)
         {
             MySave.Current.OBSWSPass = OBSRmPass.Password;
+           
+        }
+
+        private void OBSRmPass_LostFocus(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OBSWebSock.ReAuth();
+            }
+            catch
+            {
+
+            }
         }
 
         private void Script_TextChanged(object sender, TextChangedEventArgs e)

@@ -148,14 +148,15 @@
                     <CheckBox x:Name="OBSRemEn" Content="Включить управление обс (OBS WebSocket)" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" IsChecked="True" Click="OBSRemEn_Click"/>
                     <Label Content="Порт" HorizontalAlignment="Left" Margin="88,81,0,0" VerticalAlignment="Top"/>
                     <Label Content="Пароль(если стоит)" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top"/>
-                    <PasswordBox x:Name="OBSRmPass" HorizontalAlignment="Left" Margin="131,113,0,0" VerticalAlignment="Top" Width="120" Height="21" PasswordChanged="OBSRmPass_PasswordChanged"/>
+                    <PasswordBox x:Name="OBSRmPass" HorizontalAlignment="Left" Margin="131,113,0,0" VerticalAlignment="Top" Width="120" Height="21" PasswordChanged="OBSRmPass_PasswordChanged" LostFocus="OBSRmPass_LostFocus"/>
                     <TextBlock HorizontalAlignment="Left" Margin="11,139,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="296"><Run Text="Для применения настроек OBS WebSocket необходим перезапуск приложения"/><Run Text="."/><Run Text=" "/><Run/><LineBreak/><Run Text="Данная "/><Run Text="функция работ"/><Run Text="ает "/><Run Text="только в "/><Run Text="OBS Studio "/><Run Text="с установленным плагином "/><Run Text="OBS WebSocket."/></TextBlock>
-                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Top" Height="115" Margin="0,212,0,0"/>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" Height="115" Margin="0,212,0,0"/>
 
                 </Grid>
             </TabItem>
         </TabControl>
         <Label x:Name="VersionLabel" Content="v0.0.0.0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,0" Padding="0"/>
+        <Label x:Name="OBSRstatus" Content="OBS Отключен" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,0" Padding="0"/>
 
     </Grid>
 </Window>
