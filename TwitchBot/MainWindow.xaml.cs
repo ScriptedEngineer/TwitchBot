@@ -618,7 +618,7 @@ namespace TwitchBot
                 var kvpe = 0;
                 if (voting.ContainsKey(index))
                     kvpe = voting[index];
-                end += "[" + (addVotes? "":"("+index + ")") + X.Strings[0] + "=" + (kvpe == 0?0:(float)kvpe / (float)Votings.Count()).ToString("0.0%") + "]; ";
+                end += " " + (addVotes? "":index + "-") + X.Strings[0] + " [" + (kvpe == 0?0:(float)kvpe / (float)Votings.Count()).ToString("0.0%") + "]; ";
             }
             //string kvpo = "";
             string win = "";
@@ -675,8 +675,7 @@ namespace TwitchBot
                     aTimer?.Close();
                     bTimer?.Close();
                     var x = GetVotes(true);
-                    Client.SendMessage("Голосование окончено, результаты: " + x.Item2);
-                    Client.SendMessage(x.Item1);
+                    Client.SendMessage($"Голосование окончено. {x.Item1} Результаты: {x.Item2}");
                     //DisplayVotes();
                 });
             }
@@ -737,7 +736,7 @@ namespace TwitchBot
             }
             File.WriteAllText(ToFile, votesave.ToString());
         }
-        private void StartVoting()
+        private void StartVoting(int Minutes = 0)
         {
             Votings.Clear();
             UserList.Items.Clear();
@@ -751,7 +750,7 @@ namespace TwitchBot
             IsVoting = true;
             //string eXtraString = "";//(" " + Rand.Next(-100, 100).ToString());
             VoteMax = VotingList.Items.Count;
-            Client.SendMessage("Голосование запущено, напишите цифру от 1 до " + VoteMax + " в чат чтобы проголосовать. " + Vrotes);
+            Client.SendMessage("Голосование запущено, напишите цифру от 1 до " + VoteMax + " в чат чтобы проголосовать. " + Vrotes + (Minutes != 0?$" У вас {Minutes} {Mins(Minutes)}.":""));
             index = 0;
             Votes.Clear();
             foreach (ListElement X in VotingList.Items)
@@ -760,6 +759,16 @@ namespace TwitchBot
                 //Votes += "  (" + index + "-" + X.Strings[0] + ");";
                 Votes.Add(index, X.Strings[0]);
             }
+        }
+        string Mins(int number)
+        {
+            if (((number % 100) > 10) && ((number % 100) < 20))
+                return "минут";
+            if (number % 10 == 1)
+                return "минута";
+            if ((number % 10 == 2) || (number % 10 == 3) || (number % 10 == 4))
+                return "минуты";
+            return "минут";
         }
 
         private float GetEqualPercent(string A, string B, MessageEventArgs e, out float BrWordProc, out byte ban)
@@ -835,8 +844,8 @@ namespace TwitchBot
         }
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            StartVoting();
             int Minutes = int.Parse(MinutesBox.Text);
+            StartVoting(Minutes);
             aTimer = new System.Timers.Timer(Minutes * 60000);
             bTimer = new System.Timers.Timer(Minutes * 15010);
             aTimer.Elapsed += EndVoting;
