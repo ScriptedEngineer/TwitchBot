@@ -142,6 +142,7 @@ namespace TwitchBot
             MinimizeToTray.IsChecked = MySave.Current.Bools[5];
             Filtred.IsChecked = MySave.Current.Bools[6];
             OBSRemEn.IsChecked = MySave.Current.Bools[7];
+            UseYA.IsChecked = MySave.Current.Bools[8];
             BadWords.Text = MySave.Current.BadWords;
             Censor.Text = MySave.Current.Censor;
             Streamer.Text = MySave.Current.Streamer;
@@ -182,7 +183,7 @@ namespace TwitchBot
             }
             SwitcherKey = new WinHotKey(MySave.Current.Hotkey, MySave.Current.HotkeyModifier, AcSwitch);
             HotKey.Text = (MySave.Current.HotkeyModifier == KeyModifier.None ? "" : MySave.Current.HotkeyModifier.ToString() + "+") + MySave.Current.Hotkey;
-            Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = (int)Extentions.Player.NaturalDuration.TimeSpan.TotalMilliseconds; };
+            Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = (int)(Extentions.Player.NaturalDuration.HasTimeSpan? Extentions.Player.NaturalDuration.TimeSpan.TotalMilliseconds:0); };
             VersionLabel.Content = "v" + Extentions.Version;
             LoadEvents();
 
@@ -515,6 +516,12 @@ namespace TwitchBot
                         if (!MySave.Current.Bools[0] || (e.Message.Length >= MySave.Current.Nums[3] && MySave.Current.Bools[4]))
                             return;
                         SpeechTask = Thread.CurrentThread;
+                        TTSrate = Extentions.SpeechSynth.Rate;
+                        if (e.Message.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
+                            Extentions.SpeechSynth.Rate = 10;
+                        string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message;
+                        if (MySave.Current.Bools[8])
+                            Extentions.GetTrueTTSReady(Text);
                         if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
                         {
                             Extentions.AsyncWorker(() =>
@@ -528,7 +535,7 @@ namespace TwitchBot
 
                             });
                             WebSockServ.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
-                            Thread.Sleep(1200);
+                            Thread.Sleep(1000);
                             Thread.Sleep(MediaDurationMs);
                         }
                         else
@@ -536,7 +543,7 @@ namespace TwitchBot
                             WebSockServ.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
                             Thread.Sleep(1000);
                         }
-                        TTSrate = Extentions.SpeechSynth.Rate;
+                        
                         Extentions.AsyncWorker(() =>
                         {
                             if (!MySave.Current.Bools[0])
@@ -544,10 +551,11 @@ namespace TwitchBot
                                 WebSockServ.SendAll("Close");
                                 return;
                             }
-                            if (e.Message.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
-                                Extentions.SpeechSynth.Rate = 10;
-                            Extentions.TextToSpeech(MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message);
+                            if (!MySave.Current.Bools[8])
+                                Extentions.TextToSpeech(Text);
                         });
+                        if(MySave.Current.Bools[8])
+                            Extentions.TrueTTS(Text);
                         Thread.Sleep(100);
                         while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
                         {
@@ -930,6 +938,7 @@ namespace TwitchBot
         {
             int num = (int)Math.Max(Math.Min(SynthSpeed.Value, 10), -10);
             Extentions.SpeechSynth.Rate = num;
+            TTSrate = num;
             SynthSpeed.Value = num;
             SpeedLabel.Content = $"Скорость ({num})";
             MySave.Current.Nums[2] = num;
@@ -1300,6 +1309,7 @@ namespace TwitchBot
         {
             int num = (int)Math.Max(Math.Min(Volume.Value, 100), 0);
             Extentions.SpeechSynth.Volume = num;
+            Extentions.Player.Volume = num/100d;
             Volume.Value = num;
             VolumeLabel.Content = $"Громкость ({num})";
             MySave.Current.Nums[4] = num;
@@ -1333,6 +1343,11 @@ namespace TwitchBot
             {
 
             }
+        }
+
+        private void UseYA_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[8] = UseYA.IsChecked.Value;
         }
 
         private void Script_TextChanged(object sender, TextChangedEventArgs e)
