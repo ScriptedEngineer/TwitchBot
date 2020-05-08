@@ -25,7 +25,7 @@
 
 ## Авторы
 
-* **ScriptedEngineer** - *Вся работа* - [Канал](https://www.twitch.tv/scriptedengineer) [Личный сайт](https://wsxz.ru/)
+* **ScriptedEngineer** - *Вся работа* - [Канал](https://www.twitch.tv/scriptedengineer), [Личный сайт](https://wsxz.ru/)
 
 ## Благодарность
 
