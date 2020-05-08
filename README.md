@@ -1,14 +1,32 @@
 # TwitchBot
 
-Bot for twitch streamers
+Бот для стримеров Twitch, умеет проводить голосования, автоматизировать награды, озвучивать чат, и т.д. постоянно улучшается и совершенствуется.
 
-## Download
+## Инструкция
 
-[Google Drive](https://drive.google.com/open?id=1njbVh6DhDaKW85HdIEzst5xULQYcN_Rm)
+[На моем сайте](https://wsxz.ru/content/TwitchBotGuide)
 
-### Prewiew
+## Скачать
 
+[С гугл диска](https://drive.google.com/open?id=1njbVh6DhDaKW85HdIEzst5xULQYcN_Rm)
 
-![Prewiew](https://sun9-35.userapi.com/c206516/v206516725/a9ac1/psR8Bb-bCYU.jpg "Vote settings")
+### Скриншоты
 
-![Prewiew](https://sun9-43.userapi.com/c206516/v206516725/a9ad1/jMwKV68vIac.jpg "TTS settings")
+![Prewiew](https://sun7-6.userapi.com/nN14vpepWRDGzmp9OltGWE8t9qSUnBAK77Qy9Q/IrXT1iJQjH8.jpg "Голосования")
+![Prewiew](https://sun7-7.userapi.com/tud9HvuuKFjyW92JYqf9jvhGzT3vknP_tJdDgg/_Xtlyc5_IeE.jpg "Озвучивание чата")
+![Prewiew](https://sun7-7.userapi.com/xKEkrXHsv9jm4vM1spHqh8DultjIL2QurgZJKg/MlaxuM5Gpj8.jpg "Автоматизация наград")
+![Prewiew](https://sun7-6.userapi.com/NLxbfevCIkmcDulfBBYiPlW4YwVUc0T3XKfzEw/qNBDZoeXZSM.jpg "Настройки")
+
+## Обновления
+
+Программа обновляется автоматически.
+
+## Авторы
+
+* **ScriptedEngineer** - *Вся работа* - [Личный сайт](https://wsxz.ru/)
+
+## Благодарность
+
+* **Jagmesh** - *Вдохновитель проекта, скачал с самого начала* - [Канал](https://www.twitch.tv/jagmesh)
+* **google_hdc** - *Главный тестер новых фич, скачал с версии 0.1.0.0* - [Канал](https://www.twitch.tv/google_hdc)
+* **VANCHOBA** - *Просто хороший стример, то-же скачал программу* - [Канал](https://www.twitch.tv/vanchoba)
