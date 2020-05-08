@@ -29,4 +29,5 @@
 
 * **Jagmesh** - *Вдохновитель проекта, скачал с самого начала* - [Канал](https://www.twitch.tv/jagmesh)
 * **google_hdc** - *Главный тестер новых фич, скачал с версии 0.1.0.0* - [Канал](https://www.twitch.tv/google_hdc)
+* **GrizzlyTV_ru** - *Один из ранних, кто скачал программу* - [Канал](https://www.twitch.tv/grizzlytv_ru)
 * **VANCHOBA** - *Просто хороший стример, то-же скачал программу* - [Канал](https://www.twitch.tv/vanchoba)
