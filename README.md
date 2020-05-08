@@ -5,12 +5,12 @@
 
 ## Инструкция
 
-[На моем сайте](https://wsxz.ru/content/TwitchBotGuide)<br>
-[На github](https://github.com/ArhScriptEngineer/TwitchBot/wiki)
+[TwitchBotGuide](https://wsxz.ru/content/TwitchBotGuide)<br>
+[Github Wiki](https://github.com/ArhScriptEngineer/TwitchBot/wiki)
 
 ## Скачать
 
-[С гугл диска](https://drive.google.com/open?id=1njbVh6DhDaKW85HdIEzst5xULQYcN_Rm)
+[Google Drive](https://drive.google.com/open?id=1njbVh6DhDaKW85HdIEzst5xULQYcN_Rm)
 
 ### Скриншоты
 
@@ -22,7 +22,7 @@
 ## Обновления
 
 Программа обновляется автоматически.<br>
-[Список обновлений](https://github.com/ArhScriptEngineer/TwitchBot/wiki/Обновления)
+[Список обновлений](https://github.com/ArhScriptEngineer/TwitchBot/wiki/0.Обновления)
 
 ## Авторы
 
