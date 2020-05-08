@@ -6,6 +6,7 @@
 ## Инструкция
 
 [На моем сайте](https://wsxz.ru/content/TwitchBotGuide)
+[На github](https://github.com/ArhScriptEngineer/TwitchBot/wiki)
 
 ## Скачать
 
