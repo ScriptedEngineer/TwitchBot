@@ -20,14 +20,18 @@
 ## Обновления
 
 Программа обновляется автоматически.
+Что нового:
+* **0.1.3.5** - *Добавлен TrueTTS*
+* **0.1.3.4** - *Изменен текст при голосовании*
+* **0.1.3.2** - *Добавлено переподключение при смене пароля*
 
 ## Авторы
 
-* **ScriptedEngineer** - *Вся работа* - [Личный сайт](https://wsxz.ru/)
+* **ScriptedEngineer** - *Вся работа* - [Канал](https://www.twitch.tv/scriptedengineer) [Личный сайт](https://wsxz.ru/)
 
 ## Благодарность
 
 * **Jagmesh** - *Вдохновитель проекта, скачал с самого начала* - [Канал](https://www.twitch.tv/jagmesh)
 * **google_hdc** - *Главный тестер новых фич, скачал с версии 0.1.0.0* - [Канал](https://www.twitch.tv/google_hdc)
-* **GrizzlyTV_ru** - *Один из ранних, кто скачал программу* - [Канал](https://www.twitch.tv/grizzlytv_ru)
-* **VANCHOBA** - *Просто хороший стример, то-же скачал программу* - [Канал](https://www.twitch.tv/vanchoba)
+* **GrizzlyTV_ru** - *Один из ранних, кто скачал* - [Канал](https://www.twitch.tv/grizzlytv_ru)
+* **VANCHOBA** - *Просто хороший стример, то-же скачал* - [Канал](https://www.twitch.tv/vanchoba)
