@@ -24,6 +24,7 @@ namespace TwitchBot
         public string Censor { get; set; }
         public string OBSWSPort { get; set; }
         public string OBSWSPass { get; set; }
+        public string YPS { get; set; }
         private static Random Rand = new Random();
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }

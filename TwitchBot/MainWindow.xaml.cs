@@ -150,6 +150,8 @@ namespace TwitchBot
             RewardName.Text = MySave.Current.TTSCRTitle;
             OBS_port.Text = MySave.Current.OBSWSPort;
             OBSRmPass.Password = MySave.Current.OBSWSPass;
+            if(string.IsNullOrEmpty(MySave.Current.YPS))
+                MySave.Current.YPS = @"""voice"":""alena"",""emotion"":""neutral""";
             TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
             foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices(Thread.CurrentThread.CurrentCulture)) // перебираем все установленные в системе голоса
             {
@@ -446,6 +448,24 @@ namespace TwitchBot
                                 Extentions.TextToSpeech(Text);
                             }
                             break;
+                        case "yps":
+                            if (lowNick == "scriptedengineer" && args.Length > 1)
+                            {
+                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                                MySave.Current.YPS = Text;
+                            }
+                            break;
+                        case "tts":
+                            if (lowNick == "scriptedengineer" && args.Length > 1)
+                            {
+                                lock (Extentions.SpeechSynth)
+                                {
+                                    string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                                    Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
+                                    Extentions.TrueTTS(Text);
+                                }
+                            }
+                            break;
                         case "notify":
                             if (lowNick == "scriptedengineer")
                             {
@@ -521,7 +541,7 @@ namespace TwitchBot
                             Extentions.SpeechSynth.Rate = 10;
                         string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message;
                         if (MySave.Current.Bools[8])
-                            Extentions.GetTrueTTSReady(Text);
+                            Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
                         if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
                         {
                             Extentions.AsyncWorker(() =>
