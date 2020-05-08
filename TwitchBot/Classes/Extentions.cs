@@ -11,6 +11,8 @@ using System.Net;
 using TwitchLib;
 using System.IO;
 using System.Threading;
+using System.Text.RegularExpressions;
+using System.Web;
 
 namespace TwitchBot
 {
@@ -88,8 +90,8 @@ namespace TwitchBot
             reqGetUser.Accept = "application/json";
             reqGetUser.ContentType = "application/json;charset=UTF-8";
             reqGetUser.Method = "POST";
-            reqGetUser.Headers["x-csrf-token"] = $"e739485e86e867fcadd56d7a2bb6ade8dc429270:1588871295";
-            reqGetUser.Headers["Cookie"] = @"yandexuid=9455142891577976533; _ym_uid=15779765341028083167; my=YwA=; gdpr=0; L=SQlcRgB0flxfdm1zV3B5cn1pAnthVGxRBQEAHzwSPAMBMw05Mg==.1581186474.14135.352245.8dee20e420cb0539fd3e7a75fa38a21f; yandex_login=shclyaevdenis; ymex=1902244157.yrts.1586884157; yandex_gid=38; i=t9rd2g12viCjl5Pz//0stNSfryAJoHuXRo4PxQBHmM/8Crl4wwfxIokZLapvqwzXnV9Ck8YOxKVJspnMAfDdGJnshkA=; yp=1610039787.p_sw.1578503786#1896546474.udn.cDrQlNC10L3QuNGBINCo0LrQu9GP0LXQsg%3D%3D#1589476158.ygu.1#1587488963.szm.1%3A1360x768%3A1360x700#1587488964.zmblt.1565#1587488964.zmbbr.chrome%3A67_0_3396_87; ys=searchextchrome.8-24-1#svt.1#udn.cDrQlNC10L3QuNGBINCo0LrQu9GP0LXQsg%3D%3D#ymrefl.22EF29D21987976F#wprid.1586884162273278-383636657990254980000324-production-app-host-vla-web-yp-74; _ym_d=1587245278; Session_id=3:1588871295.5.0.1581186474751:KaPpvA:43.1|555490791.-1.2.1:98171527|216653.12891.XwpUyQTaF-FDAfGBTPjOQSPtLEs; sessionid2=3:1588871295.5.0.1581186474751:KaPpvA:43.1|555490791.-1.2.1:98171527|216653.553987.Ls5m-XcATmLdY398EH3u2NcdMWE; mda=0; XSRF-TOKEN=999ce03b7cfb21b90d1959cfb3352a00e0773517%3A1588871298; _ym_visorc_50027884=w; _ym_visorc_51465824=w; _ym_isad=2";
+            reqGetUser.Headers["x-csrf-token"] = MySave.Current.YPT;
+            reqGetUser.Headers["Cookie"] = @"XSRF-TOKEN="+HttpUtility.UrlEncode(MySave.Current.YPT);
             reqGetUser.ContentLength = byteArray.Length;
             Stream dataStream = reqGetUser.GetRequestStream();
             dataStream.Write(byteArray, 0, byteArray.Length);
@@ -109,6 +111,19 @@ namespace TwitchBot
             }
             catch (WebException ex)
             {
+                Console.WriteLine(Web.GetResponse(ex.Response));
+                try
+                {
+                    Match MTH = Regex.Match(ex.Response.Headers["Set-Cookie"], @"XSRF-TOKEN=([^;]*);");
+                    if (MTH.Success)
+                    {
+                        MySave.Current.YPT = HttpUtility.UrlDecode(MTH.Groups[1].Value);
+                    }
+                }
+                catch(Exception e)
+                {
+
+                }
                 TrueTTSReady = false;
             }
         }
