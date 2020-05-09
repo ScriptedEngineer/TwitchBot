@@ -78,7 +78,7 @@ namespace TwitchBot
         public static void GetTrueTTSReady(string Text, string Settings = @"""voice"":""alena"",""emotion"":""neutral""", string Voice = "")
         {
             string Setts = @"{
-""message"":""" + Text + @""",
+""message"":""" + Text.Replace(@"""",@".").Replace(@"\",@"\\") + @""",
 ""language"":""ru-RU"",
 ""speed"":" + RateToSpeed().ToString().Replace(",",".") + @",
 " + Settings + @",
