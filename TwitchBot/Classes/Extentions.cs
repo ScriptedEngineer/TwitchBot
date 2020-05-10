@@ -99,6 +99,7 @@ namespace TwitchBot
             WebResponse response;
             try
             {
+                
                 response = reqGetUser.GetResponse();
                 Stream receiveStream = response.GetResponseStream();
                 if (File.Exists("YAPI.wav")) File.Delete("YAPI.wav");
@@ -149,6 +150,10 @@ namespace TwitchBot
             });
             Thread.Sleep(1000);
             Thread.Sleep(MainWindow.CurrentW.MediaDurationMs);
+            AsyncWorker(() =>
+            {
+                Player.Close();
+            });
             TrueTTSReady = false;
         }
         public static void CopyStream(Stream input, Stream output)
