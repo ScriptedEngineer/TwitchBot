@@ -380,6 +380,7 @@ namespace TwitchBot
                             if (permlvl.HasFlag(UserRights.ping))
                                 Client.SendMessage(e.NickName + ", pong");
                             break;
+                        case "help":
                         case "rights":
                             if (permlvl == UserRights.All && args.Length > 1)
                             {
@@ -395,7 +396,8 @@ namespace TwitchBot
                                 Client.SendMessage(">Для " + e.NickName.ToLower() + " доступны следующие команды:"
                                 + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
                                 + (permlvl.HasFlag(UserRights.tts) ? " >speech [Text] >tts [Text]" : "")
-                                + (permlvl.HasFlag(UserRights.Модератор) ? " >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : ""));
+                                + (permlvl.HasFlag(UserRights.Модератор) ? " >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : "")
+                                + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]" : ""));
                             }
                             break;
                         case "rights.add":
@@ -488,10 +490,17 @@ namespace TwitchBot
                             break;
                         //ExtraFeatures
                         case "speech":
-                            if (permlvl.HasFlag(UserRights.tts) && args.Length > 1)
+                            if (permlvl.HasFlag(UserRights.tts))
                             {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                Extentions.TextToSpeech(Text);
+                                if (args.Length > 1)
+                                {
+                                    string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                                    Extentions.TextToSpeech(Text);
+                                }
+                            }
+                            else
+                            {
+                                Client.SendMessage(e.NickName + ", недостаточно прав!");
                             }
                             break;
                         case "yps":
@@ -502,14 +511,21 @@ namespace TwitchBot
                             }
                             break;
                         case "tts":
-                            if (permlvl.HasFlag(UserRights.tts) && args.Length > 1)
+                            if (permlvl.HasFlag(UserRights.tts))
                             {
-                                lock (Extentions.SpeechSynth)
+                                if (args.Length > 1)
                                 {
-                                    string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                    Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
-                                    Extentions.TrueTTS(Text);
+                                    lock (Extentions.SpeechSynth)
+                                    {
+                                        string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                                        Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
+                                        Extentions.TrueTTS(Text);
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                Client.SendMessage(e.NickName + ", недостаточно прав!");
                             }
                             break;
                         case "notify":
