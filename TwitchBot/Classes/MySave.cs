@@ -14,7 +14,7 @@ namespace TwitchBot
     public class MySave
     {
         const int BL = 9;
-        const int NL = 5;
+        const int NL = 6;
 
         public static MySave Current = new MySave();
         public string Streamer { get; set; }
@@ -35,6 +35,7 @@ namespace TwitchBot
         public KeyModifier HotkeyModifier = KeyModifier.Alt;
         public Key Hotkey = Key.F1;
         public static Dictionary<string, UserRights> UsersRights = new Dictionary<string, UserRights>();
+        public static Dictionary<string, UserRights> TmpUsersRights = new Dictionary<string, UserRights>();
         private MySave()
         {
             Bools = new bool[BL];
@@ -125,8 +126,9 @@ namespace TwitchBot
 
         ping        = 1 << 2,
         tts         = 1 << 3,
-        
-        All         = ~(-1 << 4)
+        speech      = 1 << 4,
+
+        All         = ~(-1 << 5)
 
     }
 }

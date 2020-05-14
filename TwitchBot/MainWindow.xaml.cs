@@ -346,7 +346,8 @@ namespace TwitchBot
 
         Random Rand = new Random();
         bool IsVoting;
-        
+        DateTime LastTTS;
+
         private void Message(object Sender, MessageEventArgs e)
         {
             if (MySave.Current.Bools[6])
@@ -363,6 +364,8 @@ namespace TwitchBot
                     permlvl |= UserRights.VIP;
                 if (MySave.UsersRights.ContainsKey(lowNick))
                     permlvl |= MySave.UsersRights[lowNick];
+                if (MySave.TmpUsersRights.ContainsKey(lowNick))
+                    permlvl |= MySave.TmpUsersRights[lowNick];
             }
             //if (lowNick == Client.Account.Login)return;
             if (IsVoting)
@@ -386,18 +389,22 @@ namespace TwitchBot
                             {
                                 UserRights usrddf = UserRights.Зритель;
                                 if (MySave.UsersRights.ContainsKey(args[1].ToLower()))
-                                    usrddf = MySave.UsersRights[args[1].ToLower()];
+                                    usrddf |= MySave.UsersRights[args[1].ToLower()];
+                                if (MySave.TmpUsersRights.ContainsKey(args[1].ToLower())) 
+                                    usrddf |= MySave.TmpUsersRights[args[1].ToLower()];
                                 Client.SendMessage(">Для " + args[1].ToLower() + ", дополнительно, доступны следующие команды:"
-                                + (usrddf.HasFlag(UserRights.ping) ? " >ping" : "")
-                                + (usrddf.HasFlag(UserRights.tts) ? " >speech [Text] >tts [Text]" : ""));
+                                + (usrddf.HasFlag(UserRights.ping) ? " >ping" : "") 
+                                + (usrddf.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
+                                + (usrddf.HasFlag(UserRights.tts) ? " >tts [Text]" : ""));
                             }
                             else
                             {
                                 Client.SendMessage(">Для " + e.NickName.ToLower() + " доступны следующие команды:"
                                 + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
-                                + (permlvl.HasFlag(UserRights.tts) ? " >speech [Text] >tts [Text]" : "")
+                                + (permlvl.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
+                                + (permlvl.HasFlag(UserRights.tts) ? " >tts [Text]" : "") 
                                 + (permlvl.HasFlag(UserRights.Модератор) ? " >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : "")
-                                + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]" : ""));
+                                + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]  >tmprights.add [UserName] [Right] >tmprights.del [UserName] [Right] >tts.cooldown [Seconds]" : ""));
                             }
                             break;
                         case "rights.add":
@@ -417,6 +424,25 @@ namespace TwitchBot
                                     MySave.UsersRights.Add(args[1].ToLower(), UserRights.Зритель);
                                 else
                                     MySave.UsersRights[args[1].ToLower()] &= ~(UserRights)Enum.Parse(typeof(UserRights), args[2]);
+                            }
+                            break;
+                        case "tmprights.add":
+                            if (permlvl == UserRights.All && args.Length > 2)
+                            {
+                                if (!MySave.TmpUsersRights.ContainsKey(args[1].ToLower()))
+                                    MySave.TmpUsersRights.Add(args[1].ToLower(), (UserRights)Enum.Parse(typeof(UserRights), args[2]));
+                                else
+                                    MySave.TmpUsersRights[args[1].ToLower()] |= (UserRights)Enum.Parse(typeof(UserRights), args[2]);
+
+                            }
+                            break;
+                        case "tmprights.del":
+                            if (permlvl == UserRights.All && args.Length > 2)
+                            {
+                                if (!MySave.TmpUsersRights.ContainsKey(args[1].ToLower()))
+                                    MySave.TmpUsersRights.Add(args[1].ToLower(), UserRights.Зритель);
+                                else
+                                    MySave.TmpUsersRights[args[1].ToLower()] &= ~(UserRights)Enum.Parse(typeof(UserRights), args[2]);
                             }
                             break;
                         case "voting.start":
@@ -489,13 +515,27 @@ namespace TwitchBot
                             }
                             break;
                         //ExtraFeatures
-                        case "speech":
-                            if (permlvl.HasFlag(UserRights.tts))
+                        case "tts.cooldown":
+                            if (permlvl.HasFlag(UserRights.All))
                             {
                                 if (args.Length > 1)
                                 {
-                                    string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                    Extentions.TextToSpeech(Text);
+                                    int.TryParse(args[1],out int x);
+                                    MySave.Current.Nums[5] = x;
+                                }
+                            }
+                            break;
+                        case "speech":
+                            if (permlvl.HasFlag(UserRights.tts))
+                            {
+                                if (args.Length > 1 && (DateTime.Now-LastTTS).TotalSeconds > MySave.Current.Nums[5])
+                                {
+                                    lock (Extentions.SpeechSynth)
+                                    {
+                                        string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
+                                        Extentions.TextToSpeech(Text);
+                                        LastTTS = DateTime.Now;
+                                    }
                                 }
                             }
                             else
@@ -513,13 +553,14 @@ namespace TwitchBot
                         case "tts":
                             if (permlvl.HasFlag(UserRights.tts))
                             {
-                                if (args.Length > 1)
+                                if (args.Length > 1 && (DateTime.Now - LastTTS).TotalSeconds > MySave.Current.Nums[5])
                                 {
                                     lock (Extentions.SpeechSynth)
                                     {
                                         string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                         Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
                                         Extentions.TrueTTS(Text);
+                                        LastTTS = DateTime.Now;
                                     }
                                 }
                             }

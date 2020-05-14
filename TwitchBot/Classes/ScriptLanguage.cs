@@ -121,6 +121,40 @@ namespace TwitchBot
                                 break;
                         }
                         break;
+                    case "Rights":
+                        switch (param[1])
+                        {
+                            case "Add":
+                                    if (!MySave.UsersRights.ContainsKey(param[2].ToLower()))
+                                        MySave.UsersRights.Add(param[2].ToLower(), (UserRights)Enum.Parse(typeof(UserRights), param[3]));
+                                    else
+                                        MySave.UsersRights[param[2].ToLower()] |= (UserRights)Enum.Parse(typeof(UserRights), param[3]);
+                                break;
+                            case "Del":
+                                    if (!MySave.UsersRights.ContainsKey(param[2].ToLower()))
+                                        MySave.UsersRights.Add(param[2].ToLower(), UserRights.Зритель);
+                                    else
+                                        MySave.UsersRights[param[2].ToLower()] &= ~(UserRights)Enum.Parse(typeof(UserRights), param[3]);
+                                break;
+                        }
+                        break;
+                    case "TmpRights":
+                        switch (param[1])
+                        {
+                            case "Add":
+                                if (!MySave.TmpUsersRights.ContainsKey(param[2].ToLower()))
+                                    MySave.TmpUsersRights.Add(param[2].ToLower(), (UserRights)Enum.Parse(typeof(UserRights), param[3]));
+                                else
+                                    MySave.TmpUsersRights[param[2].ToLower()] |= (UserRights)Enum.Parse(typeof(UserRights), param[3]);
+                                break;
+                            case "Del":
+                                if (!MySave.TmpUsersRights.ContainsKey(param[2].ToLower()))
+                                    MySave.TmpUsersRights.Add(param[2].ToLower(), UserRights.Зритель);
+                                else
+                                    MySave.TmpUsersRights[param[2].ToLower()] &= ~(UserRights)Enum.Parse(typeof(UserRights), param[3]);
+                                break;
+                        }
+                        break;
                     case "Speech":
                         lock (Extentions.SpeechSynth)
                         {
