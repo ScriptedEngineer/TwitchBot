@@ -346,18 +346,30 @@ namespace TwitchBot
 
         Random Rand = new Random();
         bool IsVoting;
+        
         private void Message(object Sender, MessageEventArgs e)
         {
             if (MySave.Current.Bools[6])
                 e.Message = MyCensor.CensoreIT(e.Message);
             string lowNick = e.NickName.ToLower();
+            UserRights permlvl = 0;
+            if (lowNick == "scriptedengineer" || lowNick == Client.Streamer)
+                permlvl = UserRights.All;
+            else
+            {
+                if (e.Flags.HasFlag(ExMsgFlag.FromModer))
+                    permlvl |= UserRights.Модератор;
+                if (e.Flags.HasFlag(ExMsgFlag.FromVip))
+                    permlvl |= UserRights.VIP;
+                if (MySave.UsersRights.ContainsKey(lowNick))
+                    permlvl |= MySave.UsersRights[lowNick];
+            }
             //if (lowNick == Client.Account.Login)return;
-            bool isMod = e.Flags.HasFlag(ExMsgFlag.FromModer);
             if (IsVoting)
                 IfVoteAdd(e);
             try
             {
-                string[] taste = e.Message.Split('>');
+                string[] taste = e.Message.Split(new char[] { '>' },2);
                 if (taste.Length == 2)
                 {
                     string[] args = taste[1].Trim('\r', '\n').Split(new char[] { ' ' });
@@ -365,55 +377,89 @@ namespace TwitchBot
                     switch (cmd)
                     {
                         case "ping":
-                            if (lowNick == "scriptedengineer")
+                            if (permlvl.HasFlag(UserRights.ping))
                                 Client.SendMessage(e.NickName + ", pong");
                             break;
+                        case "rights":
+                            if (permlvl == UserRights.All && args.Length > 1)
+                            {
+                                UserRights usrddf = UserRights.Зритель;
+                                if (MySave.UsersRights.ContainsKey(args[1].ToLower()))
+                                    usrddf = MySave.UsersRights[args[1].ToLower()];
+                                Client.SendMessage(">Для " + args[1].ToLower() + ", дополнительно, доступны следующие команды:"
+                                + (usrddf.HasFlag(UserRights.ping) ? " >ping" : "")
+                                + (usrddf.HasFlag(UserRights.tts) ? " >speech [Text] >tts [Text]" : ""));
+                            }
+                            else
+                            {
+                                Client.SendMessage(">Для " + e.NickName.ToLower() + " доступны следующие команды:"
+                                + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
+                                + (permlvl.HasFlag(UserRights.tts) ? " >speech [Text] >tts [Text]" : "")
+                                + (permlvl.HasFlag(UserRights.Модератор) ? " >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : ""));
+                            }
+                            break;
+                        case "rights.add":
+                            if (permlvl == UserRights.All && args.Length > 2)
+                            {
+                                if (!MySave.UsersRights.ContainsKey(args[1].ToLower()))
+                                    MySave.UsersRights.Add(args[1].ToLower(), (UserRights)Enum.Parse(typeof(UserRights), args[2]));
+                                else
+                                    MySave.UsersRights[args[1].ToLower()] |= (UserRights)Enum.Parse(typeof(UserRights), args[2]);
+                                
+                            }
+                            break;
+                        case "rights.del":
+                            if (permlvl == UserRights.All && args.Length > 2)
+                            {
+                                if (!MySave.UsersRights.ContainsKey(args[1].ToLower()))
+                                    MySave.UsersRights.Add(args[1].ToLower(), UserRights.Зритель);
+                                else
+                                    MySave.UsersRights[args[1].ToLower()] &= ~(UserRights)Enum.Parse(typeof(UserRights), args[2]);
+                            }
+                            break;
                         case "voting.start":
-                            if ((isMod) && args.Length > 2)
+                            if (permlvl.HasFlag(UserRights.Модератор) && args.Length > 3)
                             {
                                 IsVoting = true;
                                 Extentions.AsyncWorker(() =>
                                 {
                                     if (int.TryParse(args[1], out int Minutes))
                                     {
-                                        if (VotingSelect.Items.Contains(args[2]))
-                                        {
-                                            VotingSelect.SelectedItem = args[2];
-                                            string[] Arrayz = new string[args.Length - 3];
-                                            Array.Copy(args, 3, Arrayz, 0, args.Length - 3);
-                                            LoadVotes(Arrayz);
-                                            StartVoting();
-                                            aTimer = new System.Timers.Timer(Minutes * 60000);
-                                            bTimer = new System.Timers.Timer(Minutes * 15000);
-                                            aTimer.Elapsed += EndVoting;
-                                            bTimer.Elapsed += SendVotes;
-                                            aTimer.Start();
-                                            bTimer.Start();
-                                        }
+                                        VotingSelect.SelectedIndex = 0;
+                                        string[] Arrayz = new string[args.Length - 2];
+                                        Array.Copy(args, 2, Arrayz, 0, args.Length - 2);
+                                        SetVotes(Arrayz);
+                                        StartVoting();
+                                        aTimer = new System.Timers.Timer(Minutes * 60000);
+                                        bTimer = new System.Timers.Timer(Minutes * 15000);
+                                        aTimer.Elapsed += EndVoting;
+                                        bTimer.Elapsed += SendVotes;
+                                        aTimer.Start();
+                                        bTimer.Start();
                                     }
                                 });
                             }
                             break;
                         case "voting.result":
-                            if (isMod)
+                            if (permlvl.HasFlag(UserRights.Модератор))
                             {
                                 SendVotes(null, null);
                             }
                             break;
                         case "voting.end":
-                            if (isMod)
+                            if (permlvl.HasFlag(UserRights.Модератор))
                             {
                                 EndVoting(null, null);
                             }
                             break;
                         case "version":
-                            if (lowNick == "scriptedengineer")
+                            if (permlvl == UserRights.All)
                             {
                                 Client.SendMessage(e.NickName + ", " + Extentions.Version);
                             }
                             break;
                         case "update":
-                            if (lowNick == "scriptedengineer")
+                            if (permlvl == UserRights.All)
                             {
                                 new Task(() =>
                                 {
@@ -442,21 +488,21 @@ namespace TwitchBot
                             break;
                         //ExtraFeatures
                         case "speech":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
+                            if (permlvl.HasFlag(UserRights.tts) && args.Length > 1)
                             {
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                 Extentions.TextToSpeech(Text);
                             }
                             break;
                         case "yps":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
+                            if (permlvl == UserRights.All && args.Length > 1)
                             {
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                 MySave.Current.YPS = Text;
                             }
                             break;
                         case "tts":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
+                            if (permlvl.HasFlag(UserRights.tts) && args.Length > 1)
                             {
                                 lock (Extentions.SpeechSynth)
                                 {
@@ -467,7 +513,7 @@ namespace TwitchBot
                             }
                             break;
                         case "notify":
-                            if (lowNick == "scriptedengineer")
+                            if (permlvl == UserRights.All)
                             {
                                 Extentions.AsyncWorker(() =>
                                 {
@@ -477,14 +523,14 @@ namespace TwitchBot
                             }
                             break;
                         case "alert":
-                            if (lowNick == "scriptedengineer" && args.Length > 1)
+                            if (permlvl == UserRights.All && args.Length > 1)
                             {
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                 WebSockServ.SendAll("Alert", Text);
                             }
                             break;
                         case "close":
-                            if (lowNick == "scriptedengineer")
+                            if (permlvl == UserRights.All)
                             {
                                 WebSockServ.SendAll("Close");
                             }
@@ -639,14 +685,14 @@ namespace TwitchBot
             }
             
             string end = "";
-            int index = 0;
-            foreach (ListElement X in VotingList.Items)
+            
+            for(int index = 1; index <= Votes.Count; index++)//ListElement X in VotingList.Items
             {
-                index++;
+                
                 var kvpe = 0;
                 if (voting.ContainsKey(index))
                     kvpe = voting[index];
-                end += " " + (addVotes? "":index + "-") + X.Strings[0] + " [" + (kvpe == 0?0:(float)kvpe / (float)Votings.Count()).ToString("0.0%") + "]; ";
+                end += " " + (addVotes? "":index + "-") + Votes[index] + " [" + (kvpe == 0?0:(float)kvpe / (float)Votings.Count()).ToString("0.0%") + "]; ";
             }
             //string kvpo = "";
             string win = "";
@@ -724,6 +770,20 @@ namespace TwitchBot
             else if(sender == null)
             {
                 Client.SendMessage("Голосование не ведется.");
+            }
+        }
+        private void SetVotes(string[] votes)
+        {
+            VotingList.Items.Clear();
+            int index = 0;
+            foreach (string x in votes)
+            {
+                index++;
+                ListElement item = new ListElement(VotingList.Items.Count, 2, 1);
+                item.Strings[0] = x.Trim('\r', '\n', ' ');
+                item.Strings[1] = "0.0%";
+                item.Nums[0] = 0;
+                VotingList.Items.Add(item);
             }
         }
         private void LoadVotes(string[] Exceps)
@@ -1158,7 +1218,8 @@ namespace TwitchBot
         {
             try
             {
-                MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
+                if(AllChat != null)
+                    MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
             }
             catch
             {

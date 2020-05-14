@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -30,8 +31,10 @@ namespace TwitchBot
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }
         public string[] Strings { get; set; }
+        public string[] UserRightes { get; set; }
         public KeyModifier HotkeyModifier = KeyModifier.Alt;
         public Key Hotkey = Key.F1;
+        public static Dictionary<string, UserRights> UsersRights = new Dictionary<string, UserRights>();
         private MySave()
         {
             Bools = new bool[BL];
@@ -39,6 +42,7 @@ namespace TwitchBot
             Nums[0] = 0;
             Nums[4] = 100;
             OBSWSPort = "4444";
+            UserRightes = new string[] { };
             //TTSNTFL = $"{Path.GetDirectoryName(Extentions.AppFile)}/tts.mp3";
         }
         public static void Load()
@@ -72,9 +76,36 @@ namespace TwitchBot
                     Current.Bools = nms;
                 }
             }
+            foreach(string usrigh in Current.UserRightes)
+            {
+                try
+                {
+                    string[] Flds = usrigh.Split(':');
+                    if (UsersRights.ContainsKey(Flds[0]))
+                        continue;
+                    UsersRights.Add(Flds[0], (UserRights)Enum.Parse(typeof(UserRights), Flds[1]));
+                }
+                catch
+                {
+
+                }
+            }
         }
         public static void Save()
         {
+            List<string> frg = new List<string>();
+            foreach (var usrigh in UsersRights)
+            {
+                try
+                {
+                    frg.Add(usrigh.Key+":"+usrigh.Value.ToString());
+                }
+                catch
+                {
+
+                }
+            }
+            Current.UserRightes = frg.ToArray();
             MySave X = Current;
             XmlSerializer formatter = new XmlSerializer(typeof(MySave));
             if(File.Exists("save.xml"))File.Delete("save.xml");
@@ -83,5 +114,19 @@ namespace TwitchBot
                 formatter.Serialize(fs, X);
             }
         }
+    }
+
+    [Flags]
+    public enum UserRights
+    {
+        Зритель     = 0,
+        VIP         = 1 << 0,
+        Модератор   = 1 << 1,
+
+        ping        = 1 << 2,
+        tts         = 1 << 3,
+        
+        All         = ~(-1 << 4)
+
     }
 }
