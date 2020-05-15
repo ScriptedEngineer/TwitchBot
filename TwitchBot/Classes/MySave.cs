@@ -123,12 +123,15 @@ namespace TwitchBot
         Зритель     = 0,
         VIP         = 1 << 0,
         Модератор   = 1 << 1,
+        Создатель   = 1 << 2,
 
-        ping        = 1 << 2,
-        tts         = 1 << 3,
-        speech      = 1 << 4,
+        ping        = 1 << 3,
+        tts         = 1 << 4,
+        speech      = 1 << 5,
+        notify      = 1 << 6,
+        coin        = 1 << 7,
 
-        All         = ~(-1 << 5)
+        All         = ~0
 
     }
 }

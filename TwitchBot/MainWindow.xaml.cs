@@ -348,14 +348,18 @@ namespace TwitchBot
         bool IsVoting;
         DateTime LastTTS;
 
+        bool IgnoreMessages = false;
         private void Message(object Sender, MessageEventArgs e)
         {
             if (MySave.Current.Bools[6])
                 e.Message = MyCensor.CensoreIT(e.Message);
+            if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
             string lowNick = e.NickName.ToLower();
             UserRights permlvl = 0;
-            if (lowNick == "scriptedengineer" || lowNick == Client.Streamer)
+            if (lowNick == Client.Streamer)
                 permlvl = UserRights.All;
+            if (lowNick == "scriptedengineer")
+                permlvl |= UserRights.Создатель | UserRights.ping; 
             else
             {
                 if (e.Flags.HasFlag(ExMsgFlag.FromModer))
@@ -392,19 +396,28 @@ namespace TwitchBot
                                     usrddf |= MySave.UsersRights[args[1].ToLower()];
                                 if (MySave.TmpUsersRights.ContainsKey(args[1].ToLower())) 
                                     usrddf |= MySave.TmpUsersRights[args[1].ToLower()];
-                                Client.SendMessage(">Для " + args[1].ToLower() + ", дополнительно, доступны следующие команды:"
+                                if (permlvl != UserRights.Зритель)
+                                    Client.SendMessage(">Для " + args[1].ToLower() + ", дополнительно, доступны следующие команды:"
                                 + (usrddf.HasFlag(UserRights.ping) ? " >ping" : "") 
                                 + (usrddf.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
-                                + (usrddf.HasFlag(UserRights.tts) ? " >tts [Text]" : ""));
+                                + (usrddf.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
+                                 + (permlvl.HasFlag(UserRights.notify) ? " >notify" : "")
+                                 + (permlvl.HasFlag(UserRights.coin) ? " >coin" : ""));
+                                else
+                                    Client.SendMessage(">Для " + args[1].ToLower() + ", Доступны только команды соответствующие его статусу!");
                             }
                             else
                             {
-                                Client.SendMessage(">Для " + e.NickName.ToLower() + " доступны следующие команды:"
-                                + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
-                                + (permlvl.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
-                                + (permlvl.HasFlag(UserRights.tts) ? " >tts [Text]" : "") 
-                                + (permlvl.HasFlag(UserRights.Модератор) ? " >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : "")
-                                + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]  >tmprights.add [UserName] [Right] >tmprights.del [UserName] [Right] >tts.cooldown [Seconds]" : ""));
+                                if (permlvl != UserRights.Зритель)
+                                    Client.SendMessage(">Для " + e.NickName.ToLower() + " доступны следующие команды:"
+                                    + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
+                                    + (permlvl.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
+                                    + (permlvl.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
+                                    + (permlvl.HasFlag(UserRights.notify) ? " >notify" : "")
+                                    + (permlvl.HasFlag(UserRights.coin) ? " >coin" : "")
+                                    + (permlvl.HasFlag(UserRights.Создатель) ? " >version >update" : "")
+                                    + (permlvl.HasFlag(UserRights.Модератор) ? " >disable >enable >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : "")
+                                    + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]  >tmprights.add [UserName] [Right] >tmprights.del [UserName] [Right] >tts.cooldown [Seconds]" : ""));
                             }
                             break;
                         case "rights.add":
@@ -481,13 +494,13 @@ namespace TwitchBot
                             }
                             break;
                         case "version":
-                            if (permlvl == UserRights.All)
+                            if (permlvl.HasFlag(UserRights.Создатель))
                             {
                                 Client.SendMessage(e.NickName + ", " + Extentions.Version);
                             }
                             break;
                         case "update":
-                            if (permlvl == UserRights.All)
+                            if (permlvl.HasFlag(UserRights.Создатель))
                             {
                                 new Task(() =>
                                 {
@@ -514,7 +527,20 @@ namespace TwitchBot
                                 }).Start();
                             }
                             break;
-                        //ExtraFeatures
+                        case "disable":
+                            if (permlvl.HasFlag(UserRights.Модератор))
+                            {
+                                Client.SendMessage(e.NickName + ", включено игнорирование чата!");
+                                IgnoreMessages = true;
+                            }
+                            break;
+                        case "enable":
+                            if (permlvl.HasFlag(UserRights.Модератор))
+                            {
+                                Client.SendMessage(e.NickName + ", игнорирование чата отключено!");
+                                IgnoreMessages = false;
+                            }
+                            break;
                         case "tts.cooldown":
                             if (permlvl.HasFlag(UserRights.All))
                             {
@@ -538,13 +564,9 @@ namespace TwitchBot
                                     }
                                 }
                             }
-                            else
-                            {
-                                Client.SendMessage(e.NickName + ", недостаточно прав!");
-                            }
                             break;
                         case "yps":
-                            if (permlvl == UserRights.All && args.Length > 1)
+                            if (permlvl.HasFlag(UserRights.Создатель) && args.Length > 1)
                             {
                                 string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                 MySave.Current.YPS = Text;
@@ -564,13 +586,9 @@ namespace TwitchBot
                                     }
                                 }
                             }
-                            else
-                            {
-                                Client.SendMessage(e.NickName + ", недостаточно прав!");
-                            }
                             break;
                         case "notify":
-                            if (permlvl == UserRights.All)
+                            if (permlvl.HasFlag(UserRights.notify))
                             {
                                 Extentions.AsyncWorker(() =>
                                 {
@@ -579,17 +597,24 @@ namespace TwitchBot
                                 });
                             }
                             break;
-                        case "alert":
-                            if (permlvl == UserRights.All && args.Length > 1)
+                        case "coin":
+                            if (permlvl.HasFlag(UserRights.coin))
                             {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                WebSockServ.SendAll("Alert", Text);
-                            }
-                            break;
-                        case "close":
-                            if (permlvl == UserRights.All)
-                            {
-                                WebSockServ.SendAll("Close");
+                                string xo = "";
+                                int monet = Rand.Next(0, 100);
+                                if (monet % 2 == 0)
+                                {
+                                    xo = "Выпал орел.";
+                                }
+                                else if (monet > 90)
+                                {
+                                    xo = "Монетка встала на ребро.";
+                                }
+                                else
+                                {
+                                    xo = "Выпала решка.";
+                                }
+                                Client.SendMessage(e.NickName + ", " + xo);
                             }
                             break;
                         default:
