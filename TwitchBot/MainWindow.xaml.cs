@@ -281,6 +281,11 @@ namespace TwitchBot
 
         TwitchClient Client;
         //Кнопка подключения
+        private void ClientSendMessage(string text)
+        {
+            Client.SendMessage("‌" + text);
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             ConnectButton.Content = "Подключение...";
@@ -351,10 +356,12 @@ namespace TwitchBot
         bool IgnoreMessages = false;
         private void Message(object Sender, MessageEventArgs e)
         {
+            string lowNick = e.NickName.ToLower();
+            if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
+            if (lowNick == Client.Account.Login && e.Message.Contains("‌")) return;
             if (MySave.Current.Bools[6])
                 e.Message = MyCensor.CensoreIT(e.Message);
-            if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
-            string lowNick = e.NickName.ToLower();
+            
             UserRights permlvl = 0;
             if (lowNick == Client.Streamer)
                 permlvl = UserRights.All;
@@ -385,7 +392,7 @@ namespace TwitchBot
                     {
                         case "ping":
                             if (permlvl.HasFlag(UserRights.ping))
-                                Client.SendMessage(e.NickName + ", pong");
+                                ClientSendMessage(e.NickName + ", pong");
                             break;
                         case "help":
                         case "rights":
@@ -397,19 +404,19 @@ namespace TwitchBot
                                 if (MySave.TmpUsersRights.ContainsKey(args[1].ToLower())) 
                                     usrddf |= MySave.TmpUsersRights[args[1].ToLower()];
                                 if (permlvl != UserRights.Зритель)
-                                    Client.SendMessage(">Для " + args[1].ToLower() + ", дополнительно, доступны следующие команды:"
+                                    ClientSendMessage("Для " + args[1].ToLower() + ", дополнительно, доступны следующие команды:"
                                 + (usrddf.HasFlag(UserRights.ping) ? " >ping" : "") 
                                 + (usrddf.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
                                 + (usrddf.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
                                  + (permlvl.HasFlag(UserRights.notify) ? " >notify" : "")
                                  + (permlvl.HasFlag(UserRights.coin) ? " >coin" : ""));
                                 else
-                                    Client.SendMessage(">Для " + args[1].ToLower() + ", Доступны только команды соответствующие его статусу!");
+                                    ClientSendMessage("Для " + args[1].ToLower() + ", Доступны только команды соответствующие его статусу!");
                             }
                             else
-                            {
+                            { 
                                 if (permlvl != UserRights.Зритель)
-                                    Client.SendMessage(">Для " + e.NickName.ToLower() + " доступны следующие команды:"
+                                    ClientSendMessage("Для " + e.NickName.ToLower() + " доступны следующие команды:"
                                     + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
                                     + (permlvl.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
                                     + (permlvl.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
@@ -496,7 +503,7 @@ namespace TwitchBot
                         case "version":
                             if (permlvl.HasFlag(UserRights.Создатель))
                             {
-                                Client.SendMessage(e.NickName + ", " + Extentions.Version);
+                                ClientSendMessage(e.NickName + ", " + Extentions.Version);
                             }
                             break;
                         case "update":
@@ -511,7 +518,7 @@ namespace TwitchBot
                                         Extentions.SpeechSynth.Rate = TTSrate;
                                         if (!File.Exists("udpateprotocol"))
                                             File.Create("udpateprotocol").Close();
-                                        Client.SendMessage(e.NickName + ", обновляюсь!");
+                                        ClientSendMessage(e.NickName + ", обновляюсь!");
                                         Extentions.AsyncWorker(() =>
                                         {
                                             //TTSpeech.IsChecked = false;
@@ -523,21 +530,21 @@ namespace TwitchBot
                                         });
                                     }
                                     else
-                                        Client.SendMessage(e.NickName + ", обновления не найдены!");
+                                        ClientSendMessage(e.NickName + ", обновления не найдены!");
                                 }).Start();
                             }
                             break;
                         case "disable":
                             if (permlvl.HasFlag(UserRights.Модератор))
                             {
-                                Client.SendMessage(e.NickName + ", включено игнорирование чата!");
+                                ClientSendMessage(e.NickName + ", включено игнорирование чата!");
                                 IgnoreMessages = true;
                             }
                             break;
                         case "enable":
                             if (permlvl.HasFlag(UserRights.Модератор))
                             {
-                                Client.SendMessage(e.NickName + ", игнорирование чата отключено!");
+                                ClientSendMessage(e.NickName + ", игнорирование чата отключено!");
                                 IgnoreMessages = false;
                             }
                             break;
@@ -614,7 +621,7 @@ namespace TwitchBot
                                 {
                                     xo = "Выпала решка.";
                                 }
-                                Client.SendMessage(e.NickName + ", " + xo);
+                                ClientSendMessage(e.NickName + ", " + xo);
                             }
                             break;
                         default:
@@ -629,7 +636,7 @@ namespace TwitchBot
             }
             catch
             {
-                Client.SendMessage(e.NickName + ", было вызвано исключение во время обработки.");
+                ClientSendMessage(e.NickName + ", было вызвано исключение во время обработки.");
             }
             //Console.WriteLine(e.CustomRewardID);
         }
@@ -831,13 +838,13 @@ namespace TwitchBot
                     aTimer?.Close();
                     bTimer?.Close();
                     var x = GetVotes(true);
-                    Client.SendMessage($"Голосование окончено. {x.Item1} Результаты: {x.Item2}");
+                    ClientSendMessage($"Голосование окончено. {x.Item1} Результаты: {x.Item2}");
                     //DisplayVotes();
                 });
             }
             else
             {
-                Client.SendMessage("Голосование не ведется.");
+                ClientSendMessage("Голосование не ведется.");
             }
         }
         private void SendVotes(object sender, ElapsedEventArgs e)
@@ -845,13 +852,13 @@ namespace TwitchBot
             if (IsVoting)
             {
                 if (Votings.Count > 0)
-                    Client.SendMessage("Голосование на текуший момент: " + GetVotes().Item2);
+                    ClientSendMessage("Голосование на текуший момент: " + GetVotes().Item2);
                 else
-                    Client.SendMessage("Еще никто не проголосавал.");
+                    ClientSendMessage("Еще никто не проголосавал.");
             }
             else if(sender == null)
             {
-                Client.SendMessage("Голосование не ведется.");
+                ClientSendMessage("Голосование не ведется.");
             }
         }
         private void SetVotes(string[] votes)
@@ -920,7 +927,7 @@ namespace TwitchBot
             IsVoting = true;
             //string eXtraString = "";//(" " + Rand.Next(-100, 100).ToString());
             VoteMax = VotingList.Items.Count;
-            Client.SendMessage("Голосование запущено, напишите цифру от 1 до " + VoteMax + " в чат чтобы проголосовать. " + Vrotes + (Minutes != 0?$" У вас {Minutes} {Mins(Minutes)}.":""));
+            ClientSendMessage("Голосование запущено, напишите цифру от 1 до " + VoteMax + " в чат чтобы проголосовать. " + Vrotes + (Minutes != 0?$" У вас {Minutes} {Mins(Minutes)}.":""));
             index = 0;
             Votes.Clear();
             foreach (ListElement X in VotingList.Items)
