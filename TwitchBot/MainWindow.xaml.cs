@@ -241,7 +241,7 @@ namespace TwitchBot
             //Авторизация
             if (!File.Exists("account.txt"))
             {
-                Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read");
+                Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read%20channel:read:redemptions%20channel:moderate");
                 while (!File.Exists("account.txt"))
                 {
                     Thread.Sleep(500);

@@ -55,10 +55,6 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="TwitchLib">
-      <HintPath>C:\Users\Денис\source\repos\Twitch\TwitchLib\bin\Release\TwitchLib.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="UIAutomationProvider" />
     <Reference Include="websocket-sharp, Version=1.0.1.0, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocketSharp-netstandard.1.0.1\lib\net45\websocket-sharp.dll</HintPath>
@@ -135,6 +131,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TwitchLib\TwitchLib.csproj">
+      <Project>{d29a2894-6765-4d60-a15e-bed5b93bd537}</Project>
+      <Name>TwitchLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
