@@ -14,7 +14,7 @@ namespace TwitchLib
         {
             NickName = nickName;
             Message = message;
-            ID = id;
+            ID = id; 
             Chanel = chanel;
             Flags = flags;
             UserID = userid;

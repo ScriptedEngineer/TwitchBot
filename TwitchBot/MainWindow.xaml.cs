@@ -1228,6 +1228,7 @@ namespace TwitchBot
             if (VotingSelect.SelectedIndex != -1)
                 SaveVotes("./votings/" + VotingSelect.Items[lastselected] + ".txt");
             ni.Visible = false;
+            Application.Current.Shutdown();
         }
         private void SaveEvents()
         {

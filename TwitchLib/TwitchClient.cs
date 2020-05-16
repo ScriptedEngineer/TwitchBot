@@ -413,7 +413,10 @@ namespace TwitchLib
                             Match title = Regex.Match(nbs, @"""title"":""([^""]*)""");
                             Match chanel = Regex.Match(nbs, @"""channel_id"":""(\d*)""");
                             Match text = Regex.Match(nbs, @"""user_input"":""([^""]*)""");
-                            OnReward.Invoke(this, new RewardEventArgs(login.Groups[1].ToString(), rewrad.Groups[1].ToString(), user.Groups[1].ToString(), redem.Groups[1].ToString(), chanel.Groups[1].ToString(), title.Groups[1].ToString(), text.Groups[1].ToString()));
+                            new Thread(() =>
+                            {
+                                OnReward.Invoke(this, new RewardEventArgs(login.Groups[1].ToString(), rewrad.Groups[1].ToString(), user.Groups[1].ToString(), redem.Groups[1].ToString(), chanel.Groups[1].ToString(), title.Groups[1].ToString(), text.Groups[1].ToString()));
+                            }).Start();
                         }
                         //Console.WriteLine(e.Data);
                     }
