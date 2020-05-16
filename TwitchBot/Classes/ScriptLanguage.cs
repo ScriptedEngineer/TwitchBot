@@ -158,12 +158,20 @@ namespace TwitchBot
                     case "Speech":
                         lock (Extentions.SpeechSynth)
                         {
-                            Extentions.TextToSpeech(Regex.Replace(command, "^Speech ", " "));
+                            Extentions.TextToSpeech(Regex.Replace(command, "^Speech ", " ").Trim());
+                        }
+                        break;
+                    case "TTS":
+                        lock (Extentions.SpeechSynth)
+                        {
+                            string Text = Regex.Replace(command, "^TTS ", " ").Trim();
+                            Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
+                            Extentions.TrueTTS(Text);
                         }
                         break;
                     case "CMD":
                         {
-                            RunConsole(Regex.Replace(command, "^CMD ", ""));
+                            RunConsole(Regex.Replace(command, "^CMD ", "").Trim());
                         }
                         break;
                     case "Play":
@@ -171,7 +179,7 @@ namespace TwitchBot
                         {
                             Extentions.AsyncWorker(() =>
                             {
-                                Extentions.Player.Open(new Uri(Regex.Replace(command, "^Play ", " "), UriKind.Absolute));
+                                Extentions.Player.Open(new Uri(Regex.Replace(command, "^Play ", " ").Trim(), UriKind.Absolute));
                                 Extentions.Player.Play();
                             });
                             Thread.Sleep(1200);
