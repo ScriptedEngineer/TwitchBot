@@ -81,6 +81,9 @@
     <Compile Include="Classes\WebServer.cs" />
     <Compile Include="Classes\WebSockServ.cs" />
     <Compile Include="Classes\WinApi.cs" />
+    <Compile Include="Startup.xaml.cs">
+      <DependentUpon>Startup.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Updater.xaml.cs">
       <DependentUpon>Updater.xaml</DependentUpon>
     </Compile>
@@ -97,6 +100,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Startup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Updater.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

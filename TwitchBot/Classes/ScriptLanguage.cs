@@ -213,6 +213,10 @@ namespace TwitchBot
                                 break;
                         }
                         break;
+                    case "Send":
+                        MainWindow.Client.SendMessage(Regex.Replace(command, "^Send ", " ").Trim());
+                        break;
+                    
                     case "Wait":
                         {
                             if (int.TryParse(param[1], out int Kb))

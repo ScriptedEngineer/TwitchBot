@@ -41,42 +41,6 @@ namespace TwitchBot
         public MainWindow()
         {
             CurrentW = this;
-            //Заметаем следы обновления
-            bool Update = false;
-            if (File.Exists("update.vbs"))
-            {
-                File.Delete("update.vbs");
-                Update = true;
-            }
-
-            //Загрузка зависимостей программы
-            if (!File.Exists("TwitchLib.dll") || Update)
-            {
-                try
-                {
-                    WebClient web = new WebClient();
-                    web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
-                    
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message, "Ошибка загрузки TwitchLib.dll", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-
-            //Загрузка зависимостей библиотеки
-            if (!File.Exists("websocket-sharp.dll"))
-            {
-                try
-                {
-                    WebClient web = new WebClient();
-                    web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/websocket-sharp.dll"), "websocket-sharp.dll");
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message, "Ошибка загрузки websocket-sharp.dll", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
 
             //Инициализация трей иконки
             ni.Icon = Properties.Resources.icon;
@@ -214,6 +178,22 @@ namespace TwitchBot
                 }).Start();
             }
 
+            //Web сервер визуалки
+            WebServer = new WebServer("http://localhost:8190/");
+            WebServer.Run();
+
+            //Авторизация
+            if (!File.Exists("account.txt"))
+            {
+                Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read");
+                while (!File.Exists("account.txt"))
+                {
+                    Thread.Sleep(500);
+                }
+            }
+            string[] AccountFields = File.ReadAllLines("account.txt");
+            Account = new TwitchAccount(AccountFields[0], AccountFields[1]);
+
             //Параметры командной строки
             string[] argsv = Environment.GetCommandLineArgs();
             if (argsv.Length > 1)
@@ -229,24 +209,10 @@ namespace TwitchBot
                             break;
                     }
 
-            //Web сервер визуалки
-            WebServer = new WebServer(WebRequest, "http://localhost:8190/");
-            WebServer.Run();
-
             //WebSocket сервер визуалки
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
             WebSocketServer.AddWebSocketService<WebSockServ>("/alert");
             WebSocketServer.Start();
-
-            //Авторизация
-            if (!File.Exists("account.txt"))
-            {
-                Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read%20channel:read:redemptions%20channel:moderate");
-                while (!File.Exists("account.txt"))
-                {
-                    Thread.Sleep(500);
-                }
-            }
 
             //Подключениее к OBS WebSocket
             if (MySave.Current.Bools[7])
@@ -259,28 +225,9 @@ namespace TwitchBot
         }
         WebSocketSharp.Server.WebSocketServer WebSocketServer;
         WebServer WebServer;
-        public static string WebRequest(HttpListenerRequest request)
-        {
-            switch (request.RawUrl.Split('?').First().Trim('/'))
-            {
-                case "obs":
-                    return Properties.Resources.ServerMain;
-                case "control":
-                    return "NO";
-                case "twitchcode":
-                    return "<script>location.replace('http://localhost:8190/twithctoken?' + window.location.href.split('#')[1]);</script>";
-                case "twithctoken":
-                    string token = request.QueryString.Get("access_token");
-                    string login = TwitchAccount.GetLogin(token);
-                    File.WriteAllLines("account.txt", new string[] { login, token });
-                    return "<script>location.replace('https://wsxz.ru');</script>";
-                default:
-                    return "Not found";
-            }            
-        }
-
-        TwitchClient Client;
-        //Кнопка подключения
+        
+        public static TwitchClient Client;
+        TwitchAccount Account;
         private void ClientSendMessage(string text)
         {
             Client.SendMessage("‌" + text);
@@ -294,8 +241,9 @@ namespace TwitchBot
             MySave.Current.Streamer = Streamer.Text;
             new Task(() =>
             {
-                string[] AccountFields = File.ReadAllLines("account.txt");
-                Client = new TwitchClient(new TwitchAccount(AccountFields[0], AccountFields[1]), MySave.Current.Streamer, "", "", true);
+                while (Account == null)
+                    Thread.Sleep(100);
+                Client = new TwitchClient(Account, MySave.Current.Streamer, "", "", true);
                 Client.OnMessage += Message;
                 Client.OnReward += Reward;
                 Client.OnBan += Ban;
@@ -307,6 +255,25 @@ namespace TwitchBot
                     Controls.IsEnabled = true;
                     ConnectButton.Content = "Подключено";
                 });
+                while (string.IsNullOrEmpty(Account.Scopes))
+                    Thread.Sleep(100);
+                if (!Client.Account.CheckScopes("chat:edit", "chat:read"))
+                {
+                    Extentions.AsyncWorker(() =>
+                    {
+                        if(File.Exists("account.txt"))
+                            File.Delete("account.txt");
+                        Process.Start(Extentions.AppFile);
+                        Application.Current.Shutdown();
+                    });
+                }
+                else if(Client.Account.CheckScopes("channel:moderate"))
+                {
+                    Extentions.AsyncWorker(() =>
+                    {
+                        GetModBtt.IsEnabled = false;
+                    });
+                }
             }).Start();
         }
 
@@ -416,7 +383,7 @@ namespace TwitchBot
                             else
                             { 
                                 if (permlvl != UserRights.Зритель)
-                                    ClientSendMessage("Для " + e.NickName.ToLower() + " доступны следующие команды:"
+                                    ClientSendMessage("Для " + e.NickName.ToLower() + " доступны следующие команды: >help"
                                     + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
                                     + (permlvl.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
                                     + (permlvl.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
@@ -477,7 +444,7 @@ namespace TwitchBot
                                         string[] Arrayz = new string[args.Length - 2];
                                         Array.Copy(args, 2, Arrayz, 0, args.Length - 2);
                                         SetVotes(Arrayz);
-                                        StartVoting();
+                                        StartVoting(Minutes);
                                         aTimer = new System.Timers.Timer(Minutes * 60000);
                                         bTimer = new System.Timers.Timer(Minutes * 15000);
                                         aTimer.Elapsed += EndVoting;
@@ -1518,6 +1485,20 @@ namespace TwitchBot
         private void UseYA_Click(object sender, RoutedEventArgs e)
         {
             MySave.Current.Bools[8] = UseYA.IsChecked.Value;
+        }
+
+        private void Button_Click_9(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists("account.txt")) 
+                File.Delete("account.txt");
+            Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read%20channel:moderate");
+            while (!File.Exists("account.txt"))
+            {
+                Thread.Sleep(500);
+            }
+            Thread.Sleep(500);
+            Process.Start(Extentions.AppFile);
+            Application.Current.Shutdown();
         }
 
         private void Script_TextChanged(object sender, TextChangedEventArgs e)

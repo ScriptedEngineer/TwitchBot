@@ -201,6 +201,7 @@ namespace TwitchLib
             WSock.Close();
             WSock1?.Close();
         }
+
         public void SendMessage(string text)
         {
             //if (string.IsNullOrEmpty(StreamerID))
@@ -389,8 +390,9 @@ namespace TwitchLib
 
         private void WSock1_Opened(object sender, EventArgs e)
         {
-            //WSock1.Send($"{{\"type\":\"LISTEN\",\"nonce\":\"{RandomString(30)}\",\"data\":{{\"topics\":[\"community-points-channel-v1.{StreamerID}\"]}}}}");
-            WSock1.Send($"{{\"type\":\"LISTEN\",\"nonce\":\"{RandomString(30)}\",\"data\":{{\"topics\":[\"channel-points-channel-v1.{StreamerID}\"],\"auth_token\":\"{Account.Token}\"}}}}");
+            WSock1.Send($"{{\"type\":\"LISTEN\",\"nonce\":\"{RandomString(30)}\",\"data\":{{\"topics\":[\"community-points-channel-v1.{StreamerID}\"]}}}}");
+            //WSock1.Send($"{{\"type\":\"LISTEN\",\"nonce\":\"{RandomString(30)}\",\"data\":{{\"topics\":[\"channel-points-channel-v1.{StreamerID}\"],\"auth_token\":\"{Account.Token}\"}}}}");
+            //WSock1.Send($"{{\"type\":\"LISTEN\",\"nonce\":\"{RandomString(30)}\",\"data\":{{\"topics\":[\"chat_moderator_actions.{StreamerID}\"],\"auth_token\":\"{Account.Token}\"}}}}");
             //WSock1_MessageReceived(null,null);
         }
         private void WSock1_MessageReceived(object sender, WebSocketSharp.MessageEventArgs e)

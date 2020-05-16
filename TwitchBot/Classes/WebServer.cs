@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchLib;
 
 namespace TwitchBot
 {
@@ -12,6 +14,26 @@ namespace TwitchBot
     {
         private readonly HttpListener _listener = new HttpListener();
         private readonly Func<HttpListenerRequest, string> _responderMethod;
+
+        public static string WebRequest(HttpListenerRequest request)
+        {
+            switch (request.RawUrl.Split('?').First().Trim('/'))
+            {
+                case "obs":
+                    return Properties.Resources.ServerMain;
+                case "control":
+                    return "NO";
+                case "twitchcode":
+                    return "<script>location.replace('http://localhost:8190/twithctoken?' + window.location.href.split('#')[1]);</script>";
+                case "twithctoken":
+                    string token = request.QueryString.Get("access_token");
+                    string login = TwitchAccount.GetLogin(token);
+                    File.WriteAllLines("account.txt", new string[] { login, token });
+                    return "<script>location.replace('https://wsxz.ru');</script>";
+                default:
+                    return "Not found";
+            }
+        }
 
         public WebServer(IReadOnlyCollection<string> prefixes, Func<HttpListenerRequest, string> method)
         {
@@ -40,6 +62,10 @@ namespace TwitchBot
             _listener.Start();
         }
 
+        public WebServer(params string[] prefixes)
+           : this(prefixes, WebRequest)
+        {
+        }
         public WebServer(Func<HttpListenerRequest, string> method, params string[] prefixes)
            : this(prefixes, method)
         {
