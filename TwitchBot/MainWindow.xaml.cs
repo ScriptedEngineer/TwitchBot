@@ -306,13 +306,12 @@ namespace TwitchBot
             if (!string.IsNullOrEmpty(e.CustomRewardID))
             {
                 RewardTrapHatch?.Invoke(this, e);
-                foreach (var x in RewEvents)
+                new Thread(() =>
                 {
-                    if (x.CustomRewardID == e.CustomRewardID)
-                    {
-                        x.invoke(e);
-                    }
-                }
+                    if (MySave.Current.Bools[6])
+                        e.Text = MyCensor.CensoreIT(e.Text);
+                    RewEvents.FirstOrDefault(x => x.CustomRewardID == e.CustomRewardID)?.invoke(e);
+                }).Start();
             }
         }
 
@@ -535,6 +534,10 @@ namespace TwitchBot
                                         string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
                                         Extentions.TextToSpeech(Text);
                                         LastTTS = DateTime.Now;
+                                        while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
+                                        {
+                                            Thread.Sleep(100);
+                                        }
                                     }
                                 }
                             }

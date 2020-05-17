@@ -75,7 +75,8 @@ namespace TwitchBot
                 return (float)(1-((SpeechSynth.Rate*-1d)/20d));
             }
         }
-        public static void GetTrueTTSReady(string Text, string Settings = @"""voice"":""alena"",""emotion"":""neutral""", string Voice = "")
+
+        public static void GetTrueTTSReady(string Text, string Settings = @"""voice"":""alena"",""emotion"":""neutral""")
         {
             string Setts = @"{
 ""message"":""" + Text.Replace(@"""",@".").Replace(@"\",@"\\") + @""",
@@ -140,10 +141,10 @@ namespace TwitchBot
             {
                 string path = Path.GetDirectoryName(AppFile) + "\\YAPI.wav";
                 //Uri File = new Uri(path, UriKind.Absolute);
-                if (!MySave.Current.Bools[0])
+                /*if (!MySave.Current.Bools[0])
                 {
                     return;
-                }
+                }*/
                 Player.Open(new Uri("F:/lol.mp3"));
                 Player.Open(new Uri(path, UriKind.Absolute));
                 Player.Play();

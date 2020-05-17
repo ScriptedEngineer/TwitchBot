@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Speech.Synthesis;
 
 namespace TwitchBot
 {
@@ -159,6 +160,10 @@ namespace TwitchBot
                         lock (Extentions.SpeechSynth)
                         {
                             Extentions.TextToSpeech(Regex.Replace(command, "^Speech ", " ").Trim());
+                            while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
+                            {
+                                Thread.Sleep(100);
+                            }
                         }
                         break;
                     case "TTS":

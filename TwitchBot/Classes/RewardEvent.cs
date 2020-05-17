@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using TwitchLib;
@@ -16,17 +17,20 @@ namespace TwitchBot
             RewardName = "Определено пользователем",
             EventName = "Новый",
             Script;
+        private bool  Runing;
         public RewardEvent()
         {
 
         }
         public void invoke(RewardEventArgs e)
         {
-            lock (CustomRewardID)
-            {
+            while (Runing)
+                Thread.Sleep(100);
+            Runing = true;
                 string scripd = Script;
                 if (scripd.Contains("%"))
                 {
+                
                     if (scripd.Contains("%TEXT%"))
                         scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", ""));
                     if (scripd.Contains("%NICK%"))
@@ -37,7 +41,7 @@ namespace TwitchBot
                     //  scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", ""));
                 }
                 ScriptLanguage.RunScript(scripd);
-            }
+            Runing = false;
         }
     }
 }
