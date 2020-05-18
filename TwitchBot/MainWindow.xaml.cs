@@ -322,7 +322,7 @@ namespace TwitchBot
         bool IgnoreMessages = false;
         private void Message(object Sender, MessageEventArgs e)
         {
-            string lowNick = e.NickName.ToLower();
+            string lowNick = e.NickName.ToLower().Trim();
             if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
             if (lowNick == Client.Account.Login && e.Message.Contains("‌")) return;
             if (MySave.Current.Bools[6])
@@ -331,10 +331,10 @@ namespace TwitchBot
             UserRights permlvl = 0;
             if (lowNick == Client.Streamer)
                 permlvl = UserRights.All;
-            if (lowNick == "scriptedengineer")
-                permlvl |= UserRights.Создатель | UserRights.ping; 
             else
             {
+                if (lowNick == "scriptedengineer")
+                    permlvl |= UserRights.Создатель | UserRights.ping;
                 if (e.Flags.HasFlag(ExMsgFlag.FromModer))
                     permlvl |= UserRights.Модератор;
                 if (e.Flags.HasFlag(ExMsgFlag.FromVip))
@@ -367,20 +367,20 @@ namespace TwitchBot
                                 UserRights usrddf = UserRights.Зритель;
                                 if (MySave.UsersRights.ContainsKey(args[1].ToLower()))
                                     usrddf |= MySave.UsersRights[args[1].ToLower()];
-                                if (MySave.TmpUsersRights.ContainsKey(args[1].ToLower())) 
+                                if (MySave.TmpUsersRights.ContainsKey(args[1].ToLower()))
                                     usrddf |= MySave.TmpUsersRights[args[1].ToLower()];
-                                if (permlvl != UserRights.Зритель)
+                                if (usrddf != UserRights.Зритель)
                                     ClientSendMessage("Для " + args[1].ToLower() + ", дополнительно, доступны следующие команды:"
-                                + (usrddf.HasFlag(UserRights.ping) ? " >ping" : "") 
-                                + (usrddf.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
-                                + (usrddf.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
-                                 + (permlvl.HasFlag(UserRights.notify) ? " >notify" : "")
-                                 + (permlvl.HasFlag(UserRights.coin) ? " >coin" : ""));
+                                    + (usrddf.HasFlag(UserRights.ping) ? " >ping" : "")
+                                    + (usrddf.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
+                                    + (usrddf.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
+                                    + (usrddf.HasFlag(UserRights.notify) ? " >notify" : "")
+                                    + (usrddf.HasFlag(UserRights.coin) ? " >coin" : ""));
                                 else
                                     ClientSendMessage("Для " + args[1].ToLower() + ", Доступны только команды соответствующие его статусу!");
                             }
                             else
-                            { 
+                            {
                                 if (permlvl != UserRights.Зритель)
                                     ClientSendMessage("Для " + e.NickName.ToLower() + " доступны следующие команды: >help"
                                     + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")

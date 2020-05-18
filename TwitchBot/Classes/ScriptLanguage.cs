@@ -123,37 +123,47 @@ namespace TwitchBot
                         }
                         break;
                     case "Rights":
-                        switch (param[1])
                         {
-                            case "Add":
-                                    if (!MySave.UsersRights.ContainsKey(param[2].ToLower()))
-                                        MySave.UsersRights.Add(param[2].ToLower(), (UserRights)Enum.Parse(typeof(UserRights), param[3]));
+                            string nick = param[2].ToLower().Trim();
+                            string right = param[3].ToLower().Trim();
+                            switch (param[1])
+                            {
+
+                                case "Add":
+                                    if (!MySave.UsersRights.ContainsKey(nick))
+                                        MySave.UsersRights.Add(nick, (UserRights)Enum.Parse(typeof(UserRights), right));
                                     else
-                                        MySave.UsersRights[param[2].ToLower()] |= (UserRights)Enum.Parse(typeof(UserRights), param[3]);
-                                break;
-                            case "Del":
-                                    if (!MySave.UsersRights.ContainsKey(param[2].ToLower()))
-                                        MySave.UsersRights.Add(param[2].ToLower(), UserRights.Зритель);
+                                        MySave.UsersRights[nick] |= (UserRights)Enum.Parse(typeof(UserRights), right);
+                                    break;
+                                case "Del":
+                                    if (!MySave.UsersRights.ContainsKey(nick))
+                                        MySave.UsersRights.Add(nick, UserRights.Зритель);
                                     else
-                                        MySave.UsersRights[param[2].ToLower()] &= ~(UserRights)Enum.Parse(typeof(UserRights), param[3]);
-                                break;
+                                        MySave.UsersRights[nick] &= ~(UserRights)Enum.Parse(typeof(UserRights), right);
+                                    break;
+                            }
                         }
                         break;
                     case "TmpRights":
-                        switch (param[1])
                         {
-                            case "Add":
-                                if (!MySave.TmpUsersRights.ContainsKey(param[2].ToLower()))
-                                    MySave.TmpUsersRights.Add(param[2].ToLower(), (UserRights)Enum.Parse(typeof(UserRights), param[3]));
-                                else
-                                    MySave.TmpUsersRights[param[2].ToLower()] |= (UserRights)Enum.Parse(typeof(UserRights), param[3]);
-                                break;
-                            case "Del":
-                                if (!MySave.TmpUsersRights.ContainsKey(param[2].ToLower()))
-                                    MySave.TmpUsersRights.Add(param[2].ToLower(), UserRights.Зритель);
-                                else
-                                    MySave.TmpUsersRights[param[2].ToLower()] &= ~(UserRights)Enum.Parse(typeof(UserRights), param[3]);
-                                break;
+                            string nick = param[2].ToLower().Trim();
+                            string right = param[3].ToLower().Trim();
+                            switch (param[1])
+                            {
+
+                                case "Add":
+                                    if (!MySave.TmpUsersRights.ContainsKey(nick))
+                                        MySave.TmpUsersRights.Add(nick, (UserRights)Enum.Parse(typeof(UserRights), right));
+                                    else
+                                        MySave.TmpUsersRights[nick] |= (UserRights)Enum.Parse(typeof(UserRights), right);
+                                    break;
+                                case "Del":
+                                    if (!MySave.TmpUsersRights.ContainsKey(nick))
+                                        MySave.TmpUsersRights.Add(nick, UserRights.Зритель);
+                                    else
+                                        MySave.TmpUsersRights[nick] &= ~(UserRights)Enum.Parse(typeof(UserRights), right);
+                                    break;
+                            }
                         }
                         break;
                     case "Speech":

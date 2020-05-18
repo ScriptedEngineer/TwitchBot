@@ -32,11 +32,11 @@ namespace TwitchBot
                 {
                 
                     if (scripd.Contains("%TEXT%"))
-                        scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", ""));
+                        scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", "").Trim());
                     if (scripd.Contains("%NICK%"))
-                        scripd = scripd.Replace("%NICK%", e.NickName.Replace("\n", ""));
+                        scripd = scripd.Replace("%NICK%", e.NickName.Replace("\n", "").Trim());
                     if (scripd.Contains("%TITLE%"))
-                        scripd = scripd.Replace("%TITLE%", e.Title.Replace("\n", ""));
+                        scripd = scripd.Replace("%TITLE%", e.Title.Replace("\n", "").Trim());
                     //if (scripd.Contains("%TEXT%"))
                     //  scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", ""));
                 }
