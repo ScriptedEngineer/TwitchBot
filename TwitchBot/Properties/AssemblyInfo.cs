@@ -10,10 +10,10 @@ using System.Windows;
 [assembly: AssemblyTitle("TwitchBot")]
 [assembly: AssemblyDescription("Bot for twitch")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Just do it")]
-[assembly: AssemblyProduct("TwitchBot")]
-[assembly: AssemblyCopyright("Copyleft 🄯 ScriptedEngineer 2020")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("ScriptedEngineer Developing")]
+[assembly: AssemblyProduct("TwitchBot (ScriptedBot)")]
+[assembly: AssemblyCopyright("Copyright © ScriptedEngineer 2020")]
+[assembly: AssemblyTrademark("ScriptedBot")]
 [assembly: AssemblyCulture("")]
 
 // Установка значения False для параметра ComVisible делает типы в этой сборке невидимыми
@@ -53,3 +53,5 @@ using System.Windows;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.1.5.7")]
 [assembly: AssemblyFileVersion("0.1.5.7")]
+[assembly: Guid("ec4767b2-eb5d-4740-b605-c9145b8fb711")]
+[assembly: NeutralResourcesLanguage("ru")]
