@@ -1504,6 +1504,12 @@ namespace TwitchBot
             Application.Current.Shutdown();
         }
 
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
+        }
+
         private void Script_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (EvList.SelectedIndex == -1)

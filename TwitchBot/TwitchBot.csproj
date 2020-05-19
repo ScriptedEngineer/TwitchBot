@@ -158,7 +158,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="signkeys.pfx" />
-    <None Include="twbtkey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
