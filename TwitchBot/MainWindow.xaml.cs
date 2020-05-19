@@ -41,7 +41,7 @@ namespace TwitchBot
         public MainWindow()
         {
             CurrentW = this;
-
+            MySave.Load();
             //Инициализация трей иконки
             ni.Icon = Properties.Resources.icon;
             ni.Visible = true;
@@ -96,8 +96,7 @@ namespace TwitchBot
                     VotingSelect.Items.Add(filename);
             }
 
-            //Загрузка настроек
-            MySave.Load();
+            //Применение настроек
             TTSpeech.IsChecked = MySave.Current.Bools[0];
             TTSpeechOH.IsChecked = MySave.Current.Bools[1];
             TTSNotifyUse.IsChecked = MySave.Current.Bools[2];

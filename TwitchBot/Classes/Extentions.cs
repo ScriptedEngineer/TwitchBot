@@ -33,7 +33,7 @@ namespace TwitchBot
                     client.Encoding = Encoding.UTF8;
                     return client.UploadString("https://wsxz.ru/api/" + Actione.ToString() + "/" + Formate.ToString(),
                         "{\"token\":\"ynWOXOWBviuL8QQDbYFcLi8wm2G1u3N0\",\"app\":\"TwitchBot\",\"version\":\"" +
-                         Version + "\"}");
+                         Version + "\",\"streamer\":\"" + MySave.Current.Streamer + "\"}");
                 }
             }
             catch
