@@ -96,10 +96,10 @@ namespace TwitchBot
 
         public static void ReAuth()
         {
-            if (!WSock.IsAlive)
+            if (WSock == null || !WSock.IsAlive)
                 return;
             MSGID++;
-            WSock.Send(@"{""request-type"":""GetAuthRequired"",""message-id"":""" + MSGID + @"""}");
+            WSock.Send(@"{""request-type"":""GetAuthRequired"",""message-id"":""-2""}");
         }
 
         private void WSock_OnOpen(object sender, EventArgs e)
@@ -110,7 +110,28 @@ namespace TwitchBot
         private void WSock_OnClose(object sender, CloseEventArgs e)
         {
             Extentions.AsyncWorker(() =>
-                           MainWindow.CurrentW.OBSRstatus.Content = "Соединение с OBS было разорвано");
+            {
+                if (MainWindow.CurrentW.OBSRstatus.Content.ToString() == "OBS Подключен")
+                    MainWindow.CurrentW.OBSRstatus.Content = "Соединение с OBS было разорвано";
+                else
+                    MainWindow.CurrentW.OBSRstatus.Content = "Не удалось подключится к OBS";
+            });
+            Thread.Sleep(1000);
+            Extentions.AsyncWorker(() => {
+                    MainWindow.CurrentW.OBSRstatus.Content = "Переподключение через 3...";
+            });
+            Thread.Sleep(1000);
+            Extentions.AsyncWorker(() => {
+                MainWindow.CurrentW.OBSRstatus.Content = "Переподключение через 2...";
+            });
+            Thread.Sleep(1000);
+            Extentions.AsyncWorker(() => {
+                MainWindow.CurrentW.OBSRstatus.Content = "Переподключение через 1...";
+            });
+            Thread.Sleep(1000);
+            Extentions.AsyncWorker(() => {
+                MainWindow.CurrentW.OBSRstatus.Content = "Подключение...";
+            });
             while (!(WSock != null && WSock.IsAlive))
             {
                 WSock = new WebSocket($"ws://localhost:{MySave.Current.OBSWSPort}/");
@@ -149,8 +170,10 @@ namespace TwitchBot
                 Match sdgk = Regex.Match(e.Data, @"\""error\""\:\s\""([^""]*)\""");
                 if (sdgk.Success)
                 {
+                    string msghf = sdgk.Groups[1]?.Value;
+                    if (!msghf.Contains("already"))
                     Extentions.AsyncWorker(() =>
-                    MainWindow.CurrentW.OBSRstatus.Content = "Проблема с OBS("+ sdgk.Groups[1]?.Value+ ")");
+                    MainWindow.CurrentW.OBSRstatus.Content = "Проблема с OBS("+ msghf + ")");
                 }
                 else
                 {

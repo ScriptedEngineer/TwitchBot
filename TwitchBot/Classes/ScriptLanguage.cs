@@ -180,7 +180,7 @@ namespace TwitchBot
                         lock (Extentions.SpeechSynth)
                         {
                             string Text = Regex.Replace(command, "^TTS ", " ").Trim();
-                            Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
+                            Extentions.GetTrueTTSReady(Text, MySave.Current.YPV.ToString());
                             Extentions.TrueTTS(Text);
                         }
                         break;

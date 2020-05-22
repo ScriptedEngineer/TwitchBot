@@ -23,7 +23,7 @@ namespace TwitchBot
         public static SpeechSynthesizer SpeechSynth = new SpeechSynthesizer();
         public static List<Prompt> Speechs = new List<Prompt>();
         public static string Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static DispatcherOperation AsyncWorker(Action act) => Application.Current?.Dispatcher?.BeginInvoke(DispatcherPriority.Background, act);
+        public static void AsyncWorker(Action act) => _ = Application.Current?.Dispatcher?.BeginInvoke(DispatcherPriority.Background, act);
         public static string ApiServer(ApiServerAct Actione, ApiServerOutFormat Formate = ApiServerOutFormat.@string)
         {
             try
@@ -62,7 +62,7 @@ namespace TwitchBot
             }).Start();
         }
 
-        private static float RateToSpeed()
+        public static float RateToSpeed()
         {
             if (SpeechSynth.Rate == 0)
                 return 1;
@@ -76,13 +76,14 @@ namespace TwitchBot
             }
         }
 
-        public static void GetTrueTTSReady(string Text, string Settings = @"""voice"":""alena"",""emotion"":""neutral""")
+        public static void GetTrueTTSReady(string Text, string Voice = @"alena")
         {
             string Setts = @"{
 ""message"":""" + Text.Replace(@"""",@".").Replace(@"\",@"\\") + @""",
 ""language"":""ru-RU"",
 ""speed"":" + RateToSpeed().ToString().Replace(",",".") + @",
-" + Settings + @",
+""voice"":"""+ Voice + @""",
+""emotion"":""good"",
 ""format"":""lpcm""
 }";
 
@@ -122,7 +123,7 @@ namespace TwitchBot
                         MySave.Current.YPT = HttpUtility.UrlDecode(MTH.Groups[1].Value);
                     }
                 }
-                catch(Exception e)
+                catch (Exception)
                 {
 
                 }

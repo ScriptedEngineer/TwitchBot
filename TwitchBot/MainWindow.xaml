@@ -6,17 +6,22 @@
         xmlns:local="clr-namespace:TwitchBot"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="TwitchBot.MainWindow"
         mc:Ignorable="d"
-        Title="TwitchBot" Height="480" Width="360" MinWidth="360" MinHeight="480" Closed="Window_Closed" WindowStartupLocation="CenterScreen" Closing="Window_Closing" StateChanged="Window_StateChanged" MaxWidth="400" MaxHeight="500">
+        Title="ScriptedBot (Bot for Twitch)" Height="500" Width="900" Closed="Window_Closed" WindowStartupLocation="CenterScreen" Closing="Window_Closing" StateChanged="Window_StateChanged">
     <Grid>
-        <TextBox x:Name="Streamer" Height="23" Margin="10,21,118,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
-        <Button x:Name="ConnectButton" Content="Подключить" HorizontalAlignment="Right" Margin="0,21,10,0" VerticalAlignment="Top" Width="103" Click="Button_Click" Height="23"/>
-        <TabControl x:Name="Controls" Margin="10,49,10,16" IsEnabled="False">
+        <TextBox x:Name="Streamer" Height="23" Margin="10,10,130,0" TextWrapping="Wrap" VerticalAlignment="Top" Visibility="Collapsed"/>
+        <Button x:Name="ConnectButton" Content="Подключить" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="115" Click="Button_Click" Height="24" Visibility="Collapsed"/>
+        <TabControl x:Name="Controls" Margin="250,0,0,16">
             <TabItem Header="Голосование">
                 <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="2"/>
                     <ListView x:Name="VotingList" Margin="1,1,0,60">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="Название">
+                                <GridViewColumn Header="Название" Width="135">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel>
@@ -25,7 +30,7 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn x:Name="VotesHeader" Header="Голоса">
+                                <GridViewColumn x:Name="VotesHeader" Header="Голоса" Width="95">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel>
@@ -46,21 +51,17 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <Button Content="Запустить" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" Width="63" Click="Button_Click_2"/>
-                    <Button Content="Остановить" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="73" Click="Button_Click_3" Height="20"/>
-                    <Button Content="Добавить" Margin="10,0,0,35" VerticalAlignment="Bottom" Click="Button_Click_1" HorizontalAlignment="Left" Width="61"/>
-                    <Button Content="Удалить" Margin="76,0,0,35" VerticalAlignment="Bottom" Click="Button_Click_4" HorizontalAlignment="Left" Width="54"/>
-                    <Button Content="Сохранить как" HorizontalAlignment="Right" Margin="0,0,88,10" VerticalAlignment="Bottom" Width="69" Click="Button_Click_5" FontSize="9" Height="20"/>
-                    <ComboBox x:Name="VotingSelect" HorizontalAlignment="Left" Margin="10,0,0,6" VerticalAlignment="Bottom" Width="120" Height="24" SelectedIndex="0" SelectionChanged="VotingSelect_SelectionChanged">
+                    <Button Content="Запустить" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="63" Click="Button_Click_2" Grid.Column="1" Height="20"/>
+                    <Button Content="Остановить" HorizontalAlignment="Right" Margin="0,0,78,10" VerticalAlignment="Bottom" Width="73" Click="Button_Click_3" Height="20" Grid.Column="1"/>
+                    <Button Content="Добавить" Margin="10,0,0,35" VerticalAlignment="Bottom" Click="Button_Click_1" HorizontalAlignment="Left" Width="80" Height="20"/>
+                    <Button Content="Удалить" Margin="95,0,0,35" VerticalAlignment="Bottom" Click="Button_Click_4" HorizontalAlignment="Left" Width="65" Height="20"/>
+                    <Button Content="Сохранить как" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" Click="Button_Click_5" Height="20" Width="120"/>
+                    <ComboBox x:Name="VotingSelect" HorizontalAlignment="Right" Margin="0,0,10,6" VerticalAlignment="Bottom" Width="120" Height="24" SelectedIndex="0" SelectionChanged="VotingSelect_SelectionChanged">
                         <System:String>Текущий</System:String>
                     </ComboBox>
-                    <TextBox x:Name="MinutesBox" HorizontalAlignment="Right" Height="20" Margin="0,0,78,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38"/>
-                    <Label Content="Минут: " HorizontalAlignment="Right" Margin="0,0,116,35" VerticalAlignment="Bottom" Padding="0"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Голоса">
-                <Grid Background="#FFE5E5E5">
-                    <ListView x:Name="UserList" Margin="1,1,0,0">
+                    <TextBox x:Name="MinutesBox" HorizontalAlignment="Right" Height="20" Margin="0,0,10,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38" Grid.Column="1"/>
+                    <Label Content="Закончить через(минуты):" HorizontalAlignment="Right" Margin="0,0,48,38" VerticalAlignment="Bottom" Padding="0" Grid.Column="1" Height="16" Width="145"/>
+                    <ListView x:Name="UserList" Margin="0,1,1,60" Grid.Column="1">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="Ник" DisplayMemberBinding="{Binding Nickname}" Width="180" />
@@ -68,27 +69,33 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
+                    <Label Content="Шаблон:" HorizontalAlignment="Right" Margin="0,0,130,11" VerticalAlignment="Bottom" Padding="0" Height="16" Width="50"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="TTS">
+            <TabItem Header="Озвучивание">
                 <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="2"/>
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black"/>
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="0,0,0,92"/>
-                    <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White" IsChecked="True"/>
-                    <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top" IsChecked="True" Checked="TTSpeechOH_Checked"/>
-                    <ComboBox x:Name="Voices" VerticalAlignment="Bottom" Margin="10,0,0,126" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141">
+                    <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White" IsChecked="True" Height="15" Width="105"/>
+                    <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top" IsChecked="True" Checked="TTSpeechOH_Checked" Height="15" Width="130"/>
+                    <ComboBox x:Name="Voices" VerticalAlignment="Bottom" Margin="10,0,0,126" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141" Height="22">
 
                     </ComboBox>
-                    <Label Content="Голос:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,148" Width="57"/>
-                    <CheckBox x:Name="TTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" IsChecked="True" Click="TTSNicks_Click"/>
-                    <TextBox x:Name="CustomRewardID" Height="23" Margin="156,70,10,0" TextWrapping="NoWrap" VerticalAlignment="Top" TextChanged="CustomRewardID_TextChanged"/>
-                    <RadioButton x:Name="CustomReward" Content="Только товар:" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top" Checked="CustomReward_Checked"/>
-                    <RadioButton x:Name="AllChat" Content="Весь чат" HorizontalAlignment="Left" Margin="156,10,0,0" VerticalAlignment="Top" IsChecked="True" Checked="AllChat_Checked"/>
-                    <Slider x:Name="SynthSpeed" Margin="156,0,10,126" VerticalAlignment="Bottom" Minimum="-10" ValueChanged="Slider_ValueChanged"/>
-                    <Label x:Name="SpeedLabel" Content="Скорость (0)" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="156,0,0,145" Width="134"/>
-                    <Button Content="..." HorizontalAlignment="Right" Margin="0,0,10,97" VerticalAlignment="Bottom" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Click="Button_Click_6"/>
-                    <Label x:Name="TTSNotifyLabel" Content="tts.mp3" Margin="127,0,39,97" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="TTSNotifyUse" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="10,0,0,97" VerticalAlignment="Bottom" IsChecked="True" RenderTransformOrigin="0.5,0.5" Click="TTSNotifyUse_Click">
+                    <Label Content="Голос (WIN SAPI5):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,148" Width="105" Height="16"/>
+                    <CheckBox x:Name="TTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" IsChecked="True" Click="TTSNicks_Click" Height="15" Width="114"/>
+                    <TextBox x:Name="CustomRewardID" Height="23" Margin="156,70,7,0" TextWrapping="NoWrap" VerticalAlignment="Top" TextChanged="CustomRewardID_TextChanged"/>
+                    <RadioButton x:Name="CustomReward" Content="Только товар:" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top" Checked="CustomReward_Checked" Height="15" Width="95"/>
+                    <RadioButton x:Name="AllChat" Content="Весь чат" HorizontalAlignment="Left" Margin="156,10,0,0" VerticalAlignment="Top" IsChecked="True" Checked="AllChat_Checked" Height="15" Width="65"/>
+                    <Slider x:Name="SynthSpeed" Margin="156,0,7,126" VerticalAlignment="Bottom" Minimum="-10" ValueChanged="Slider_ValueChanged" Height="18"/>
+                    <Label x:Name="SpeedLabel" Content="Скорость (0) [1x]" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="156,0,0,145" Width="134" Height="16"/>
+                    <Button Content="..." HorizontalAlignment="Right" Margin="0,0,7,97" VerticalAlignment="Bottom" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Click="Button_Click_6"/>
+                    <Label x:Name="TTSNotifyLabel" Content="tts.mp3" Margin="127,0,36,97" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center"/>
+                    <CheckBox x:Name="TTSNotifyUse" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="10,0,0,97" VerticalAlignment="Bottom" IsChecked="True" RenderTransformOrigin="0.5,0.5" Click="TTSNotifyUse_Click" Height="15" Width="112">
                         <CheckBox.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform ScaleY="1" ScaleX="1"/>
@@ -99,67 +106,97 @@
                         </CheckBox.RenderTransform>
                     </CheckBox>
                     <TextBox x:Name="MaxSymbols" HorizontalAlignment="Left" Height="20" Margin="9,0,0,56" TextWrapping="Wrap" Text="480" VerticalAlignment="Bottom" Width="42" TextChanged="TextBox_TextChanged_1"/>
-                    <Label x:Name="SpeedLabel_Copy" Content="Максимум символов" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,76"/>
-                    <RadioButton x:Name="DontTTS" Content="Не озвучивать" HorizontalAlignment="Left" Margin="10,0,0,25" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="DontTTS_Checked"/>
-                    <RadioButton x:Name="SMaxTTS" Content="Максимальная скорость" HorizontalAlignment="Left" Margin="9,0,0,10" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="SMaxTTS_Checked"/>
-                    <TextBox x:Name="HotKey" Height="20" Margin="191,0,10,56" TextWrapping="NoWrap" IsReadOnly="True" VerticalAlignment="Bottom" KeyDown="TextBox_KeyDown" KeyUp="TextBox_KeyUp"/>
-                    <Label x:Name="SpeedLabel_Copy1" Content="Стоп кнопка:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,76"/>
-                    <Label x:Name="SpeedLabel_Copy2" Content="При превышении:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,40"/>
-                    <Button x:Name="RewardTrap" Content="Сканировать товар" Margin="156,93,10,0" VerticalAlignment="Top" Click="RewardTrap_Click"/>
-                    <TextBlock x:Name="RewardName" Margin="156,113,10,169" TextWrapping="Wrap" Text="Определено пользователем" FontSize="10"/>
-                    <TextBox x:Name="BadWords" HorizontalAlignment="Left" Height="20" Margin="9,0,0,205" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="141" TextChanged="BadWords_TextChanged"/>
-                    <Label Content="Фильр(через пробел):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,225" Width="141"/>
-                    <TextBox x:Name="Censor" HorizontalAlignment="Left" Height="20" Margin="10,0,0,169" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="141" Text="." TextChanged="Censor_TextChanged"/>
-                    <Label Content="Заменить на:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,189" Width="120"/>
-                    <CheckBox x:Name="Filtred" Content="Фильровать слова" HorizontalAlignment="Left" Margin="10,0,0,242" VerticalAlignment="Bottom" Click="Filtred_Click"/>
-                    <Label x:Name="VolumeLabel" Content="Громкость" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,28" Width="115"/>
-                    <Slider x:Name="Volume" Margin="191,0,10,10" VerticalAlignment="Bottom" ValueChanged="Volume_ValueChanged" Maximum="100" Value="100"/>
-                    <CheckBox x:Name="UseYA" Content="Через TrueTTS" HorizontalAlignment="Left" Margin="10,50,0,0" Click="UseYA_Click" VerticalAlignment="Top"/>
-                    <TextBlock x:Name="RewardName_Copy" Margin="9,65,170,0" TextWrapping="Wrap" Text="Сильно замедляет обработку" FontSize="10" VerticalAlignment="Top"/>
+                    <Label x:Name="SpeedLabel_Copy" Content="Максимум символов" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,76" Height="16" Width="115"/>
+                    <RadioButton x:Name="DontTTS" Content="Не озвучивать" HorizontalAlignment="Left" Margin="10,0,0,25" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="DontTTS_Checked" Height="15" Width="99"/>
+                    <RadioButton x:Name="SMaxTTS" Content="Максимальная скорость" HorizontalAlignment="Left" Margin="9,0,0,10" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="SMaxTTS_Checked" Height="15" Width="153"/>
+                    <TextBox x:Name="HotKey" Height="20" Margin="191,0,7,56" TextWrapping="NoWrap" IsReadOnly="True" VerticalAlignment="Bottom" KeyDown="TextBox_KeyDown" KeyUp="TextBox_KeyUp"/>
+                    <Label x:Name="SpeedLabel_Copy1" Content="Стоп кнопка:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,76" Height="16" Width="71"/>
+                    <Label x:Name="SpeedLabel_Copy2" Content="При превышении:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,40" Height="16" Width="100"/>
+                    <Button x:Name="RewardTrap" Content="Сканировать товар" Margin="156,93,7,0" VerticalAlignment="Top" Click="RewardTrap_Click" Height="20"/>
+                    <TextBlock x:Name="RewardName" Margin="156,113,7,169" TextWrapping="Wrap" Text="Определено пользователем" FontSize="10"/>
+                    <TextBox x:Name="BadWords" Height="63" Margin="10,50,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TextChanged="BadWords_TextChanged" Grid.Column="1"/>
+                    <Label Content="Доп фильр(через пробел):" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,34,0,0" Width="150" Height="16" Grid.Column="1"/>
+                    <TextBox x:Name="Censor" Height="20" Margin="186,25,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="." TextChanged="Censor_TextChanged" Grid.Column="1"/>
+                    <Label Content="Заменить на:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="186,9,0,0" Width="120" Height="16" Grid.Column="1"/>
+                    <CheckBox x:Name="Filtred" Content="Фильровать слова (600+)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="Filtred_Click" Height="15" Width="171" Grid.Column="1"/>
+                    <Label x:Name="VolumeLabel" Content="Громкость" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,28" Width="115" Height="16"/>
+                    <Slider x:Name="Volume" Margin="191,0,7,10" VerticalAlignment="Bottom" ValueChanged="Volume_ValueChanged" Maximum="100" Value="100" Height="18"/>
+                    <CheckBox x:Name="UseYA" Content="Через TrueTTS" HorizontalAlignment="Left" Margin="10,50,0,0" Click="UseYA_Click" VerticalAlignment="Top" Height="15" Width="98"/>
+                    <TextBlock x:Name="RewardName_Copy" Margin="9,65,167,0" TextWrapping="Wrap" Text="Сильно замедляет обработку" FontSize="10" VerticalAlignment="Top" Height="13"/>
+                    <ComboBox x:Name="Voices_TTTS" VerticalAlignment="Bottom" Margin="10,0,0,169" HorizontalAlignment="Left" Width="141" Height="22" SelectionChanged="Voices_TTTS_SelectionChanged">
+                        <ComboBoxItem Content="Алена"/>
+                        <ComboBoxItem Content="Филипп"/>
+                        <ComboBoxItem Content="Элис"/>
+                        <ComboBoxItem Content="Джейн"/>
+                        <ComboBoxItem Content="Оксана"/>
+                        <ComboBoxItem Content="Омаж"/>
+                        <ComboBoxItem Content="Захар"/>
+                        <ComboBoxItem Content="Ермил"/>
+                    </ComboBox>
+                    <Label Content="Голос (TrueTTS):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,191" Width="105" Height="16"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Товары">
+            <TabItem Header="Награды">
                 <Grid  Background="#FFE5E5E5">
-                    <ListBox x:Name="EvList" HorizontalAlignment="Left" Margin="10,10,0,35" Width="141" SelectionChanged="EvList_SelectionChanged"/>
-                    <Button Content="Добавить" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="76" Click="Button_Click_7"/>
-                    <TextBox x:Name="CustomEventRewardID" Height="23" Margin="156,41,10,0" TextWrapping="NoWrap" VerticalAlignment="Top" TextChanged="CustomEventRewardID_TextChanged" IsEnabled="False"/>
-                    <Button x:Name="EventRewardTrap" Content="Сканировать товар" Margin="156,64,10,0" VerticalAlignment="Top" Click="EventRewardTrap_Click"/>
-                    <TextBlock x:Name="EventRewardName" Margin="156,84,10,195" TextWrapping="Wrap" Text="Определено пользователем" Height="48" FontSize="10"/>
-                    <TabControl x:Name="RewTypeCtrl" Margin="156,137,10,10">
-                        <TabItem Header="ConsoleAndKeyboardEvent" Height="0" Width="0" >
-                            <Grid Background="#FFE5E5E5">
-                                <Label x:Name="RewEvLabel" Content="Алгоритм выполнения" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="2,2,0,0"/>
-                                <TextBox x:Name="Script" Margin="0,18,0,0" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="Script_TextChanged" IsEnabled="False"/>
-                            </Grid>
-                        </TabItem>
-                    </TabControl>
-                    <TextBox x:Name="EvName" Height="23" Margin="156,13,10,0" TextWrapping="Wrap" Text="Новое событие" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_2" IsEnabled="False"/>
-                    <Button Content="Удалить" HorizontalAlignment="Left" Margin="91,0,0,10" VerticalAlignment="Bottom" Width="60" Click="Button_Click_8"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="190"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="240"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="3"/>
+                    <ListBox x:Name="EvList" Margin="10,10,10,35" SelectionChanged="EvList_SelectionChanged"/>
+                    <Button Content="Добавить" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="86" Click="Button_Click_7" Height="20"/>
+                    <TextBox x:Name="CustomEventRewardID" Height="23" Margin="3,41,1,0" TextWrapping="NoWrap" VerticalAlignment="Top" TextChanged="CustomEventRewardID_TextChanged" IsEnabled="False" Grid.Column="1"/>
+                    <Button x:Name="EventRewardTrap" Content="Сканировать товар" Margin="3,64,1,0" VerticalAlignment="Top" Click="EventRewardTrap_Click" Grid.Column="1" Height="20"/>
+                    <TextBlock x:Name="EventRewardName" Margin="4,84,0,288" TextWrapping="Wrap" Text="Определено пользователем" FontSize="10" Grid.Column="1"/>
+                    <TextBox x:Name="EvName" Height="23" Margin="3,13,1,0" TextWrapping="Wrap" Text="Новое событие" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_2" IsEnabled="False" Grid.Column="1"/>
+                    <Button Content="Удалить" HorizontalAlignment="Left" Margin="101,0,0,10" VerticalAlignment="Bottom" Width="69" Click="Button_Click_8" Height="20"/>
+                    <Button Content="Выдать VIP" Grid.Column="2" HorizontalAlignment="Left" Margin="10,152,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /vip %NICK%"/>
+                    <Label Content="Примеры" Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Padding="0"/>
+                    <TextBlock x:Name="Thanks_Copy" HorizontalAlignment="Left" Margin="4,0,0,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="159" Grid.Column="1"><Hyperlink NavigateUri="https://github.com/ScriptedEngineer/TwitchBot/wiki/6.Как-писать-алгоритмы-для-автоматизации-наград" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Гайд по алгоритму"/></Hyperlink></TextBlock>
+                    <Button Content="Озвучить покупку награды" Grid.Column="2" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Speech %NICK% получает награду %TITLE%"/>
+                    <Label Content="Разрешите модерирвоание" Grid.Column="2" HorizontalAlignment="Left" Margin="10,131,0,0" VerticalAlignment="Top" Padding="0"/>
+                    <Button Content="Чат для смайлов" Grid.Column="2" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /emoteonly&#10;Wait 120000&#10;Send /emoteonlyoff"/>
+                    <Button Content="Выдать право &quot;coin&quot; до конца стрима" Grid.Column="2" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="TmpRights Add %NICK% coin"/>
+                    <Button Content="Выдать право &quot;coin&quot; навсегда" Grid.Column="2" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Rights Add %NICK% coin"/>
+                    <Button Content="Написать в чат" Grid.Column="2" HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send %NICK% получает награду %TITLE%"/>
+                    <Button Content="Временно отстранить" Grid.Column="2" HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /timeout %NICK% 30"/>
+                    <Label x:Name="RewEvLabel" Content="Алгоритм выполнения" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="4,142,0,0" Grid.Column="1"/>
+                    <TextBox x:Name="Script" Margin="2,158,1,40" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="Script_TextChanged" IsEnabled="False" Grid.Column="1"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Пожертвования" Width="0">
+                <Grid Background="#FFE5E5E5">
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="2"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Настройки">
                 <Grid  Background="#FFE5E5E5">
-                    <TextBox x:Name="HotKey2" Height="20" Margin="10,0,0,10" TextWrapping="NoWrap" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="81" TextChanged="HotKey2_Copy_TextChanged"/>
-                    <CheckBox x:Name="HotkeySetting" Content="Настройка Hotkey'ев(End)" HorizontalAlignment="Left" Margin="10,0,0,35" VerticalAlignment="Bottom" Click="HotkeySetting_Click"/>
-
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="168*"/>
+                        <ColumnDefinition Width="145*"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="2"/>
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black"/>
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Top" Height="170" Margin="0,51,0,0"/>
-                    <CheckBox x:Name="MinimizeToTray" Content="Сворачивать в трей" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="CheckBox_Click" IsChecked="True"/>
+                    <CheckBox x:Name="MinimizeToTray" Content="Сворачивать в трей" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="CheckBox_Click" IsChecked="True" Height="15" Width="129"/>
                     <TextBox x:Name="OBS_port" HorizontalAlignment="Left" Height="23" Margin="131,85,0,0" TextWrapping="Wrap" Text="4444" VerticalAlignment="Top" Width="120" TextChanged="OBS_port_TextChanged"/>
-                    <CheckBox x:Name="OBSRemEn" Content="Включить управление обс (OBS WebSocket)" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" IsChecked="True" Click="OBSRemEn_Click"/>
-                    <Label Content="Порт" HorizontalAlignment="Left" Margin="88,81,0,0" VerticalAlignment="Top"/>
-                    <Label Content="Пароль(если стоит)" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="OBSRemEn" Content="Включить управление обс (OBS WebSocket)" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" IsChecked="True" Click="OBSRemEn_Click" Height="15" Width="260"/>
+                    <Label Content="Порт" HorizontalAlignment="Left" Margin="88,81,0,0" VerticalAlignment="Top" Height="26" Width="38"/>
+                    <Label Content="Пароль(если стоит)" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" Height="26" Width="116"/>
                     <PasswordBox x:Name="OBSRmPass" HorizontalAlignment="Left" Margin="131,113,0,0" VerticalAlignment="Top" Width="120" Height="21" PasswordChanged="OBSRmPass_PasswordChanged" LostFocus="OBSRmPass_LostFocus"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="11,139,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="296"><Run Text="Для применения настроек OBS WebSocket необходим перезапуск приложения"/><Run Text="."/><Run Text=" "/><Run/><LineBreak/><Run Text="Данная "/><Run Text="функция работ"/><Run Text="ает "/><Run Text="только в "/><Run Text="OBS Studio "/><Run Text="с установленным плагином "/><Run Text="OBS WebSocket."/></TextBlock>
-                    <Button x:Name="GetModBtt" Content="Разрешить модерирование" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="185" Click="Button_Click_9"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="11,139,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="296" Height="64"><Run Text="Для применения настроек OBS WebSocket необходим перезапуск приложения"/><Run Text="."/><Run Text=" "/><Run/><LineBreak/><Run Text="Данная "/><Run Text="функция работ"/><Run Text="ает "/><Run Text="только в "/><Run Text="OBS Studio "/><Run Text="с установленным плагином "/><Run Text="OBS WebSocket."/></TextBlock>
+                    <Button x:Name="GetModBtt" Content="Разрешить модерирование" HorizontalAlignment="Right" Margin="0,230,10,0" VerticalAlignment="Top" Width="185" Click="Button_Click_9" Height="20"/>
+                    <TextBlock x:Name="Status" Grid.Column="1" Margin="10" TextWrapping="Wrap" Text="Ошибка загрузки данных"/>
 
                 </Grid>
             </TabItem>
         </TabControl>
         <Label x:Name="VersionLabel" Content="v0.0.0.0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,0" Padding="0"/>
-        <Label x:Name="OBSRstatus" Content="OBS Отключен" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,0" Padding="0"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,5,0,0" TextWrapping="Wrap" VerticalAlignment="Top">
-        Спасибо за использование! <Hyperlink NavigateUri="https://www.donationalerts.com/r/scriptedengineer" RequestNavigate="Hyperlink_RequestNavigate">Поддержать разработчика</Hyperlink>
+        <Label x:Name="OBSRstatus" Content="OBS Отключен" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="250,0,0,0" Padding="0" Visibility="Collapsed"/>
+        <TextBlock x:Name="Thanks" HorizontalAlignment="Left" Margin="10,0,0,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="159">
+        Спасибо за использование!
+       <Hyperlink NavigateUri="https://www.donationalerts.com/r/scriptedengineer" RequestNavigate="Hyperlink_RequestNavigate">Поддержать разработчика</Hyperlink>
         </TextBlock>
 
     </Grid>

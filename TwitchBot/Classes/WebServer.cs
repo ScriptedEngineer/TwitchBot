@@ -110,7 +110,7 @@ namespace TwitchBot
                         }, _listener.GetContext());
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // ignored
                 }

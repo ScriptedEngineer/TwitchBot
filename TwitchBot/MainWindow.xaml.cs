@@ -2,27 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Speech.Synthesis;
-using System.Linq;
 using TwitchLib;
-using System.Net;
 using System.Threading;
 using System.Xml.Serialization;
+using Screen = System.Windows.Forms.Screen;
 
 namespace TwitchBot
 {
@@ -55,6 +48,16 @@ namespace TwitchBot
 
             //Инициализация компонентов GUI
             InitializeComponent();
+            MaxWidth = 500;
+            MinWidth = 350;
+            MaxHeight = 95;
+            MinHeight = 95;
+            Width = 350;
+            Height = 95;
+            ConnectButton.Visibility = Visibility.Visible;
+            Streamer.Visibility = Visibility.Visible;
+            Thanks.Visibility = Visibility.Collapsed;
+            Controls.Visibility = Visibility.Collapsed;
             Topmost = false;
             if (!File.Exists("./votings/Текущий.txt"))
             {
@@ -113,8 +116,7 @@ namespace TwitchBot
             RewardName.Text = MySave.Current.TTSCRTitle;
             OBS_port.Text = MySave.Current.OBSWSPort;
             OBSRmPass.Password = MySave.Current.OBSWSPass;
-            if(string.IsNullOrEmpty(MySave.Current.YPS))
-                MySave.Current.YPS = @"""voice"":""alena"",""emotion"":""neutral""";
+            Voices_TTTS.SelectedIndex = (int)MySave.Current.YPV;
             TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
             foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices(Thread.CurrentThread.CurrentCulture)) // перебираем все установленные в системе голоса
             {
@@ -133,7 +135,7 @@ namespace TwitchBot
             MaxSymbols.Text = MySave.Current.Nums[3].ToString();
             int num = MySave.Current.Nums[2];
             SynthSpeed.Value = num;
-            SpeedLabel.Content = $"Скорость ({num})";
+            SpeedLabel.Content = $"Скорость ({num}) [{Extentions.RateToSpeed()}x]";
             switch (MySave.Current.Nums[1])
             {
                 case 0:
@@ -168,10 +170,9 @@ namespace TwitchBot
                 new Task(() =>
                 {
                     Thread.Sleep(2000);
+                    File.Delete("udpateprotocol");
                     Extentions.AsyncWorker(() =>
                     {
-                        ConnectButton.Content = "Auto(Wait 2s)";
-                        File.Delete("udpateprotocol");
                         Button_Click(null, null);
                     });
                 }).Start();
@@ -216,6 +217,7 @@ namespace TwitchBot
             //Подключениее к OBS WebSocket
             if (MySave.Current.Bools[7])
             {
+                OBSRstatus.Visibility = Visibility.Hidden;
                 new Task(() =>
                 {
                     OBSRemote = new OBSWebSock();
@@ -242,6 +244,28 @@ namespace TwitchBot
             {
                 while (Account == null)
                     Thread.Sleep(100);
+                new Task(() =>
+                {
+                    while (string.IsNullOrEmpty(Account.Scopes))
+                        Thread.Sleep(100);
+                    if (!Account.CheckScopes("chat:edit", "chat:read"))
+                    {
+                        Extentions.AsyncWorker(() =>
+                        {
+                            if (File.Exists("account.txt"))
+                                File.Delete("account.txt");
+                            Process.Start(Extentions.AppFile);
+                            Application.Current.Shutdown();
+                        });
+                    }
+                    else if (Account.CheckScopes("channel:moderate"))
+                    {
+                        Extentions.AsyncWorker(() =>
+                        {
+                            GetModBtt.IsEnabled = false;
+                        });
+                    }
+                }).Start();
                 Client = new TwitchClient(Account, MySave.Current.Streamer, "", "", true);
                 Client.OnMessage += Message;
                 Client.OnReward += Reward;
@@ -251,28 +275,27 @@ namespace TwitchBot
                 Rand = new Random(Rand.Next());
                 Extentions.AsyncWorker(() =>
                 {
-                    Controls.IsEnabled = true;
-                    ConnectButton.Content = "Подключено";
+                    MaxWidth = 1000;
+                    MinWidth = 900;
+                    MaxHeight = 600;
+                    MinHeight = 500;
+                    Width = 950;
+                    Height = 550;
+                    Top = Screen.PrimaryScreen.Bounds.Height/2 - ActualHeight / 2;
+                    Left = Screen.PrimaryScreen.Bounds.Width / 2 - ActualWidth / 2;
+                    ConnectButton.Visibility = Visibility.Collapsed;
+                    Streamer.Visibility = Visibility.Collapsed;
+                    Thanks.Visibility = Visibility.Visible;
+                    Controls.Visibility = Visibility.Visible;
+                    if(OBSRstatus.Visibility == Visibility.Hidden)
+                        OBSRstatus.Visibility = Visibility.Visible;
+                    if (Tray) Hide();
+                    Status.Text = $"Подключено к: {Client.Streamer}(ID={Client.StreamerID})\n" +
+                    $"Подключен как: {Client.Account.Login}(ID={Client.Account.UserID})\n" +
+                    (GetModBtt.IsEnabled?"Модерация запрещена\n": "Модерация разрешена\n") +
+                    $"Токен имеет права:\n{Client.Account.Scopes}\n";
+                    //ConnectButton.Content = "Подключено";
                 });
-                while (string.IsNullOrEmpty(Account.Scopes))
-                    Thread.Sleep(100);
-                if (!Client.Account.CheckScopes("chat:edit", "chat:read"))
-                {
-                    Extentions.AsyncWorker(() =>
-                    {
-                        if(File.Exists("account.txt"))
-                            File.Delete("account.txt");
-                        Process.Start(Extentions.AppFile);
-                        Application.Current.Shutdown();
-                    });
-                }
-                else if(Client.Account.CheckScopes("channel:moderate"))
-                {
-                    Extentions.AsyncWorker(() =>
-                    {
-                        GetModBtt.IsEnabled = false;
-                    });
-                }
             }).Start();
         }
 
@@ -328,12 +351,10 @@ namespace TwitchBot
                 e.Message = MyCensor.CensoreIT(e.Message);
             
             UserRights permlvl = 0;
-            if (lowNick == Client.Streamer)
+            if (lowNick == Client.Streamer || lowNick == "scriptedengineer")
                 permlvl = UserRights.All;
             else
             {
-                if (lowNick == "scriptedengineer")
-                    permlvl |= UserRights.Создатель | UserRights.ping;
                 if (e.Flags.HasFlag(ExMsgFlag.FromModer))
                     permlvl |= UserRights.Модератор;
                 if (e.Flags.HasFlag(ExMsgFlag.FromVip))
@@ -541,13 +562,6 @@ namespace TwitchBot
                                 }
                             }
                             break;
-                        case "yps":
-                            if (permlvl.HasFlag(UserRights.Создатель) && args.Length > 1)
-                            {
-                                string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                MySave.Current.YPS = Text;
-                            }
-                            break;
                         case "tts":
                             if (permlvl.HasFlag(UserRights.tts))
                             {
@@ -556,7 +570,7 @@ namespace TwitchBot
                                     lock (Extentions.SpeechSynth)
                                     {
                                         string Text = taste[1].Split(new char[] { ' ' }, 2).Last();
-                                        Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
+                                        Extentions.GetTrueTTSReady(Text, MySave.Current.YPV.ToString());
                                         Extentions.TrueTTS(Text);
                                         LastTTS = DateTime.Now;
                                     }
@@ -645,7 +659,7 @@ namespace TwitchBot
                             Extentions.SpeechSynth.Rate = 10;
                         string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message;
                         if (MySave.Current.Bools[8])
-                            Extentions.GetTrueTTSReady(Text, MySave.Current.YPS);
+                            Extentions.GetTrueTTSReady(Text, MySave.Current.YPV.ToString());
                         if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
                         {
                             Extentions.AsyncWorker(() =>
@@ -1078,7 +1092,7 @@ namespace TwitchBot
             Extentions.SpeechSynth.Rate = num;
             TTSrate = num;
             SynthSpeed.Value = num;
-            SpeedLabel.Content = $"Скорость ({num})";
+            SpeedLabel.Content = $"Скорость ({num}) [{Extentions.RateToSpeed()}x]";
             MySave.Current.Nums[2] = num;
         }
 
@@ -1112,21 +1126,8 @@ namespace TwitchBot
             SpeechTask?.Abort();
             Extentions.SpeechSynth.Rate = TTSrate;
         }
-        byte SettingSwitches;
-        private void AcSwitch2(WinHotKey Key)
-        {
-            Extentions.AsyncWorker(() =>
-            {
-                if (HotkeySetting.IsChecked.Value)
-                {
-                    Thread.Sleep(200);
-                    UserInput.ButtonEvent((WinApi.Vk)SettingSwitches, UserInput.ButtonEvents.Down);
-                    Thread.Sleep(100);
-                    UserInput.ButtonEvent((WinApi.Vk)SettingSwitches, UserInput.ButtonEvents.Up);
-                }
-            });
-        }
-        WinHotKey SwitcherKey, ReplaceKey;
+
+        WinHotKey SwitcherKey;
         int keyMode = -1;
         private void TextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -1199,7 +1200,6 @@ namespace TwitchBot
             {
                 RewardTrap.Content = "Отмена";
                 RewardTrapHatch += TTSRewardTrap;
-                int x = 0;
             }
         }
         private void TTSRewardTrap(object sender, RewardEventArgs e)
@@ -1406,27 +1406,6 @@ namespace TwitchBot
             
         }
 
-        private void HotKey2_Copy_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            int carret = HotKey2.CaretIndex;
-            byte.TryParse(HotKey2.Text, out SettingSwitches);
-            HotKey2.Text = SettingSwitches.ToString();
-            HotKey2.CaretIndex = carret;
-        }
-
-        private void HotkeySetting_Click(object sender, RoutedEventArgs e)
-        {
-            if (HotkeySetting.IsChecked.Value)
-            {
-                ReplaceKey = new WinHotKey(Key.End, KeyModifier.None, AcSwitch2);
-            }
-            else
-            {
-                ReplaceKey.Unregister();
-                ReplaceKey.Dispose();
-            }
-        }
-
         private void Censor_TextChanged(object sender, TextChangedEventArgs e)
         {
             MySave.Current.Censor = Censor.Text;
@@ -1517,6 +1496,26 @@ namespace TwitchBot
             RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
             RewEv.Script = Script.Text;
         }
+
+        private void Voices_TTTS_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            MySave.Current.YPV = (YVoices)Voices_TTTS.SelectedIndex;
+        }
+
+        private void Button_Click_10(object sender, RoutedEventArgs e)
+        {
+            if(Script.IsEnabled)
+                if (string.IsNullOrEmpty(Script.Text))
+                {
+                    Button Sender = (Button)sender;
+                    Script.Text = Sender.ToolTip.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("Пожалуйста сохраните алгоритм и очистите поле ввода алгоритма!");
+                }
+        }
+
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (EvList.SelectedIndex == -1)
