@@ -114,20 +114,22 @@ namespace TwitchBot
             }
             catch (WebException ex)
             {
-                Console.WriteLine(Web.GetResponse(ex.Response));
+                //Console.WriteLine(Web.GetResponse(ex.Response));
                 try
                 {
                     Match MTH = Regex.Match(ex.Response.Headers["Set-Cookie"], @"XSRF-TOKEN=([^;]*);");
                     if (MTH.Success)
                     {
                         MySave.Current.YPT = HttpUtility.UrlDecode(MTH.Groups[1].Value);
+                        GetTrueTTSReady(Text, Voice);
                     }
+                    else
+                        TrueTTSReady = false;
                 }
                 catch (Exception)
                 {
-
+                    TrueTTSReady = false;
                 }
-                TrueTTSReady = false;
             }
         }
         static bool TrueTTSReady = false;

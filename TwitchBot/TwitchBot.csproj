@@ -94,6 +94,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\DonationAlerts.cs" />
     <Compile Include="Classes\Extentions.cs" />
     <Compile Include="Classes\ListElement.cs" />
     <Compile Include="Classes\MyCensor.cs" />

@@ -13,19 +13,21 @@ namespace TwitchBot
 {
     public class MySave
     {
-        const int BL = 9;
+        const int BL = 13;
         const int NL = 6;
 
         public static MySave Current = new MySave();
         public string Streamer { get; set; }
         public string TTSCRID { get; set; }
         public string TTSNTFL { get; set; }
+        public string DTTSNTFL { get; set; }
         public string TTSCRTitle { get; set; }
         public string BadWords { get; set; }
         public string Censor { get; set; }
         public string OBSWSPort { get; set; }
         public string OBSWSPass { get; set; }
         public YVoices YPV { get; set; }
+        public YVoices DYPV { get; set; }
         public string YPT { get; set; }
         private static Random Rand = new Random();
         public bool[] Bools { get; set; }

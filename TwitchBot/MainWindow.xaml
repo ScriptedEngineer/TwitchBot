@@ -79,6 +79,8 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="2"/>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="318,0,0,92" Grid.ColumnSpan="2"/>
+
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black"/>
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="0,0,0,92"/>
                     <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White" IsChecked="True" Height="15" Width="105"/>
@@ -134,6 +136,42 @@
                         <ComboBoxItem Content="Ермил"/>
                     </ComboBox>
                     <Label Content="Голос (TrueTTS):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,191" Width="105" Height="16"/>
+                    <Button x:Name="DAConnect" Content="Подключить DonationAlerts" Grid.Column="1" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="186" Click="DAConnect_Click"/>
+                    <CheckBox x:Name="DATTSEnable" Content="Озвучивать донаты" HorizontalAlignment="Left" Margin="10,0,0,126" VerticalAlignment="Bottom" Background="White" Height="15" Width="147" Grid.Column="1" Click="DATTSEnable_Click" RenderTransformOrigin="0.5,0.5">
+                        <CheckBox.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="0.242"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </CheckBox.RenderTransform>
+                    </CheckBox>
+                    <Button Content="..." HorizontalAlignment="Right" Margin="0,0,10,97" VerticalAlignment="Bottom" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Grid.Column="1" Click="Button_Click_11"/>
+                    <Label x:Name="TTSNotifyLabel_Copy" Content="tts.mp3" Margin="120,0,39,97" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center" Grid.Column="1"/>
+                    <CheckBox x:Name="DANotify" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="10,0,0,97" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5" Height="15" Width="112" Grid.Column="1" Click="DANotify_Click">
+                        <CheckBox.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleY="1" ScaleX="1"/>
+                                <SkewTransform AngleY="0" AngleX="0"/>
+                                <RotateTransform Angle="0"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </CheckBox.RenderTransform>
+                    </CheckBox>
+                    <CheckBox x:Name="DTTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,0,0,72" VerticalAlignment="Bottom" Background="White" Height="15" Width="150" Grid.Column="1" Click="DTTSNicks_Click"/>
+                    <CheckBox x:Name="DTTSAmount" Content="Озвучивать сумму" HorizontalAlignment="Left" Margin="10,0,0,52" VerticalAlignment="Bottom" Background="White" Height="15" Width="139" Grid.Column="1" Click="DTTSAmount_Click"/>
+                    <ComboBox x:Name="Voices_TTTS_Copy" VerticalAlignment="Bottom" Margin="0,0,10,49" HorizontalAlignment="Right" Width="141" Height="22" Grid.Column="1" SelectionChanged="Voices_TTTS_Copy_SelectionChanged">
+                        <ComboBoxItem Content="Алена"/>
+                        <ComboBoxItem Content="Филипп"/>
+                        <ComboBoxItem Content="Элис"/>
+                        <ComboBoxItem Content="Джейн"/>
+                        <ComboBoxItem Content="Оксана"/>
+                        <ComboBoxItem Content="Омаж"/>
+                        <ComboBoxItem Content="Захар"/>
+                        <ComboBoxItem Content="Ермил"/>
+                    </ComboBox>
+                    <Label Content="Голос:" HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="0" Margin="0,0,46,71" Width="105" Height="16" Grid.Column="1"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Награды">

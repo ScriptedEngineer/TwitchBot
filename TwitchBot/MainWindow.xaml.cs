@@ -16,6 +16,7 @@ using TwitchLib;
 using System.Threading;
 using System.Xml.Serialization;
 using Screen = System.Windows.Forms.Screen;
+using TwitchBot.Classes;
 
 namespace TwitchBot
 {
@@ -30,6 +31,7 @@ namespace TwitchBot
         bool Tray = false;
         Thread SpeechTask;
         OBSWebSock OBSRemote;
+        DonationAlerts DonAlert;
         static public MainWindow CurrentW;
         public MainWindow()
         {
@@ -44,15 +46,15 @@ namespace TwitchBot
                 WindowState = WindowState.Normal;
                 Tray = false;
             };
-            
+
 
             //Инициализация компонентов GUI
             InitializeComponent();
-            MaxWidth = 500;
+            MaxWidth = 550;
             MinWidth = 350;
             MaxHeight = 95;
             MinHeight = 95;
-            Width = 350;
+            Width = 400;
             Height = 95;
             ConnectButton.Visibility = Visibility.Visible;
             Streamer.Visibility = Visibility.Visible;
@@ -109,6 +111,10 @@ namespace TwitchBot
             Filtred.IsChecked = MySave.Current.Bools[6];
             OBSRemEn.IsChecked = MySave.Current.Bools[7];
             UseYA.IsChecked = MySave.Current.Bools[8];
+            DATTSEnable.IsChecked = MySave.Current.Bools[9];
+            DANotify.IsChecked = MySave.Current.Bools[10];
+            DTTSNicks.IsChecked = MySave.Current.Bools[11];
+            DTTSAmount.IsChecked = MySave.Current.Bools[12];
             BadWords.Text = MySave.Current.BadWords;
             Censor.Text = MySave.Current.Censor;
             Streamer.Text = MySave.Current.Streamer;
@@ -117,7 +123,9 @@ namespace TwitchBot
             OBS_port.Text = MySave.Current.OBSWSPort;
             OBSRmPass.Password = MySave.Current.OBSWSPass;
             Voices_TTTS.SelectedIndex = (int)MySave.Current.YPV;
+            Voices_TTTS_Copy.SelectedIndex = (int)MySave.Current.DYPV;
             TTSNotifyLabel.Content = System.IO.Path.GetFileName(MySave.Current.TTSNTFL);
+            TTSNotifyLabel_Copy.Content = System.IO.Path.GetFileName(MySave.Current.DTTSNTFL);
             foreach (var currentVoice in Extentions.SpeechSynth.GetInstalledVoices(Thread.CurrentThread.CurrentCulture)) // перебираем все установленные в системе голоса
             {
                 Voices.Items.Add(currentVoice.VoiceInfo.Name);
@@ -194,6 +202,21 @@ namespace TwitchBot
             string[] AccountFields = File.ReadAllLines("account.txt");
             Account = new TwitchAccount(AccountFields[0], AccountFields[1]);
 
+            if (File.Exists("da.txt"))
+            {
+                try
+                {
+                    string[] dafi = File.ReadAllText("da.txt").Split('\n');
+                    DonAlert = new DonationAlerts(dafi[0], dafi[1]);
+                    DonAlert.OnDonation += Donation;
+                    DAConnect.IsEnabled = false;
+                }
+                catch
+                {
+
+                }
+            }
+
             //Параметры командной строки
             string[] argsv = Environment.GetCommandLineArgs();
             if (argsv.Length > 1)
@@ -223,6 +246,15 @@ namespace TwitchBot
                     OBSRemote = new OBSWebSock();
                 }).Start();
             }
+
+            //Подготовка TrueTTS
+            lock (Extentions.SpeechSynth)
+            {
+                string Text = "А";
+                Extentions.GetTrueTTSReady(Text, MySave.Current.YPV.ToString());
+                Extentions.TrueTTS(Text);
+                LastTTS = DateTime.Now;
+            }
         }
         WebSocketSharp.Server.WebSocketServer WebSocketServer;
         WebServer WebServer;
@@ -239,7 +271,11 @@ namespace TwitchBot
             ConnectButton.Content = "Подключение...";
             ConnectButton.IsEnabled = false;
             Streamer.IsEnabled = false;
-            MySave.Current.Streamer = Streamer.Text;
+            string[] lfstregme = Streamer.Text.Split('/');
+            string strmer = lfstregme.LastOrDefault();
+            if(string.IsNullOrEmpty(strmer))
+                strmer = lfstregme[lfstregme.Length-2];
+            MySave.Current.Streamer = strmer;
             new Task(() =>
             {
                 while (Account == null)
@@ -301,6 +337,83 @@ namespace TwitchBot
 
         Dictionary<string, string> Queue = new Dictionary<string, string>();
         (string, string) Current;
+        private void Donation(object Sender, DonationEventArgs e)
+        {
+            if(MySave.Current.Bools[9])
+            switch (e.MessageType)
+            {
+                case "text":
+                        new Thread(() =>
+                        {
+                            if (MySave.Current.Bools[6])
+                            {
+                                e.Message = MyCensor.CensoreIT(e.Message);
+                                e.NickName = MyCensor.CensoreIT(e.NickName);
+                            }
+                            lock (Extentions.SpeechSynth)
+                            {
+                                SpeechTask = Thread.CurrentThread;
+                                int.TryParse(e.Amount, out int amnt);
+                                string Text = (MySave.Current.Bools[11] ? $"{e.NickName} задонатил " : "") + (MySave.Current.Bools[12] ? $"{MoneyText(amnt, e.Currency)} со словами " : (MySave.Current.Bools[11] ? $" со словами " : "")) + e.Message;
+                                Extentions.GetTrueTTSReady(Text, MySave.Current.DYPV.ToString());
+                                if (MySave.Current.Bools[10] && File.Exists(MySave.Current.DTTSNTFL))
+                                {
+                                    Extentions.AsyncWorker(() =>
+                                    {
+                                        Extentions.Player.Open(new Uri(MySave.Current.DTTSNTFL, UriKind.Absolute));
+                                        Extentions.Player.Play();
+
+                                    });
+                                    Thread.Sleep(1000);
+                                    Thread.Sleep(MediaDurationMs);
+                                }
+                                Extentions.TrueTTS(Text);
+                                Thread.Sleep(100);
+                                while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
+                                {
+                                    Thread.Sleep(100);
+                                }
+                            }
+                        }).Start();
+                    break;
+                case "sound":
+                    
+                    break;
+            }
+        }
+
+        string MoneyText(int number, string concu)
+        {
+            if (((number % 100) > 10) && ((number % 100) < 20))
+            {
+                switch (concu)
+                {
+                    case "RUB": return number+"рублей";
+                    default: return number+"едениц денег";
+                }
+            }
+            if (number % 10 == 1)
+            {
+                switch (concu)
+                {
+                    case "RUB": return number + "рубль";
+                    default: return number + "еденицу денег";
+                }
+            }
+            if ((number % 10 == 2) || (number % 10 == 3) || (number % 10 == 4))
+            {
+                switch (concu)
+                {
+                    case "RUB": return number + "рубля";
+                    default: return number + "еденицы денег";
+                }
+            }
+            switch (concu)
+            {
+                case "RUB": return number + "рублей";
+                default: return number + "едениц денег";
+            }
+        }
         private void Ban(object Sender, BanEventArgs e)
         {
             switch (e.Type)
@@ -351,10 +464,12 @@ namespace TwitchBot
                 e.Message = MyCensor.CensoreIT(e.Message);
             
             UserRights permlvl = 0;
-            if (lowNick == Client.Streamer || lowNick == "scriptedengineer")
+            if (lowNick == Client.Streamer)
                 permlvl = UserRights.All;
             else
             {
+                if(lowNick == "scriptedengineer")
+                    permlvl |= UserRights.Создатель;
                 if (e.Flags.HasFlag(ExMsgFlag.FromModer))
                     permlvl |= UserRights.Модератор;
                 if (e.Flags.HasFlag(ExMsgFlag.FromVip))
@@ -377,7 +492,7 @@ namespace TwitchBot
                     switch (cmd)
                     {
                         case "ping":
-                            if (permlvl.HasFlag(UserRights.ping))
+                            if (permlvl.HasFlag(UserRights.ping) || permlvl.HasFlag(UserRights.Создатель))
                                 ClientSendMessage(e.NickName + ", pong");
                             break;
                         case "help":
@@ -1514,6 +1629,59 @@ namespace TwitchBot
                 {
                     MessageBox.Show("Пожалуйста сохраните алгоритм и очистите поле ввода алгоритма!");
                 }
+        }
+
+        private void DAConnect_Click(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists("da.txt"))
+                File.Delete("da.txt");
+            Process.Start("https://www.donationalerts.com/oauth/authorize?client_id=865&redirect_uri=http://localhost:8190/da&response_type=code&scope=oauth-donation-subscribe+oauth-user-show");
+            while (!File.Exists("da.txt"))
+            {
+                Thread.Sleep(500);
+            }
+            Thread.Sleep(500);
+            Process.Start(Extentions.AppFile);
+            Application.Current.Shutdown();
+            //"https://www.donationalerts.com/oauth/authorize?client_id=865&redirect_uri=http://localhost:8190/da&response_type=code&scope=oauth-donation-subscribe"
+        }
+
+        private void DATTSEnable_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[9] = DATTSEnable.IsChecked.Value;
+        }
+
+        private void DANotify_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[10] = DANotify.IsChecked.Value;
+        }
+
+        private void DTTSNicks_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[11] = DTTSNicks.IsChecked.Value;
+        }
+
+        private void DTTSAmount_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[12] = DTTSAmount.IsChecked.Value;
+        }
+
+        private void Button_Click_11(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.OpenFileDialog Dial = new System.Windows.Forms.OpenFileDialog();
+            Dial.Filter = "Аудиофайл(*.mp3,*.wav)|*.mp3;*.wav";
+            if (Dial.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string file = Dial.FileName;
+                MySave.Current.DTTSNTFL = file;
+                TTSNotifyLabel_Copy.Content = System.IO.Path.GetFileName(file);
+            }
+            
+        }
+
+        private void Voices_TTTS_Copy_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            MySave.Current.DYPV = (YVoices)Voices_TTTS_Copy.SelectedIndex;
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)
