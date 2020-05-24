@@ -14,7 +14,7 @@ namespace TwitchBot
     public class MySave
     {
         const int BL = 13;
-        const int NL = 6;
+        const int NL = 7;
 
         public static MySave Current = new MySave();
         public string Streamer { get; set; }

@@ -147,6 +147,7 @@ namespace TwitchBot
             Volume.Value = MySave.Current.Nums[4];
             MaxSymbols.Text = MySave.Current.Nums[3].ToString();
             int num = MySave.Current.Nums[2];
+            WaitPlease.Text = MySave.Current.Nums[6].ToString();
             SynthSpeed.Value = num;
             SpeedLabel.Content = $"Скорость ({num}) [{Extentions.RateToSpeed()}x]";
             switch (MySave.Current.Nums[1])
@@ -361,6 +362,10 @@ namespace TwitchBot
                                 int.TryParse(e.Amount, out int amnt);
                                 string Text = (MySave.Current.Bools[11] ? $"{e.NickName} задонатил " : "") + (MySave.Current.Bools[12] ? $"{MoneyText(amnt, e.Currency)} со словами " : (MySave.Current.Bools[11] ? $" со словами " : "")) + e.Message;
                                 Extentions.GetTrueTTSReady(Text, MySave.Current.DYPV.ToString());
+                                if(MySave.Current.Nums[6] > 0)
+                                {
+                                    Thread.Sleep(MySave.Current.Nums[6]*1000);
+                                }
                                 if (MySave.Current.Bools[10] && File.Exists(MySave.Current.DTTSNTFL))
                                 {
                                     Extentions.AsyncWorker(() =>
@@ -529,7 +534,7 @@ namespace TwitchBot
                                     + (permlvl.HasFlag(UserRights.notify) ? " >notify" : "")
                                     + (permlvl.HasFlag(UserRights.coin) ? " >coin" : "")
                                     + (permlvl.HasFlag(UserRights.Создатель) ? " >version >update" : "")
-                                    + (permlvl.HasFlag(UserRights.Модератор) ? " >disable >enable >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : "")
+                                    + (permlvl.HasFlag(UserRights.Модератор) ? " >disable >enable >roullete [Time] [Count] >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : "")
                                     + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]  >tmprights.add [UserName] [Right] >tmprights.del [UserName] [Right] >tts.cooldown [Seconds]" : ""));
                             }
                             break;
@@ -652,6 +657,21 @@ namespace TwitchBot
                             {
                                 ClientSendMessage(e.NickName + ", игнорирование чата отключено!");
                                 IgnoreMessages = false;
+                            }
+                            break;
+                        case "roullete":
+                            if (permlvl.HasFlag(UserRights.Модератор) && args.Length > 2)
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    MinutesBox.Text = args[1];
+                                    WinCount.Text = args[2];
+                                    int Minutes = int.Parse(MinutesBox.Text);
+                                    StartGame(Minutes);
+                                    aTimer = new System.Timers.Timer(Minutes * 60000);
+                                    aTimer.Elapsed += EndVoting;
+                                    aTimer.Start();
+                                });
                             }
                             break;
                         case "tts.cooldown":
@@ -1765,6 +1785,25 @@ namespace TwitchBot
                     ((Button)sender).IsEnabled = true;
                 });
             }).Start();
+        }
+
+        private void WaitPlease_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox Sender = (TextBox)sender;
+            int carret = Sender.CaretIndex;
+            int.TryParse(Sender.Text, out int MaxTTS);
+            Sender.Text = MaxTTS.ToString();
+            Sender.CaretIndex = carret;
+            MySave.Current.Nums[6] = MaxTTS;
+        }
+
+        private void MinutesBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox Sender = (TextBox)sender;
+            int carret = Sender.CaretIndex;
+            int.TryParse(Sender.Text, out int MaxTTS);
+            Sender.Text = MaxTTS.ToString();
+            Sender.CaretIndex = carret;
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)

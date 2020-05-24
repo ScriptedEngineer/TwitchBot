@@ -59,7 +59,7 @@
                     <ComboBox x:Name="VotingSelect" HorizontalAlignment="Right" Margin="0,0,10,6" VerticalAlignment="Bottom" Width="120" Height="24" SelectedIndex="0" SelectionChanged="VotingSelect_SelectionChanged">
                         <System:String>Текущий</System:String>
                     </ComboBox>
-                    <TextBox x:Name="MinutesBox" HorizontalAlignment="Right" Height="20" Margin="0,0,10,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38" Grid.Column="1"/>
+                    <TextBox x:Name="MinutesBox" HorizontalAlignment="Right" Height="20" Margin="0,0,10,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38" Grid.Column="1" TextChanged="MinutesBox_TextChanged"/>
                     <Label Content="Закончить через(минут):" HorizontalAlignment="Right" Margin="0,0,48,38" VerticalAlignment="Bottom" Padding="0" Grid.Column="1" Height="16" Width="136"/>
                     <ListView x:Name="UserList" Margin="0,1,1,60" Grid.Column="1">
                         <ListView.View>
@@ -71,7 +71,7 @@
                     </ListView>
                     <Label Content="Шаблон:" HorizontalAlignment="Right" Margin="0,0,130,11" VerticalAlignment="Bottom" Padding="0" Height="16" Width="50"/>
                     <Button Content="Колесо" HorizontalAlignment="Right" Margin="0,0,95,10" VerticalAlignment="Bottom" Width="57" Grid.Column="1" Height="20" Click="Button_Click_12"/>
-                    <TextBox x:Name="WinCount" HorizontalAlignment="Right" Height="20" Margin="0,0,189,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38" Grid.Column="1"/>
+                    <TextBox x:Name="WinCount" HorizontalAlignment="Right" Height="20" Margin="0,0,189,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38" Grid.Column="1" TextChanged="MinutesBox_TextChanged"/>
                     <Label Content="Победителей:" HorizontalAlignment="Right" Margin="0,0,232,38" VerticalAlignment="Bottom" Padding="0" Height="16" Width="76" Grid.Column="1"/>
                 </Grid>
             </TabItem>
@@ -175,6 +175,8 @@
                         <ComboBoxItem Content="Ермил"/>
                     </ComboBox>
                     <Label Content="Голос:" HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="0" Margin="0,0,46,71" Width="105" Height="16" Grid.Column="1"/>
+                    <TextBox x:Name="WaitPlease" HorizontalAlignment="Right" Height="20" Margin="0,0,10,123" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="38" Grid.Column="1" TextChanged="WaitPlease_TextChanged"/>
+                    <Label Content="Ждать(сек):" HorizontalAlignment="Right" Margin="0,0,53,126" VerticalAlignment="Bottom" Padding="0" Height="16" Width="64" Grid.Column="1"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Награды">
