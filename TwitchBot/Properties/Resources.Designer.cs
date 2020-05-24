@@ -69,31 +69,5 @@ namespace TwitchBot.Properties {
                 return ((System.Drawing.Icon)(obj));
             }
         }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на &lt;html style=&quot;background-color: transparent;&quot;&gt;
-        ///&lt;head&gt;
-        ///&lt;title&gt;Twitch Bot Alerts&lt;/title&gt;
-        ///&lt;meta charset=&quot;UTF-8&quot;&gt;
-        ///&lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&quot;&gt;&lt;/script&gt;
-        ///&lt;script&gt;
-        ///var timeInMs = Date.now();
-        ///var ws = new WebSocket(&apos;ws://localhost:8181/alert&apos;);
-        ///  ws.onopen = function() {
-        ///    ws.send(&quot;Ping&quot;);
-        ///  };
-        ///
-        ///  ws.onmessage = function(e) {
-        ///    var xo = event.data.split(&apos;|&apos;);
-        ///    switch(xo[0]){
-        ///        case &apos;Alert&apos;:
-        ///            $(&apos;.alert&apos;).addClass(&apos;active&apos;);
-        ///  [остаток строки не уместился]&quot;;.
-        /// </summary>
-        internal static string ServerMain {
-            get {
-                return ResourceManager.GetString("ServerMain", resourceCulture);
-            }
-        }
     }
 }

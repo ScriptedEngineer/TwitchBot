@@ -219,6 +219,50 @@ namespace TwitchBot
             // Sub-chunk 2 size.
             stream.Write(BitConverter.GetBytes((bitDepth / 8) * totalSampleCount), 0, 4);
         }
+        public static int[] TrueRandom(int min, int max, int count = 1)
+        {
+            List<int> vs = new List<int>();
+            string lol = "";
+            if (min > max)
+            {
+                int p = max;
+                max = min;
+                min = p;
+            }
+            if (max > min)
+                using (var client = new System.Net.WebClient())
+                {
+                    client.Encoding = Encoding.UTF8;
+                    lol = client.DownloadString($"https://www.random.org/integers/?num={count}&min={min}&max={max}&col=1&base=10&format=plain&rnd=new");
+                    foreach (string num in lol.Split('\n'))
+                    {
+                        if (string.IsNullOrEmpty(num)) continue;
+                        int.TryParse(num.Trim(), out int ret);
+                        while (vs.Contains(ret))
+                        {
+                            ret++;
+                            if (ret > max && max-min >= count) 
+                                ret = min;
+                        }
+                        vs.Add(ret);
+                    }
+                }
+            else
+            {
+                for (int s = 0; s < count;s++)
+                {
+                    while (vs.Contains(min))
+                    {
+                        min++;
+                        if (min > max && max - min >= count)
+                            min = min;
+                    }
+                    vs.Add(min);
+                }
+            }
+            
+            return vs.ToArray();
+        }
     }
 
     public enum ApiServerAct

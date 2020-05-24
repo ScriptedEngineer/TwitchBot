@@ -20,8 +20,7 @@ namespace TwitchBot
         {
             switch (request.RawUrl.Split('?').First().Trim('/'))
             {
-                case "obs":
-                    return Properties.Resources.ServerMain;
+                
                 case "control":
                     return "NO";
                 case "twitchcode":

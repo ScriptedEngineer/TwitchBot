@@ -17,6 +17,7 @@ using System.Threading;
 using System.Xml.Serialization;
 using Screen = System.Windows.Forms.Screen;
 using TwitchBot.Classes;
+using System.Net.Http.Headers;
 
 namespace TwitchBot
 {
@@ -40,12 +41,16 @@ namespace TwitchBot
             //Инициализация трей иконки
             ni.Icon = Properties.Resources.icon;
             ni.Visible = true;
-            ni.DoubleClick += (sndr, args) =>
+            EventHandler OpenShow = (sndr, args) =>
             {
                 Show();
                 WindowState = WindowState.Normal;
                 Tray = false;
             };
+            ni.DoubleClick += OpenShow;
+            ni.ContextMenu = new System.Windows.Forms.ContextMenu(new System.Windows.Forms.MenuItem[] { 
+            new System.Windows.Forms.MenuItem("Развернуть",OpenShow),
+            new System.Windows.Forms.MenuItem("Закрыть",(sender,EventArgs)=>Close())});
 
 
             //Инициализация компонентов GUI
@@ -824,7 +829,14 @@ namespace TwitchBot
         Dictionary<string, int> Votings = new Dictionary<string, int>();
         private void IfVoteAdd(MessageEventArgs e)
         {
-            if (int.TryParse(e.Message, out int vote) && vote <= VoteMax && vote >= 1)
+            string msg = e.Message.Trim();
+            bool isvote = int.TryParse(msg, out int vote);
+            if (!isvote && Votes.ContainsValue(msg))
+            {
+                vote = Votes.FirstOrDefault(x => x.Value == msg).Key;
+                if (vote != 0) isvote = true;
+            }
+            if (isvote && vote <= VoteMax && vote >= 1)
             {
                 if (Votings.ContainsKey(e.NickName))
                 {
@@ -839,7 +851,8 @@ namespace TwitchBot
                     });
                 }
             }
-            DisplayVotes();
+            if (!IsGame)
+                DisplayVotes();
             Extentions.AsyncWorker(() =>
             {
                 foreach (Voter X in UserList.Items)
@@ -936,13 +949,30 @@ namespace TwitchBot
                     aTimer?.Close();
                     bTimer?.Close();
                     var x = GetVotes(true);
-                    ClientSendMessage($"Голосование окончено. {x.Item1} Результаты: {x.Item2}");
-                    //DisplayVotes();
+                    if (!IsGame)
+                        ClientSendMessage($"Голосование окончено. {x.Item1} Результаты: {x.Item2}");
+                    else
+                    {
+                        int countsdvin = 1;
+                        int.TryParse(WinCount.Text,out countsdvin);
+                        string vinners = "";
+                        int[] sdx = Extentions.TrueRandom(0, Votings.Keys.Count-1, countsdvin);
+                        foreach (int vinner in sdx)
+                        {
+                            if(vinner >= 0 && vinner < Votings.Keys.Count)
+                                vinners += " "+Votings.Keys.ToArray()[vinner];
+                            else
+                                vinners += " [Ошибка]";
+                        }
+                        ClientSendMessage($"Рандом выбрал {(countsdvin == 1? "следующего зрителя":"следующих зрителей")}:"+ vinners);
+                        IsGame = false;
+                    }
                 });
             }
             else
             {
-                ClientSendMessage("Голосование не ведется.");
+                if (!IsGame)
+                    ClientSendMessage("Голосование не ведется.");
             }
         }
         private void SendVotes(object sender, ElapsedEventArgs e)
@@ -1015,7 +1045,7 @@ namespace TwitchBot
         {
             Votings.Clear();
             UserList.Items.Clear();
-            DisplayVotes();
+            //DisplayVotes();
             string Vrotes = ""; int index = 0;
             foreach (ListElement X in VotingList.Items)
             {
@@ -1035,12 +1065,35 @@ namespace TwitchBot
                 Votes.Add(index, X.Strings[0]);
             }
         }
-        string Mins(int number)
+        bool IsGame = false;
+        private void StartGame(int Minutes = 0)
+        {
+            Votings.Clear();
+            UserList.Items.Clear();
+            IsVoting = true;
+            IsGame = true;
+            Votes.Clear();
+            int.TryParse(WinCount.Text, out int countsdvin);
+            ClientSendMessage($"Через {Minutes} {Mins(Minutes,true)} {SelUS(countsdvin)}, напиши 'play' или '1' что-бы принять участие!");
+            Votes.Add(1, "play");
+
+        }
+        string SelUS(int number)
+        {
+            if (((number % 100) > 10) && ((number % 100) < 20))
+                return $"будут выбраны {number} случайных пользователей";
+            if (number % 10 == 1)
+                return $"будет выбран {number} случайный пользователь";
+            if ((number % 10 == 2) || (number % 10 == 3) || (number % 10 == 4))
+                return $"будут выбраны {number} случайных пользователя";
+            return $"будут выбраны {number} случайных пользователей";
+        }
+        string Mins(int number, bool lt = false)
         {
             if (((number % 100) > 10) && ((number % 100) < 20))
                 return "минут";
             if (number % 10 == 1)
-                return "минута";
+                return lt ? "минуту" : "минута";
             if ((number % 10 == 2) || (number % 10 == 3) || (number % 10 == 4))
                 return "минуты";
             return "минут";
@@ -1127,10 +1180,24 @@ namespace TwitchBot
             bTimer.Elapsed += SendVotes;
             aTimer.Start();
             bTimer.Start();
+            ((Button)sender).IsEnabled = false;
+            new Thread(() => {
+                Thread.Sleep(1000);
+                Extentions.AsyncWorker(() => { 
+                    ((Button)sender).IsEnabled = true;
+                });
+            }).Start();
         }
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             EndVoting(null, null);
+            ((Button)sender).IsEnabled = false;
+            new Thread(() => {
+                Thread.Sleep(1000);
+                Extentions.AsyncWorker(() => {
+                    ((Button)sender).IsEnabled = true;
+                });
+            }).Start();
         }
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
@@ -1682,6 +1749,22 @@ namespace TwitchBot
         private void Voices_TTTS_Copy_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             MySave.Current.DYPV = (YVoices)Voices_TTTS_Copy.SelectedIndex;
+        }
+
+        private void Button_Click_12(object sender, RoutedEventArgs e)
+        {
+            int Minutes = int.Parse(MinutesBox.Text);
+            StartGame(Minutes);
+            aTimer = new System.Timers.Timer(Minutes * 60000);
+            aTimer.Elapsed += EndVoting;
+            aTimer.Start();
+            ((Button)sender).IsEnabled = false;
+            new Thread(() => {
+                Thread.Sleep(1000);
+                Extentions.AsyncWorker(() => {
+                    ((Button)sender).IsEnabled = true;
+                });
+            }).Start();
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)

@@ -51,8 +51,8 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <Button Content="Запустить" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="63" Click="Button_Click_2" Grid.Column="1" Height="20"/>
-                    <Button Content="Остановить" HorizontalAlignment="Right" Margin="0,0,78,10" VerticalAlignment="Bottom" Width="73" Click="Button_Click_3" Height="20" Grid.Column="1"/>
+                    <Button Content="Голосование" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="80" Click="Button_Click_2" Grid.Column="1" Height="20"/>
+                    <Button Content="Остановить" HorizontalAlignment="Right" Margin="0,0,157,10" VerticalAlignment="Bottom" Width="73" Click="Button_Click_3" Height="20" Grid.Column="1"/>
                     <Button Content="Добавить" Margin="10,0,0,35" VerticalAlignment="Bottom" Click="Button_Click_1" HorizontalAlignment="Left" Width="80" Height="20"/>
                     <Button Content="Удалить" Margin="95,0,0,35" VerticalAlignment="Bottom" Click="Button_Click_4" HorizontalAlignment="Left" Width="65" Height="20"/>
                     <Button Content="Сохранить как" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" Click="Button_Click_5" Height="20" Width="120"/>
@@ -60,7 +60,7 @@
                         <System:String>Текущий</System:String>
                     </ComboBox>
                     <TextBox x:Name="MinutesBox" HorizontalAlignment="Right" Height="20" Margin="0,0,10,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38" Grid.Column="1"/>
-                    <Label Content="Закончить через(минуты):" HorizontalAlignment="Right" Margin="0,0,48,38" VerticalAlignment="Bottom" Padding="0" Grid.Column="1" Height="16" Width="145"/>
+                    <Label Content="Закончить через(минут):" HorizontalAlignment="Right" Margin="0,0,48,38" VerticalAlignment="Bottom" Padding="0" Grid.Column="1" Height="16" Width="136"/>
                     <ListView x:Name="UserList" Margin="0,1,1,60" Grid.Column="1">
                         <ListView.View>
                             <GridView>
@@ -70,6 +70,9 @@
                         </ListView.View>
                     </ListView>
                     <Label Content="Шаблон:" HorizontalAlignment="Right" Margin="0,0,130,11" VerticalAlignment="Bottom" Padding="0" Height="16" Width="50"/>
+                    <Button Content="Колесо" HorizontalAlignment="Right" Margin="0,0,95,10" VerticalAlignment="Bottom" Width="57" Grid.Column="1" Height="20" Click="Button_Click_12"/>
+                    <TextBox x:Name="WinCount" HorizontalAlignment="Right" Height="20" Margin="0,0,189,35" TextWrapping="Wrap" Text="1" VerticalAlignment="Bottom" Width="38" Grid.Column="1"/>
+                    <Label Content="Победителей:" HorizontalAlignment="Right" Margin="0,0,232,38" VerticalAlignment="Bottom" Padding="0" Height="16" Width="76" Grid.Column="1"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Озвучивание">
