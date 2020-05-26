@@ -107,6 +107,7 @@ namespace TwitchBot
             }
 
             //Применение настроек
+            MySave.Load();
             TTSpeech.IsChecked = MySave.Current.Bools[0];
             TTSpeechOH.IsChecked = MySave.Current.Bools[1];
             TTSNotifyUse.IsChecked = MySave.Current.Bools[2];
@@ -797,9 +798,16 @@ namespace TwitchBot
                         TTSrate = Extentions.SpeechSynth.Rate;
                         if (e.Message.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
                             Extentions.SpeechSynth.Rate = 10;
+                        string[] VoiceNText = e.Message.Split('|');
+                        string voice = MySave.Current.YPV.ToString();
+                        if (VoiceNText.Length >= 2)
+                        {
+                            e.Message = VoiceNText[1];
+                            voice = VoiceNText[0];
+                        }
                         string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message;
                         if (MySave.Current.Bools[8])
-                            Extentions.GetTrueTTSReady(Text, MySave.Current.YPV.ToString());
+                            Extentions.GetTrueTTSReady(Text, voice);
                         if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
                         {
                             Extentions.AsyncWorker(() =>
