@@ -798,12 +798,12 @@ namespace TwitchBot
                         TTSrate = Extentions.SpeechSynth.Rate;
                         if (e.Message.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
                             Extentions.SpeechSynth.Rate = 10;
-                        string[] VoiceNText = e.Message.Split('|');
+                        string[] VoiceNText = e.Message.Split(new char[] { '|' }, 2);
                         string voice = MySave.Current.YPV.ToString();
-                        if (VoiceNText.Length >= 2)
+                        if (VoiceNText.Length >= 2 && Enum.TryParse(VoiceNText[0], out YVoices dVoice))
                         {
                             e.Message = VoiceNText[1];
-                            voice = VoiceNText[0];
+                            voice = dVoice.ToString();
                         }
                         string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message;
                         if (MySave.Current.Bools[8])
@@ -829,7 +829,7 @@ namespace TwitchBot
                             WebSockServ.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
                             Thread.Sleep(1000);
                         }
-                        
+
                         Extentions.AsyncWorker(() =>
                         {
                             if (!MySave.Current.Bools[0])
@@ -840,7 +840,7 @@ namespace TwitchBot
                             if (!MySave.Current.Bools[8])
                                 Extentions.TextToSpeech(Text);
                         });
-                        if(MySave.Current.Bools[8])
+                        if (MySave.Current.Bools[8])
                             Extentions.TrueTTS(Text);
                         Thread.Sleep(100);
                         while (Extentions.SpeechSynth.State == SynthesizerState.Speaking)
