@@ -179,9 +179,10 @@
                         <Label Content="Ждать(сек):" HorizontalAlignment="Right" Margin="0,0,53,126" VerticalAlignment="Bottom" Padding="0" Height="16" Width="64" Grid.Column="1"/>
                     </Grid>
                     <CheckBox x:Name="AllowChTTTSVoice" Content="Разрешить менять" HorizontalAlignment="Left" Margin="9,0,0,169" VerticalAlignment="Bottom" Height="15" Width="124" Click="AllowChTTTSVoice_Click"/>
-                    <RadioButton x:Name="OnlySUB" Content="Только подписчики" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top" Height="15" GroupName="Who" Checked="UserSelector_Checked"/>
-                    <RadioButton x:Name="OnlyVIP" Content="Только VIP (or Moder)" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Height="15" GroupName="Who" Checked="UserSelector_Checked"/>
-                    <RadioButton x:Name="AllUsers" Content="Все пользователи" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" Height="15" GroupName="Who" Checked="UserSelector_Checked"/>
+                    <CheckBox x:Name="AllTTS" Content="Все зрители" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" Background="White" Height="15" Click="AllTTS_Click"/>
+                    <CheckBox x:Name="VIPTTS" Content="VIP зрители" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White" Height="15"/>
+                    <CheckBox x:Name="ModTTS" Content="Модераторы" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White" Height="15"/>
+                    <CheckBox x:Name="SubTTS" Content="Подписчики" HorizontalAlignment="Left" Margin="10,143,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White" Height="15"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Награды">

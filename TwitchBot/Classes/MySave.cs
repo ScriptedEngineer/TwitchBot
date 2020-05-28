@@ -132,6 +132,15 @@ namespace TwitchBot
     }
 
     [Flags]
+    public enum UsersTTS
+    {
+        All = 0,
+        VIP = 1 << 0,
+        Mod = 1 << 1,
+        Sub = 1 << 2,
+    }
+
+    [Flags]
     public enum UserRights
     {
         Зритель     = 0,

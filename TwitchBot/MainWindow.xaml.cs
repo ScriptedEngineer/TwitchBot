@@ -164,17 +164,13 @@ namespace TwitchBot
                     CustomReward.IsChecked = true;
                     break;
             }
-            switch (MySave.Current.Nums[7])
+            UsersTTSRules = (UsersTTS)MySave.Current.Nums[7];
+            if (UsersTTSRules == UsersTTS.All) AllTTS.IsChecked = true;
+            else
             {
-                case 0:
-                    AllUsers.IsChecked = true;
-                    break;
-                case 1:
-                    OnlyVIP.IsChecked = true;
-                    break;
-                case 2:
-                    OnlySUB.IsChecked = true;
-                    break;
+                if (UsersTTSRules.HasFlag(UsersTTS.VIP)) VIPTTS.IsChecked = true;
+                if (UsersTTSRules.HasFlag(UsersTTS.Mod)) ModTTS.IsChecked = true;
+                if (UsersTTSRules.HasFlag(UsersTTS.Sub)) SubTTS.IsChecked = true;
             }
             SwitcherKey = new WinHotKey(MySave.Current.Hotkey, MySave.Current.HotkeyModifier, AcSwitch);
             HotKey.Text = (MySave.Current.HotkeyModifier == KeyModifier.None ? "" : MySave.Current.HotkeyModifier.ToString() + "+") + MySave.Current.Hotkey;
@@ -799,14 +795,11 @@ namespace TwitchBot
                     speech &= e.CustomRewardID == MySave.Current.TTSCRID;
                     break;
             }
-            switch (MySave.Current.Nums[7])
+            if(UsersTTSRules != UsersTTS.All)
             {
-                case 1:
-                    speech &= (e.Flags.HasFlag(ExMsgFlag.FromVip)|| e.Flags.HasFlag(ExMsgFlag.FromModer));
-                    break;
-                case 2:
-                    speech &= e.Flags.HasFlag(ExMsgFlag.FromSub);
-                    break;
+                speech &= ((UsersTTSRules.HasFlag(UsersTTS.Mod) && e.Flags.HasFlag(ExMsgFlag.FromModer))
+                        || (UsersTTSRules.HasFlag(UsersTTS.Sub) && e.Flags.HasFlag(ExMsgFlag.FromSub))
+                        || (UsersTTSRules.HasFlag(UsersTTS.VIP) && e.Flags.HasFlag(ExMsgFlag.FromVip)));
             }
             if (speech)
             {
@@ -1827,11 +1820,35 @@ namespace TwitchBot
             Process.Start(Extentions.AppFile);
             Application.Current.Shutdown();
         }
-
-        private void UserSelector_Checked(object sender, RoutedEventArgs e)
+        UsersTTS UsersTTSRules;
+        private void AllTTS_Click(object sender, RoutedEventArgs e)
         {
-            if (AllUsers != null && OnlyVIP != null && OnlySUB != null)
-                MySave.Current.Nums[7] = AllUsers.IsChecked.Value ? 0 : (OnlyVIP.IsChecked.Value ? 1 : (OnlySUB.IsChecked.Value ? 2 : -1));
+            UsersTTSRules = (UsersTTS)MySave.Current.Nums[7];
+            CheckBox Sender = (CheckBox)sender;
+            if (AllTTS.IsChecked.Value && Sender == AllTTS)
+            {
+                UsersTTSRules = UsersTTS.All;
+                VIPTTS.IsChecked = false;
+                ModTTS.IsChecked = false;
+                SubTTS.IsChecked = false;
+            }
+            if (VIPTTS.IsChecked.Value)
+            {
+                AllTTS.IsChecked = false;
+                UsersTTSRules |= UsersTTS.VIP;
+            }
+            if (ModTTS.IsChecked.Value)
+            {
+                AllTTS.IsChecked = false;
+                UsersTTSRules |= UsersTTS.Mod;
+            }
+            if (SubTTS.IsChecked.Value)
+            {
+                AllTTS.IsChecked = false;
+                UsersTTSRules |= UsersTTS.Sub;
+            }
+            
+            MySave.Current.Nums[7] = (int)UsersTTSRules;
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)
