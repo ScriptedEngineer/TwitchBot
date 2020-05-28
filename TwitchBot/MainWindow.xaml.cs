@@ -352,7 +352,7 @@ namespace TwitchBot
                     (GetModBtt.IsEnabled?"Модерация запрещена\n": "Модерация разрешена\n") +
                     $"Токен имеет права:\n{Client.Account.Scopes}\n";
                     //ConnectButton.Content = "Подключено";
-                    if (DonAlert.Connected)
+                    if (DonAlert != null && DonAlert.Connected)
                     {
                         DAConnect.IsEnabled = false;
                         DonationTTS.IsEnabled = true;
