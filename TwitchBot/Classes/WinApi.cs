@@ -483,11 +483,16 @@ namespace TwitchBot
             {
                 return a.X != b.X || a.Y != b.Y;
             }
-            public bool Equals(object b)
+            public override bool Equals(object b)
             {
                 MousePoint bx = (MousePoint)b;
                 return X == bx.X && Y == bx.Y;
             }
+            public override int GetHashCode()
+            {
+                return X*Y;
+            }
+
         }
         [StructLayout(LayoutKind.Sequential)]
         public struct NativeMessage

@@ -121,6 +121,7 @@ namespace TwitchBot
             DANotify.IsChecked = MySave.Current.Bools[10];
             DTTSNicks.IsChecked = MySave.Current.Bools[11];
             DTTSAmount.IsChecked = MySave.Current.Bools[12];
+            AllowChTTTSVoice.IsChecked = MySave.Current.Bools[13];
             BadWords.Text = MySave.Current.BadWords;
             Censor.Text = MySave.Current.Censor;
             Streamer.Text = MySave.Current.Streamer;
@@ -163,6 +164,18 @@ namespace TwitchBot
                     CustomReward.IsChecked = true;
                     break;
             }
+            switch (MySave.Current.Nums[7])
+            {
+                case 0:
+                    AllUsers.IsChecked = true;
+                    break;
+                case 1:
+                    OnlyVIP.IsChecked = true;
+                    break;
+                case 2:
+                    OnlySUB.IsChecked = true;
+                    break;
+            }
             SwitcherKey = new WinHotKey(MySave.Current.Hotkey, MySave.Current.HotkeyModifier, AcSwitch);
             HotKey.Text = (MySave.Current.HotkeyModifier == KeyModifier.None ? "" : MySave.Current.HotkeyModifier.ToString() + "+") + MySave.Current.Hotkey;
             Extentions.Player.MediaOpened += (object s, EventArgs ex) => { MediaDurationMs = (int)(Extentions.Player.NaturalDuration.HasTimeSpan? Extentions.Player.NaturalDuration.TimeSpan.TotalMilliseconds:0); };
@@ -186,10 +199,10 @@ namespace TwitchBot
                 {
                     Thread.Sleep(2000);
                     File.Delete("udpateprotocol");
-                    Extentions.AsyncWorker(() =>
+                    /*Extentions.AsyncWorker(() =>
                     {
                         Button_Click(null, null);
-                    });
+                    });*/
                 }).Start();
             }
 
@@ -216,7 +229,8 @@ namespace TwitchBot
                     string[] dafi = File.ReadAllText("da.txt").Split('\n');
                     DonAlert = new DonationAlerts(dafi[0], dafi[1]);
                     DonAlert.OnDonation += Donation;
-                    DAConnect.IsEnabled = false;
+
+                    //DAConnect.IsEnabled = false;
                 }
                 catch
                 {
@@ -230,9 +244,6 @@ namespace TwitchBot
                 foreach (string x in argsv)
                     switch (x)
                     {
-                        case "autoconnect":
-                            Button_Click(null, null);
-                            break;
                         case "traystart":
                             Hide();
                             Tray = true;
@@ -262,6 +273,9 @@ namespace TwitchBot
                 Extentions.TrueTTS(Text);
                 LastTTS = DateTime.Now;
             }
+
+            if(!string.IsNullOrEmpty(MySave.Current.Streamer))
+                Button_Click(null, null);
         }
         WebSocketSharp.Server.WebSocketServer WebSocketServer;
         WebServer WebServer;
@@ -338,6 +352,11 @@ namespace TwitchBot
                     (GetModBtt.IsEnabled?"Модерация запрещена\n": "Модерация разрешена\n") +
                     $"Токен имеет права:\n{Client.Account.Scopes}\n";
                     //ConnectButton.Content = "Подключено";
+                    if (DonAlert.Connected)
+                    {
+                        DAConnect.IsEnabled = false;
+                        DonationTTS.IsEnabled = true;
+                    }
                 });
             }).Start();
         }
@@ -780,6 +799,15 @@ namespace TwitchBot
                     speech &= e.CustomRewardID == MySave.Current.TTSCRID;
                     break;
             }
+            switch (MySave.Current.Nums[7])
+            {
+                case 1:
+                    speech &= (e.Flags.HasFlag(ExMsgFlag.FromVip)|| e.Flags.HasFlag(ExMsgFlag.FromModer));
+                    break;
+                case 2:
+                    speech &= e.Flags.HasFlag(ExMsgFlag.FromSub);
+                    break;
+            }
             if (speech)
             {
                 bool TTSNotify = MySave.Current.Bools[2];
@@ -800,11 +828,12 @@ namespace TwitchBot
                             Extentions.SpeechSynth.Rate = 10;
                         string[] VoiceNText = e.Message.Split(new char[] { '|' }, 2);
                         string voice = MySave.Current.YPV.ToString();
-                        if (VoiceNText.Length >= 2 && Enum.TryParse(VoiceNText[0], out YVoices dVoice))
-                        {
-                            e.Message = VoiceNText[1];
-                            voice = dVoice.ToString();
-                        }
+                        if (MySave.Current.Bools[13])
+                            if (VoiceNText.Length >= 2 && Enum.TryParse(VoiceNText[0], out YVoices dVoice))
+                            {
+                                e.Message = VoiceNText[1];
+                                voice = dVoice.ToString();
+                            }
                         string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message;
                         if (MySave.Current.Bools[8])
                             Extentions.GetTrueTTSReady(Text, voice);
@@ -1474,38 +1503,10 @@ namespace TwitchBot
         }
         private void AllChat_Checked(object sender, RoutedEventArgs e)
         {
-            try
-            {
+            if (AllChat != null && TTSpeechOH != null && CustomReward != null)
                 MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
-            }
-            catch
-            {
-
-            }
         }
-        private void TTSpeechOH_Checked(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if(AllChat != null)
-                    MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
-            }
-            catch
-            {
 
-            }
-        }
-        private void CustomReward_Checked(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                MySave.Current.Nums[1] = AllChat.IsChecked.Value ? 0 : (TTSpeechOH.IsChecked.Value ? 1 : (CustomReward.IsChecked.Value ? 2 : -1));
-            }
-            catch
-            {
-
-            }
-        }
         private void CustomRewardID_TextChanged(object sender, TextChangedEventArgs e)
         {
             MySave.Current.TTSCRID = CustomRewardID.Text;
@@ -1812,6 +1813,25 @@ namespace TwitchBot
             int.TryParse(Sender.Text, out int MaxTTS);
             Sender.Text = MaxTTS.ToString();
             Sender.CaretIndex = carret;
+        }
+
+        private void AllowChTTTSVoice_Click(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Bools[13] = AllowChTTTSVoice.IsChecked.Value;
+        }
+
+        private void Button_Click_13(object sender, RoutedEventArgs e)
+        {
+            MySave.Current.Streamer = null;
+            //MySave.Save();
+            Process.Start(Extentions.AppFile);
+            Application.Current.Shutdown();
+        }
+
+        private void UserSelector_Checked(object sender, RoutedEventArgs e)
+        {
+            if (AllUsers != null && OnlyVIP != null && OnlySUB != null)
+                MySave.Current.Nums[7] = AllUsers.IsChecked.Value ? 0 : (OnlyVIP.IsChecked.Value ? 1 : (OnlySUB.IsChecked.Value ? 2 : -1));
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)

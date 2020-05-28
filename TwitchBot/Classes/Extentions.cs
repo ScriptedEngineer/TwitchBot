@@ -254,8 +254,8 @@ namespace TwitchBot
                     while (vs.Contains(min))
                     {
                         min++;
-                        if (min > max && max - min >= count)
-                            min = min;
+                        //if (min > max && max - min >= count)
+                         //   min = min;
                     }
                     vs.Add(min);
                 }

@@ -14,8 +14,10 @@ namespace TwitchBot.Classes
         WebSocket WSock;
         string UserID, CentClID;
         string SockTocken;
+        public bool Connected { get; private set; }
         public DonationAlerts(string token, string refresh_token)
         {
+            Connected = false;
             Token = RefreshToken(refresh_token, token);
             Refresh_token = refresh_token;
             GetConnectToken();
@@ -52,7 +54,8 @@ namespace TwitchBot.Classes
                         WSock.Send("{\"params\":{\"channel\":\"$alerts:donation_" + UserID + "\",\"token\":\"" + ctoken + "\"},\"method\":1,\"id\":2}");
                         break;
                     case "1":
-                        //Console.WriteLine("1");
+                        //Console.WriteLine(e.Data);
+                        Connected = true;
                         break;
                     default:
                         Match CLsID = Regex.Match(e.Data, @"""name"":""([^""]*)""");

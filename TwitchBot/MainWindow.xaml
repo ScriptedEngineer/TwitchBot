@@ -87,14 +87,14 @@
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black"/>
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="0,0,0,92"/>
                     <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White" IsChecked="True" Height="15" Width="105"/>
-                    <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top" IsChecked="True" Checked="TTSpeechOH_Checked" Height="15" Width="130"/>
+                    <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top" IsChecked="True" Checked="AllChat_Checked" Height="15" Width="130"/>
                     <ComboBox x:Name="Voices" VerticalAlignment="Bottom" Margin="10,0,0,126" SelectionChanged="Voices_SelectionChanged" HorizontalAlignment="Left" Width="141" Height="22">
 
                     </ComboBox>
                     <Label Content="Голос (WIN SAPI5):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,148" Width="105" Height="16"/>
                     <CheckBox x:Name="TTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" IsChecked="True" Click="TTSNicks_Click" Height="15" Width="114"/>
                     <TextBox x:Name="CustomRewardID" Height="23" Margin="156,70,7,0" TextWrapping="NoWrap" VerticalAlignment="Top" TextChanged="CustomRewardID_TextChanged"/>
-                    <RadioButton x:Name="CustomReward" Content="Только товар:" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top" Checked="CustomReward_Checked" Height="15" Width="95"/>
+                    <RadioButton x:Name="CustomReward" Content="Только товар:" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top" Checked="AllChat_Checked" Height="15" Width="95"/>
                     <RadioButton x:Name="AllChat" Content="Весь чат" HorizontalAlignment="Left" Margin="156,10,0,0" VerticalAlignment="Top" IsChecked="True" Checked="AllChat_Checked" Height="15" Width="65"/>
                     <Slider x:Name="SynthSpeed" Margin="156,0,7,126" VerticalAlignment="Bottom" Minimum="-10" ValueChanged="Slider_ValueChanged" Height="18"/>
                     <Label x:Name="SpeedLabel" Content="Скорость (0) [1x]" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="156,0,0,145" Width="134" Height="16"/>
@@ -118,7 +118,7 @@
                     <Label x:Name="SpeedLabel_Copy1" Content="Стоп кнопка:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,76" Height="16" Width="71"/>
                     <Label x:Name="SpeedLabel_Copy2" Content="При превышении:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,40" Height="16" Width="100"/>
                     <Button x:Name="RewardTrap" Content="Сканировать товар" Margin="156,93,7,0" VerticalAlignment="Top" Click="RewardTrap_Click" Height="20"/>
-                    <TextBlock x:Name="RewardName" Margin="156,113,7,169" TextWrapping="Wrap" Text="Определено пользователем" FontSize="10"/>
+                    <TextBlock x:Name="RewardName" Margin="156,113,7,196" TextWrapping="Wrap" Text="Определено пользователем" FontSize="10" VerticalAlignment="Top"/>
                     <TextBox x:Name="BadWords" Height="63" Margin="10,50,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TextChanged="BadWords_TextChanged" Grid.Column="1"/>
                     <Label Content="Доп фильр(через пробел):" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,34,0,0" Width="150" Height="16" Grid.Column="1"/>
                     <TextBox x:Name="Censor" Height="20" Margin="186,25,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="." TextChanged="Censor_TextChanged" Grid.Column="1"/>
@@ -128,7 +128,7 @@
                     <Slider x:Name="Volume" Margin="191,0,7,10" VerticalAlignment="Bottom" ValueChanged="Volume_ValueChanged" Maximum="100" Value="100" Height="18"/>
                     <CheckBox x:Name="UseYA" Content="Через TrueTTS" HorizontalAlignment="Left" Margin="10,50,0,0" Click="UseYA_Click" VerticalAlignment="Top" Height="15" Width="98"/>
                     <TextBlock x:Name="RewardName_Copy" Margin="9,65,167,0" TextWrapping="Wrap" Text="Сильно замедляет обработку" FontSize="10" VerticalAlignment="Top" Height="13"/>
-                    <ComboBox x:Name="Voices_TTTS" VerticalAlignment="Bottom" Margin="10,0,0,169" HorizontalAlignment="Left" Width="141" Height="22" SelectionChanged="Voices_TTTS_SelectionChanged">
+                    <ComboBox x:Name="Voices_TTTS" VerticalAlignment="Bottom" Margin="10,0,0,184" HorizontalAlignment="Left" Width="141" Height="22" SelectionChanged="Voices_TTTS_SelectionChanged">
                         <ComboBoxItem Content="Алена"/>
                         <ComboBoxItem Content="Филипп"/>
                         <ComboBoxItem Content="Элис"/>
@@ -138,45 +138,50 @@
                         <ComboBoxItem Content="Захар"/>
                         <ComboBoxItem Content="Ермил"/>
                     </ComboBox>
-                    <Label Content="Голос (TrueTTS):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,191" Width="105" Height="16"/>
-                    <Button x:Name="DAConnect" Content="Подключить DonationAlerts" Grid.Column="1" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="186" Click="DAConnect_Click"/>
-                    <CheckBox x:Name="DATTSEnable" Content="Озвучивать донаты" HorizontalAlignment="Left" Margin="10,0,0,126" VerticalAlignment="Bottom" Background="White" Height="15" Width="147" Grid.Column="1" Click="DATTSEnable_Click" RenderTransformOrigin="0.5,0.5">
-                        <CheckBox.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform/>
-                                <SkewTransform/>
-                                <RotateTransform Angle="0.242"/>
-                                <TranslateTransform/>
-                            </TransformGroup>
-                        </CheckBox.RenderTransform>
-                    </CheckBox>
-                    <Button Content="..." HorizontalAlignment="Right" Margin="0,0,10,97" VerticalAlignment="Bottom" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Grid.Column="1" Click="Button_Click_11"/>
-                    <Label x:Name="TTSNotifyLabel_Copy" Content="tts.mp3" Margin="120,0,39,97" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center" Grid.Column="1"/>
-                    <CheckBox x:Name="DANotify" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="10,0,0,97" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5" Height="15" Width="112" Grid.Column="1" Click="DANotify_Click">
-                        <CheckBox.RenderTransform>
-                            <TransformGroup>
-                                <ScaleTransform ScaleY="1" ScaleX="1"/>
-                                <SkewTransform AngleY="0" AngleX="0"/>
-                                <RotateTransform Angle="0"/>
-                                <TranslateTransform/>
-                            </TransformGroup>
-                        </CheckBox.RenderTransform>
-                    </CheckBox>
-                    <CheckBox x:Name="DTTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,0,0,72" VerticalAlignment="Bottom" Background="White" Height="15" Width="150" Grid.Column="1" Click="DTTSNicks_Click"/>
-                    <CheckBox x:Name="DTTSAmount" Content="Озвучивать сумму" HorizontalAlignment="Left" Margin="10,0,0,52" VerticalAlignment="Bottom" Background="White" Height="15" Width="139" Grid.Column="1" Click="DTTSAmount_Click"/>
-                    <ComboBox x:Name="Voices_TTTS_Copy" VerticalAlignment="Bottom" Margin="0,0,10,49" HorizontalAlignment="Right" Width="141" Height="22" Grid.Column="1" SelectionChanged="Voices_TTTS_Copy_SelectionChanged">
-                        <ComboBoxItem Content="Алена"/>
-                        <ComboBoxItem Content="Филипп"/>
-                        <ComboBoxItem Content="Элис"/>
-                        <ComboBoxItem Content="Джейн"/>
-                        <ComboBoxItem Content="Оксана"/>
-                        <ComboBoxItem Content="Омаж"/>
-                        <ComboBoxItem Content="Захар"/>
-                        <ComboBoxItem Content="Ермил"/>
-                    </ComboBox>
-                    <Label Content="Голос:" HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="0" Margin="0,0,46,71" Width="105" Height="16" Grid.Column="1"/>
-                    <TextBox x:Name="WaitPlease" HorizontalAlignment="Right" Height="20" Margin="0,0,10,123" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="38" Grid.Column="1" TextChanged="WaitPlease_TextChanged"/>
-                    <Label Content="Ждать(сек):" HorizontalAlignment="Right" Margin="0,0,53,126" VerticalAlignment="Bottom" Padding="0" Height="16" Width="64" Grid.Column="1"/>
+                    <Label Content="Голос (TrueTTS):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,206" Width="105" Height="16"/>
+                    <Grid x:Name="DonationTTS" Grid.Column="1" Margin="0,2,0,0" IsEnabled="False">
+                        <CheckBox x:Name="DATTSEnable" Content="Озвучивать донаты" HorizontalAlignment="Left" Margin="10,0,0,126" VerticalAlignment="Bottom" Background="White" Height="15" Width="147" Grid.Column="1" Click="DATTSEnable_Click" RenderTransformOrigin="0.5,0.5">
+                            <CheckBox.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="0.242"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </CheckBox.RenderTransform>
+                        </CheckBox>
+                        <Button Content="..." HorizontalAlignment="Right" Margin="0,0,10,97" VerticalAlignment="Bottom" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Grid.Column="1" Click="Button_Click_11"/>
+                        <Label x:Name="TTSNotifyLabel_Copy" Content="tts.mp3" Margin="120,0,39,97" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center" Grid.Column="1"/>
+                        <CheckBox x:Name="DANotify" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="10,0,0,97" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5" Height="15" Width="112" Grid.Column="1" Click="DANotify_Click">
+                            <CheckBox.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleY="1" ScaleX="1"/>
+                                    <SkewTransform AngleY="0" AngleX="0"/>
+                                    <RotateTransform Angle="0"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </CheckBox.RenderTransform>
+                        </CheckBox>
+                        <CheckBox x:Name="DTTSNicks" Content="Озвучивать ники" HorizontalAlignment="Left" Margin="10,0,0,72" VerticalAlignment="Bottom" Background="White" Height="15" Width="150" Grid.Column="1" Click="DTTSNicks_Click"/>
+                        <CheckBox x:Name="DTTSAmount" Content="Озвучивать сумму" HorizontalAlignment="Left" Margin="10,0,0,52" VerticalAlignment="Bottom" Background="White" Height="15" Width="139" Grid.Column="1" Click="DTTSAmount_Click"/>
+                        <ComboBox x:Name="Voices_TTTS_Copy" VerticalAlignment="Bottom" Margin="0,0,10,49" HorizontalAlignment="Right" Width="141" Height="22" Grid.Column="1" SelectionChanged="Voices_TTTS_Copy_SelectionChanged">
+                            <ComboBoxItem Content="Алена"/>
+                            <ComboBoxItem Content="Филипп"/>
+                            <ComboBoxItem Content="Элис"/>
+                            <ComboBoxItem Content="Джейн"/>
+                            <ComboBoxItem Content="Оксана"/>
+                            <ComboBoxItem Content="Омаж"/>
+                            <ComboBoxItem Content="Захар"/>
+                            <ComboBoxItem Content="Ермил"/>
+                        </ComboBox>
+                        <Label Content="Голос:" HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="0" Margin="0,0,46,71" Width="105" Height="16" Grid.Column="1"/>
+                        <TextBox x:Name="WaitPlease" HorizontalAlignment="Right" Height="20" Margin="0,0,10,123" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="38" Grid.Column="1" TextChanged="WaitPlease_TextChanged"/>
+                        <Label Content="Ждать(сек):" HorizontalAlignment="Right" Margin="0,0,53,126" VerticalAlignment="Bottom" Padding="0" Height="16" Width="64" Grid.Column="1"/>
+                    </Grid>
+                    <CheckBox x:Name="AllowChTTTSVoice" Content="Разрешить менять" HorizontalAlignment="Left" Margin="9,0,0,169" VerticalAlignment="Bottom" Height="15" Width="124" Click="AllowChTTTSVoice_Click"/>
+                    <RadioButton x:Name="OnlySUB" Content="Только подписчики" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top" Height="15" GroupName="Who" Checked="UserSelector_Checked"/>
+                    <RadioButton x:Name="OnlyVIP" Content="Только VIP (or Moder)" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Height="15" GroupName="Who" Checked="UserSelector_Checked"/>
+                    <RadioButton x:Name="AllUsers" Content="Все пользователи" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" Height="15" GroupName="Who" Checked="UserSelector_Checked"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Награды">
@@ -231,6 +236,8 @@
                     <TextBlock HorizontalAlignment="Left" Margin="11,139,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="296" Height="64"><Run Text="Для применения настроек OBS WebSocket необходим перезапуск приложения"/><Run Text="."/><Run Text=" "/><Run/><LineBreak/><Run Text="Данная "/><Run Text="функция работ"/><Run Text="ает "/><Run Text="только в "/><Run Text="OBS Studio "/><Run Text="с установленным плагином "/><Run Text="OBS WebSocket."/></TextBlock>
                     <Button x:Name="GetModBtt" Content="Разрешить модерирование" HorizontalAlignment="Right" Margin="0,230,10,0" VerticalAlignment="Top" Width="185" Click="Button_Click_9" Height="20"/>
                     <TextBlock x:Name="Status" Grid.Column="1" Margin="10" TextWrapping="Wrap" Text="Ошибка загрузки данных"/>
+                    <Button Content="Отключится" HorizontalAlignment="Left" Margin="10,230,0,0" VerticalAlignment="Top" Width="116" Click="Button_Click_13"/>
+                    <Button x:Name="DAConnect" Content="Подключить DonationAlerts" HorizontalAlignment="Right" Margin="0,255,10,0" VerticalAlignment="Top" Width="185" Click="DAConnect_Click"/>
 
                 </Grid>
             </TabItem>
