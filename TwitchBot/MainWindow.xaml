@@ -214,6 +214,33 @@
                     <TextBox x:Name="Script" Margin="2,158,1,40" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="Script_TextChanged" IsEnabled="False" Grid.Column="1"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="Команды">
+                <Grid  Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="190"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="240"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="3"/>
+                    <ListBox x:Name="CmdEvList" Margin="10,10,10,35" SelectionChanged="CmdEvList_SelectionChanged"/>
+                    <Button Content="Добавить" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="86" Height="20" Click="Button_Click_15"/>
+                    <TextBox x:Name="CmdName" Height="23" Margin="3,13,1,0" TextWrapping="Wrap" Text="Новое событие" VerticalAlignment="Top" IsEnabled="False" Grid.Column="1" TextChanged="CmdName_TextChanged"/>
+                    <Button Content="Удалить" HorizontalAlignment="Left" Margin="101,0,0,10" VerticalAlignment="Bottom" Width="69" Height="20" Click="Button_Click_16"/>
+                    <Label Content="Примеры" Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Padding="0"/>
+                    <TextBlock x:Name="CmdThanks_Copy" HorizontalAlignment="Left" Margin="4,0,0,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="159" Grid.Column="1"><Hyperlink NavigateUri="https://github.com/ScriptedEngineer/TwitchBot/wiki/6.Как-писать-алгоритмы-для-автоматизации-наград" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Гайд по алгоритму"/></Hyperlink></TextBlock>
+                    <Button Content="Написать в чат" Grid.Column="2" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_14" ToolTip="Send %NICK%, жаренный %TEXT%!"/>
+                    <Label x:Name="CmdEvLabel" Content="Алгоритм выполнения" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="3,84,0,0" Grid.Column="1"/>
+                    <TextBox x:Name="CmdScript" Margin="3,100,1,40" TextWrapping="Wrap" AcceptsReturn="True" IsEnabled="False" Grid.Column="1" TextChanged="CmdScript_TextChanged"/>
+                    <ComboBox x:Name="CmdRights" Grid.Column="1" HorizontalAlignment="Left" Margin="3,57,0,0" VerticalAlignment="Top" Width="193" SelectedIndex="0" SelectionChanged="CmdRights_SelectionChanged" IsEnabled="False">
+                        <ComboBoxItem Content="Только я"/>
+                        <ComboBoxItem Content="Подписчики"/>
+                        <ComboBoxItem Content="Модераторы"/>
+                        <ComboBoxItem Content="VIP"/>
+                        <ComboBoxItem Content="Все"/>
+                    </ComboBox>
+                    <Label x:Name="CmdEvLabel_Copy" Content="Кто может использовать" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="3,41,0,0" Grid.Column="1"/>
+                </Grid>
+            </TabItem>
             <TabItem Header="Пожертвования" Width="0">
                 <Grid Background="#FFE5E5E5">
                     <Rectangle Fill="#FFF4F4F5" Stroke="Black" Grid.ColumnSpan="2"/>

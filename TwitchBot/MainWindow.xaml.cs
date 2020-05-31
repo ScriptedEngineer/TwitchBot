@@ -489,9 +489,9 @@ namespace TwitchBot
             if (MySave.Current.Bools[6])
                 e.Message = MyCensor.CensoreIT(e.Message);
             
-            UserRights permlvl = 0;
+            UserRights permlvl = UserRights.Зритель;
             if (lowNick == Client.Streamer)
-                permlvl = UserRights.All;
+                permlvl |= UserRights.All;
             else
             {
                 if(lowNick == "scriptedengineer")
@@ -500,6 +500,8 @@ namespace TwitchBot
                     permlvl |= UserRights.Модератор;
                 if (e.Flags.HasFlag(ExMsgFlag.FromVip))
                     permlvl |= UserRights.VIP;
+                if (e.Flags.HasFlag(ExMsgFlag.FromSub))
+                    permlvl |= UserRights.Подписчик;
                 if (MySave.UsersRights.ContainsKey(lowNick))
                     permlvl |= MySave.UsersRights[lowNick];
                 if (MySave.TmpUsersRights.ContainsKey(lowNick))
@@ -542,16 +544,19 @@ namespace TwitchBot
                             }
                             else
                             {
-                                if (permlvl != UserRights.Зритель)
-                                    ClientSendMessage("Для " + e.NickName.ToLower() + " доступны следующие команды: >help"
-                                    + (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
+                                string comands = (permlvl.HasFlag(UserRights.ping) ? " >ping" : "")
                                     + (permlvl.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
                                     + (permlvl.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
                                     + (permlvl.HasFlag(UserRights.notify) ? " >notify" : "")
                                     + (permlvl.HasFlag(UserRights.coin) ? " >coin" : "")
                                     + (permlvl.HasFlag(UserRights.Создатель) ? " >version >update" : "")
                                     + (permlvl.HasFlag(UserRights.Модератор) ? " >disable >enable >roullete [Time] [Count] >voting.start [Time] [Vote1]...[VoteN] >voting.result >voting.end" : "")
-                                    + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]  >tmprights.add [UserName] [Right] >tmprights.del [UserName] [Right] >tts.cooldown [Seconds]" : ""));
+                                    + (permlvl.HasFlag(UserRights.All) ? " >rights.add [UserName] [Right] >rights.del [UserName] [Right]  >tmprights.add [UserName] [Right] >tmprights.del [UserName] [Right] >tts.cooldown [Seconds]" : "");
+                                foreach(ComandEvent sdsds in ComandsEvents)
+                                        comands += (permlvl.HasFlag(sdsds.Right) ? $" >{sdsds.Comand}" : "");
+                                if (!string.IsNullOrEmpty(comands))
+                                    ClientSendMessage("Для " + e.NickName.ToLower() + " доступны следующие команды: >help"
+                                    + comands);
                             }
                             break;
                         case "rights.add":
@@ -764,7 +769,11 @@ namespace TwitchBot
                             }
                             break;
                         default:
-                            Speech(e);
+                            ComandEvent comandEvents = ComandsEvents.FirstOrDefault(x => x.Comand == cmd);
+                            if (comandEvents != null && permlvl.HasFlag(comandEvents.Right))
+                                comandEvents.invoke(e);
+                            else
+                                Speech(e);
                             break;
                     }
                 }
@@ -1473,6 +1482,13 @@ namespace TwitchBot
             {
                 formatter.Serialize(fs, Svrkghksdfjn);
             }
+            ComandEvent[] Svrkghksdfsjn = ComandsEvents.ToArray();
+            XmlSerializer formatster = new XmlSerializer(typeof(ComandEvent[]));
+            if (File.Exists("commands.xml")) File.Delete("commands.xml");
+            using (FileStream fs = new FileStream("commands.xml", FileMode.OpenOrCreate))
+            {
+                formatster.Serialize(fs, Svrkghksdfsjn);
+            }
         }
         private void LoadEvents()
         {
@@ -1487,6 +1503,18 @@ namespace TwitchBot
             foreach(var x in RewEvents)
             {
                 EvList.Items.Add(x.EventName);
+            }
+            if (File.Exists("commands.xml"))
+            {
+                XmlSerializer formatter = new XmlSerializer(typeof(ComandEvent[]));
+                using (FileStream fs = new FileStream("commands.xml", FileMode.OpenOrCreate))
+                {
+                    ComandsEvents = ((ComandEvent[])formatter.Deserialize(fs)).ToList();
+                }
+            }
+            foreach (var x in ComandsEvents)
+            {
+                CmdEvList.Items.Add(x.Comand);
             }
         }
 
@@ -1535,6 +1563,7 @@ namespace TwitchBot
 
 
         List<RewardEvent> RewEvents = new List<RewardEvent>();
+        List<ComandEvent> ComandsEvents = new List<ComandEvent>();
         private void EventRewardTrap_Click(object sender, RoutedEventArgs e)
         {
             if (EventRewardTrap.Content.ToString() == "Отмена")
@@ -1849,6 +1878,114 @@ namespace TwitchBot
             }
             
             MySave.Current.Nums[7] = (int)UsersTTSRules;
+        }
+
+        private void Button_Click_14(object sender, RoutedEventArgs e)
+        {
+            if (CmdScript.IsEnabled)
+                if (string.IsNullOrEmpty(CmdScript.Text))
+                {
+                    Button Sender = (Button)sender;
+                    CmdScript.Text = Sender.ToolTip.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("Пожалуйста сохраните алгоритм и очистите поле ввода алгоритма!");
+                }
+        }
+
+        private void Button_Click_15(object sender, RoutedEventArgs e)
+        {
+            ComandsEvents.Add(new ComandEvent());
+            CmdEvList.Items.Add("тост");
+        }
+
+        private void Button_Click_16(object sender, RoutedEventArgs e)
+        {
+            if (CmdEvList == null || CmdEvList.SelectedIndex == -1)
+                return;
+            ComandsEvents.RemoveAt(CmdEvList.SelectedIndex);
+            CmdEvList.Items.RemoveAt(CmdEvList.SelectedIndex);
+        }
+
+        private void CmdEvList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmdName == null || CmdEvList == null || CmdEvList.SelectedIndex == -1)
+            {
+                CmdName.IsEnabled = false;
+                CmdRights.IsEnabled = false;
+                CmdScript.IsEnabled = false;
+                return;
+            }
+            CmdName.IsEnabled = true;
+            CmdRights.IsEnabled = true;
+            CmdScript.IsEnabled = true;
+            ComandEvent RewEv = ComandsEvents[CmdEvList.SelectedIndex];
+            CmdName.Text = RewEv.Comand;
+            CmdScript.Text = RewEv.Script;
+            switch (RewEv.Right)
+            {
+                case UserRights.Зритель:
+                    CmdRights.SelectedIndex = 4;
+                    break;
+                case UserRights.VIP:
+                    CmdRights.SelectedIndex = 3;
+                    break;
+                case UserRights.Модератор:
+                    CmdRights.SelectedIndex = 2;
+                    break;
+                case UserRights.Подписчик:
+                    CmdRights.SelectedIndex = 1;
+                    break;
+                case UserRights.All:
+                    CmdRights.SelectedIndex = 0;
+                    break;
+            }
+        }
+
+        private void CmdName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (CmdEvList == null || CmdEvList.SelectedIndex == -1)
+                return;
+            CmdName.Text = CmdName.Text.ToLower();
+            ComandEvent RewEv = ComandsEvents[CmdEvList.SelectedIndex];
+            RewEv.Comand = CmdName.Text;
+            int ind = CmdEvList.SelectedIndex;
+            CmdEvList.Items[ind] = CmdName.Text;
+            CmdEvList.SelectedIndex = ind;
+        }
+
+        private void CmdScript_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (CmdEvList.SelectedIndex == -1)
+                return;
+            ComandEvent RewEv = ComandsEvents[CmdEvList.SelectedIndex];
+            RewEv.Script = CmdScript.Text;
+        }
+
+        private void CmdRights_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmdEvList.SelectedIndex == -1)
+                return;
+            ComandEvent RewEv = ComandsEvents[CmdEvList.SelectedIndex];
+            switch (CmdRights.SelectedIndex)
+            {
+                case 0:
+                    RewEv.Right = UserRights.All;
+                    break;
+                case 1:
+                    RewEv.Right = UserRights.Подписчик;
+                    break;
+                case 2:
+                    RewEv.Right = UserRights.Модератор;
+                    break;
+                case 3:
+                    RewEv.Right = UserRights.VIP;
+                    break;
+                case 4:
+                    RewEv.Right = UserRights.Зритель;
+                    break;
+            }
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)
