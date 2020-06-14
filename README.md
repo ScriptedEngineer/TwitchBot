@@ -32,6 +32,6 @@
 ## Благодарность
 
 * **Jagmesh** - *Вдохновитель проекта* - [Канал](https://www.twitch.tv/jagmesh)
-* **dadyamiga** - *Отличный стример, тестер новых фич* - [Канал](https://www.twitch.tv/dadyamiga)
+* **dadyamiga** - *Главный тестер новых фич* - [Канал](https://www.twitch.tv/dadyamiga)
 * **google_hdc** - *Просто отличный стример* - [Канал](https://www.twitch.tv/google_hdc)
 * **VANCHOBA** - *Просто хороший стример* - [Канал](https://www.twitch.tv/vanchoba)
