@@ -31,8 +31,7 @@
 
 ## Благодарность
 
-* **Jagmesh** - *Вдохновитель проекта, скачал с самого начала* - [Канал](https://www.twitch.tv/jagmesh)
-* **dadyamiga** - *Отличный стример, тестер новых фич, спонсор проекта* - [Канал](https://www.twitch.tv/dadyamiga)
-* **google_hdc** - *Главный тестер новых фич, скачал с версии 0.1.0.0* - [Канал](https://www.twitch.tv/google_hdc)
-* **GrizzlyTV_ru** - *Один из ранних, кто скачал* - [Канал](https://www.twitch.tv/grizzlytv_ru)
-* **VANCHOBA** - *Просто хороший стример, тоже скачал* - [Канал](https://www.twitch.tv/vanchoba)
+* **Jagmesh** - *Вдохновитель проекта* - [Канал](https://www.twitch.tv/jagmesh)
+* **dadyamiga** - *Отличный стример, тестер новых фич* - [Канал](https://www.twitch.tv/dadyamiga)
+* **google_hdc** - *Просто отличный стример* - [Канал](https://www.twitch.tv/google_hdc)
+* **VANCHOBA** - *Просто хороший стример* - [Канал](https://www.twitch.tv/vanchoba)
