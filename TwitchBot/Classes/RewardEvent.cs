@@ -22,13 +22,13 @@ namespace TwitchBot
         {
 
         }
-        public void invoke(RewardEventArgs e)
+        public void Invoke(RewardEventArgs e)
         {
             while (Runing)
                 Thread.Sleep(100);
             Runing = true;
             string scripd = Script;
-            if (scripd.Contains("%"))
+            if (scripd != null && scripd.Contains("%"))
             {
 
                 if (scripd.Contains("%TEXT%"))
@@ -54,7 +54,7 @@ namespace TwitchBot
         {
 
         }
-        public void invoke(MessageEventArgs e)
+        public void Invoke(MessageEventArgs e)
         {
             while (Runing)
                 Thread.Sleep(100);

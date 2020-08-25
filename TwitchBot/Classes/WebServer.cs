@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using TwitchLib;
 
 namespace TwitchBot
@@ -20,7 +22,7 @@ namespace TwitchBot
         {
             switch (request.RawUrl.Split('?').First().Trim('/'))
             {
-                
+
                 case "control":
                     return "NO";
                 case "twitchcode":
@@ -29,6 +31,14 @@ namespace TwitchBot
                     string token = request.QueryString.Get("access_token");
                     string login = TwitchAccount.GetLogin(token);
                     File.WriteAllLines("account.txt", new string[] { login, token });
+                    new Task(() =>
+                    {
+                        Thread.Sleep(500);
+                        Extentions.AsyncWorker(() =>
+                        {
+                            MainWindow.CurrentW.ContinueInitializing();
+                        });
+                    }).Start();
                     return "<script>location.replace('https://wsxz.ru/closetab');</script>";
                 case "da":
                     new Thread(() =>
@@ -53,7 +63,16 @@ namespace TwitchBot
                             Match Rgex = Regex.Match(readStream.ReadToEnd(), @"""access_token"":""([^""]*)"".*""refresh_token"":""([^""]*)""");
                             try
                             {
-                                File.WriteAllText("da.txt", Rgex.Groups[1].Value +"\n"+ Rgex.Groups[2].Value);
+                                File.WriteAllText("da.txt", Rgex.Groups[1].Value + "\n" + Rgex.Groups[2].Value);
+                                new Task(() =>
+                                {
+                                    Thread.Sleep(500);
+                                    Extentions.AsyncWorker(() =>
+                                    {
+                                        Process.Start(Extentions.AppFile);
+                                        Application.Current.Shutdown();
+                                    });
+                                }).Start();
                             }
                             catch
                             {
@@ -88,17 +107,12 @@ namespace TwitchBot
                 throw new ArgumentException("URI prefixes are required");
             }
 
-            if (method == null)
-            {
-                throw new ArgumentException("responder method required");
-            }
-
             foreach (var s in prefixes)
             {
                 _listener.Prefixes.Add(s);
             }
 
-            _responderMethod = method;
+            _responderMethod = method ?? throw new ArgumentException("responder method required");
             _listener.Start();
         }
 
@@ -122,7 +136,7 @@ namespace TwitchBot
                     {
                         ThreadPool.QueueUserWorkItem(c =>
                         {
-                            var ctx = c as HttpListenerContext;
+                            HttpListenerContext ctx = c as HttpListenerContext;
                             try
                             {
                                 if (ctx == null)

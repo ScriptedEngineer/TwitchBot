@@ -19,15 +19,16 @@ namespace TwitchBot
     {
         static public void RunScript(string script)
         {
+            if (script == null) return;
             string[] functions = script.Split('\n');
             int len = functions.Length;
             for (int index = 0; index < len; index++)
             {
-                index = RunCommand(functions[index].Trim(), index, len);
+                index = RunCommand(functions[index].Trim(), index);//, len
             }
         }
 
-        static public int RunCommand(string command, int index, int max)
+        public static int RunCommand(string command, int index)//, int max
         {
             try
             {

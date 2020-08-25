@@ -27,11 +27,11 @@ namespace TwitchBot
     public partial class MainWindow : Window
     {
         private static System.Timers.Timer aTimer, bTimer;
-        System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
+        readonly System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
         public int MediaDurationMs = 0;
         bool Tray = false;
         Thread SpeechTask;
-        OBSWebSock OBSRemote;
+        private OBSWebSock OBSRemote;
         DonationAlerts DonAlert;
         static public MainWindow CurrentW;
         public MainWindow()
@@ -41,12 +41,12 @@ namespace TwitchBot
             //Инициализация трей иконки
             ni.Icon = Properties.Resources.icon;
             ni.Visible = true;
-            EventHandler OpenShow = (sndr, args) =>
+            void OpenShow(object sndr, EventArgs args)
             {
                 Show();
                 WindowState = WindowState.Normal;
                 Tray = false;
-            };
+            }
             ni.DoubleClick += OpenShow;
             ni.ContextMenu = new System.Windows.Forms.ContextMenu(new System.Windows.Forms.MenuItem[] { 
             new System.Windows.Forms.MenuItem("Развернуть",OpenShow),
@@ -55,6 +55,8 @@ namespace TwitchBot
 
             //Инициализация компонентов GUI
             InitializeComponent();
+            Streamer.IsEnabled = false;
+            ConnectButton.IsEnabled = false;
             MaxWidth = 550;
             MinWidth = 350;
             MaxHeight = 95;
@@ -206,17 +208,40 @@ namespace TwitchBot
             WebServer = new WebServer("http://localhost:8190/");
             WebServer.Run();
 
+            //Параметры командной строки
+            string[] argsv = Environment.GetCommandLineArgs();
+            if (argsv.Length > 1)
+                foreach (string x in argsv)
+                    switch (x)
+                    {
+                        case "traystart":
+                            Hide();
+                            Tray = true;
+                            break;
+                    }
+
             //Авторизация
             if (!File.Exists("account.txt"))
             {
                 Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read");
-                while (!File.Exists("account.txt"))
-                {
-                    Thread.Sleep(500);
-                }
             }
+            else ContinueInitializing();
+        }
+
+        public void ContinueInitializing()
+        {
+            if (Controls.IsVisible)
+            {
+                Process.Start(Extentions.AppFile);
+                Application.Current.Shutdown();
+                return;
+            }
+            Streamer.IsEnabled = true;
+            ConnectButton.IsEnabled = true;
             string[] AccountFields = File.ReadAllLines("account.txt");
             Account = new TwitchAccount(AccountFields[0], AccountFields[1]);
+            if (string.IsNullOrEmpty(MySave.Current.Streamer)) 
+                Streamer.Text = Account.Login;
 
             if (File.Exists("da.txt"))
             {
@@ -233,18 +258,6 @@ namespace TwitchBot
 
                 }
             }
-
-            //Параметры командной строки
-            string[] argsv = Environment.GetCommandLineArgs();
-            if (argsv.Length > 1)
-                foreach (string x in argsv)
-                    switch (x)
-                    {
-                        case "traystart":
-                            Hide();
-                            Tray = true;
-                            break;
-                    }
 
             //WebSocket сервер визуалки
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
@@ -264,17 +277,19 @@ namespace TwitchBot
             //Подготовка TrueTTS
             lock (Extentions.SpeechSynth)
             {
-                string Text = "А";
+                string Text = "Добро пожаловать "+ Account.Login;
                 Extentions.GetTrueTTSReady(Text, MySave.Current.YPV.ToString());
                 Extentions.TrueTTS(Text);
                 LastTTS = DateTime.Now;
             }
 
-            if(!string.IsNullOrEmpty(MySave.Current.Streamer))
+            if (!string.IsNullOrEmpty(MySave.Current.Streamer))
                 Button_Click(null, null);
+
+            Focus();
         }
         WebSocketSharp.Server.WebSocketServer WebSocketServer;
-        WebServer WebServer;
+        readonly WebServer WebServer;
         
         public static TwitchClient Client;
         TwitchAccount Account;
@@ -328,11 +343,11 @@ namespace TwitchBot
                 Rand = new Random(Rand.Next());
                 Extentions.AsyncWorker(() =>
                 {
-                    MaxWidth = 1000;
-                    MinWidth = 900;
+                    MaxWidth = 730;
+                    MinWidth = 630;
                     MaxHeight = 600;
                     MinHeight = 500;
-                    Width = 950;
+                    Width = 680;
                     Height = 550;
                     Top = Screen.PrimaryScreen.Bounds.Height/2 - ActualHeight / 2;
                     Left = Screen.PrimaryScreen.Bounds.Width / 2 - ActualWidth / 2;
@@ -357,7 +372,7 @@ namespace TwitchBot
             }).Start();
         }
 
-        Dictionary<string, string> Queue = new Dictionary<string, string>();
+        readonly Dictionary<string, string> Queue = new Dictionary<string, string>();
         (string, string) Current;
         private void Donation(object Sender, DonationEventArgs e)
         {
@@ -471,7 +486,7 @@ namespace TwitchBot
                 {
                     if (MySave.Current.Bools[6])
                         e.Text = MyCensor.CensoreIT(e.Text);
-                    RewEvents.FirstOrDefault(x => x.CustomRewardID == e.CustomRewardID)?.invoke(e);
+                    RewEvents.FirstOrDefault(x => x.CustomRewardID == e.CustomRewardID)?.Invoke(e);
                 }).Start();
             }
         }
@@ -771,7 +786,7 @@ namespace TwitchBot
                         default:
                             ComandEvent comandEvents = ComandsEvents.FirstOrDefault(x => x.Comand == cmd);
                             if (comandEvents != null && permlvl.HasFlag(comandEvents.Right))
-                                comandEvents.invoke(e);
+                                comandEvents.Invoke(e);
                             else
                                 Speech(e);
                             break;
@@ -1707,13 +1722,6 @@ namespace TwitchBot
             if (File.Exists("account.txt")) 
                 File.Delete("account.txt");
             Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read%20channel:moderate");
-            while (!File.Exists("account.txt"))
-            {
-                Thread.Sleep(500);
-            }
-            Thread.Sleep(500);
-            Process.Start(Extentions.AppFile);
-            Application.Current.Shutdown();
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -1754,13 +1762,24 @@ namespace TwitchBot
             if (File.Exists("da.txt"))
                 File.Delete("da.txt");
             Process.Start("https://www.donationalerts.com/oauth/authorize?client_id=865&redirect_uri=http://localhost:8190/da&response_type=code&scope=oauth-donation-subscribe+oauth-user-show");
-            while (!File.Exists("da.txt"))
-            {
-                Thread.Sleep(500);
-            }
-            Thread.Sleep(500);
-            Process.Start(Extentions.AppFile);
-            Application.Current.Shutdown();
+            /*new Task(() => {
+                bool isFocus = false;
+                while (!File.Exists("da.txt"))
+                {
+                    Thread.Sleep(500);
+                    Extentions.AsyncWorker(() => isFocus = IsFocused);
+                    if (isFocus) break;
+                }
+                if (File.Exists("da.txt"))
+                {
+                    Extentions.AsyncWorker(() =>
+                    {
+                        Thread.Sleep(500);
+                        Process.Start(Extentions.AppFile);
+                        Application.Current.Shutdown();
+                    });
+                }
+            }).Start();*/
             //"https://www.donationalerts.com/oauth/authorize?client_id=865&redirect_uri=http://localhost:8190/da&response_type=code&scope=oauth-donation-subscribe"
         }
 
