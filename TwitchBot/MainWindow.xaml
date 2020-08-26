@@ -93,8 +93,8 @@
                     <TextBox x:Name="CustomRewardID" Height="23" Margin="156,70,7,0" TextWrapping="NoWrap" VerticalAlignment="Top" TextChanged="CustomRewardID_TextChanged"/>
                     <RadioButton x:Name="CustomReward" Content="Только товар:" HorizontalAlignment="Left" Margin="156,50,0,0" VerticalAlignment="Top" Checked="AllChat_Checked" Height="15" Width="95"/>
                     <RadioButton x:Name="AllChat" Content="Весь чат" HorizontalAlignment="Left" Margin="156,10,0,0" VerticalAlignment="Top" IsChecked="True" Checked="AllChat_Checked" Height="15" Width="65"/>
-                    <Slider x:Name="SynthSpeed" Margin="156,0,7,126" VerticalAlignment="Bottom" Minimum="-10" ValueChanged="Slider_ValueChanged" Height="18"/>
-                    <Label x:Name="SpeedLabel" Content="Скорость (0) [1x]" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="156,0,0,145" Width="134" Height="16"/>
+                    <Slider x:Name="SynthSpeed" Margin="156,0,7,126" VerticalAlignment="Bottom" Minimum="-10" ValueChanged="Slider_ValueChanged"/>
+                    <Label x:Name="SpeedLabel" Content="Скорость (0) [1x]" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="156,0,0,148" Width="134" Height="16"/>
                     <Button Content="..." HorizontalAlignment="Right" Margin="0,0,7,97" VerticalAlignment="Bottom" Width="24" Height="18" Padding="0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Click="Button_Click_6"/>
                     <Label x:Name="TTSNotifyLabel" Content="tts.mp3" Margin="127,0,36,97" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" Padding="0" Height="19" VerticalContentAlignment="Center"/>
                     <CheckBox x:Name="TTSNotifyUse" Content="Звуковой сигнал" HorizontalAlignment="Left" Margin="10,0,0,97" VerticalAlignment="Bottom" IsChecked="True" RenderTransformOrigin="0.5,0.5" Click="TTSNotifyUse_Click" Width="112">
@@ -107,10 +107,10 @@
                             </TransformGroup>
                         </CheckBox.RenderTransform>
                     </CheckBox>
-                    <TextBox x:Name="MaxSymbols" HorizontalAlignment="Left" Height="20" Margin="9,0,0,56" TextWrapping="Wrap" Text="480" VerticalAlignment="Bottom" Width="42" TextChanged="TextBox_TextChanged_1"/>
+                    <TextBox x:Name="MaxSymbols" HorizontalAlignment="Left" Height="20" Margin="10,0,0,56" TextWrapping="Wrap" Text="480" VerticalAlignment="Bottom" Width="42" TextChanged="TextBox_TextChanged_1"/>
                     <Label x:Name="SpeedLabel_Copy" Content="Максимум символов" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,76" Height="16" Width="115"/>
-                    <RadioButton x:Name="DontTTS" Content="Не озвучивать" HorizontalAlignment="Left" Margin="10,0,0,25" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="DontTTS_Checked" Height="15" Width="99"/>
-                    <RadioButton x:Name="SMaxTTS" Content="Максимальная скорость" HorizontalAlignment="Left" Margin="9,0,0,10" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="SMaxTTS_Checked" Height="15" Width="153"/>
+                    <RadioButton x:Name="DontTTS" Content="Не озвучивать" HorizontalAlignment="Left" Margin="10,0,0,24" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="DontTTS_Checked" Height="15" Width="99"/>
+                    <RadioButton x:Name="SMaxTTS" Content="Максимальная скорость" HorizontalAlignment="Left" Margin="10,0,0,8" VerticalAlignment="Bottom" GroupName="MaxSymbols" IsChecked="True" Checked="SMaxTTS_Checked" Height="15" Width="153"/>
                     <TextBox x:Name="HotKey" Height="20" Margin="191,0,7,56" TextWrapping="NoWrap" IsReadOnly="True" VerticalAlignment="Bottom" KeyDown="TextBox_KeyDown" KeyUp="TextBox_KeyUp"/>
                     <Label x:Name="SpeedLabel_Copy1" Content="Стоп кнопка:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,76" Height="16" Width="71"/>
                     <Label x:Name="SpeedLabel_Copy2" Content="При превышении:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,40" Height="16" Width="100"/>
@@ -121,11 +121,11 @@
                     <TextBox x:Name="Censor" Height="20" Margin="186,25,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="." TextChanged="Censor_TextChanged" Grid.Column="1"/>
                     <Label Content="Заменить на:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="186,9,0,0" Width="120" Height="16" Grid.Column="1"/>
                     <CheckBox x:Name="Filtred" Content="Фильровать слова (600+)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="Filtred_Click" Height="15" Width="171" Grid.Column="1"/>
-                    <Label x:Name="VolumeLabel" Content="Громкость" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,28" Width="115" Height="16"/>
-                    <Slider x:Name="Volume" Margin="191,0,7,10" VerticalAlignment="Bottom" ValueChanged="Volume_ValueChanged" Maximum="100" Value="100" Height="18"/>
+                    <Label x:Name="VolumeLabel" Content="Громкость" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="191,0,0,30" Width="115" Height="16"/>
+                    <Slider x:Name="Volume" Margin="191,0,7,10" VerticalAlignment="Bottom" ValueChanged="Volume_ValueChanged" Maximum="100" Value="100"/>
                     <CheckBox x:Name="UseYA" Content="Через TrueTTS" HorizontalAlignment="Left" Margin="10,50,0,0" Click="UseYA_Click" VerticalAlignment="Top" Width="98"/>
                     <TextBlock x:Name="RewardName_Copy" Margin="10,66,166,0" TextWrapping="Wrap" Text="Сильно замедляет обработку" FontSize="10" VerticalAlignment="Top" Height="13"/>
-                    <ComboBox x:Name="Voices_TTTS" VerticalAlignment="Bottom" Margin="10,0,0,184" HorizontalAlignment="Left" Width="141" Height="22" SelectionChanged="Voices_TTTS_SelectionChanged">
+                    <ComboBox x:Name="Voices_TTTS" VerticalAlignment="Bottom" Margin="10,0,0,189" HorizontalAlignment="Left" Width="141" Height="22" SelectionChanged="Voices_TTTS_SelectionChanged">
                         <ComboBoxItem Content="Алена"/>
                         <ComboBoxItem Content="Филипп"/>
                         <ComboBoxItem Content="Элис"/>
@@ -135,7 +135,7 @@
                         <ComboBoxItem Content="Захар"/>
                         <ComboBoxItem Content="Ермил"/>
                     </ComboBox>
-                    <Label Content="Голос (TrueTTS):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,206" Width="105" Height="16"/>
+                    <Label Content="Голос (TrueTTS):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,211" Width="105" Height="16"/>
                     <Grid x:Name="DonationTTS" Grid.Column="1" Margin="0,2,0,0" IsEnabled="False">
                         <Rectangle Stroke="Black"/>
                         <Rectangle Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="0,0,0,92" RenderTransformOrigin="0.5,0.5">
@@ -186,7 +186,7 @@
                         <TextBox x:Name="WaitPlease" HorizontalAlignment="Right" Height="20" Margin="0,0,10,125" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="38" TextChanged="WaitPlease_TextChanged"/>
                         <Label Content="Ждать(сек):" HorizontalAlignment="Right" Margin="0,0,53,128" VerticalAlignment="Bottom" Padding="0" Height="16" Width="64"/>
                     </Grid>
-                    <CheckBox x:Name="AllowChTTTSVoice" Content="Разрешить менять" HorizontalAlignment="Left" Margin="10,0,0,164" VerticalAlignment="Bottom" Width="124" Click="AllowChTTTSVoice_Click"/>
+                    <CheckBox x:Name="AllowChTTTSVoice" Content="Разрешить менять" HorizontalAlignment="Left" Margin="10,0,0,169" VerticalAlignment="Bottom" Width="124" Click="AllowChTTTSVoice_Click"/>
                     <CheckBox x:Name="AllTTS" Content="Все зрители" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" Background="White" Click="AllTTS_Click"/>
                     <CheckBox x:Name="VIPTTS" Content="VIP зрители" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White"/>
                     <CheckBox x:Name="ModTTS" Content="Модераторы" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White"/>
@@ -247,6 +247,31 @@
                         <ComboBoxItem Content="Все"/>
                     </ComboBox>
                     <Label x:Name="CmdEvLabel_Copy" Content="Кто может использовать" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="3,41,0,0" Grid.Column="1"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Список дел" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Margin="0" Stroke="Black" Grid.ColumnSpan="2"/>
+                    <ListView x:Name="Doings" Margin="1,1,0,30">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Дело" DisplayMemberBinding="{Binding Nickname}" Width="200" />
+                                <GridViewColumn Header="Таймер" DisplayMemberBinding="{Binding Vote}" Width="80" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <ListView x:Name="Doings2" Margin="0,1,1,30" Grid.Column="1">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Дело" DisplayMemberBinding="{Binding Nickname}" Width="200" />
+                                <GridViewColumn Header="Время" DisplayMemberBinding="{Binding Vote}" Width="80" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </Grid>
             </TabItem>
             <TabItem Header="Пожертвования" Width="0">
