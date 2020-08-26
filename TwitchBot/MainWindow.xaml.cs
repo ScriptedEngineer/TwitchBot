@@ -499,6 +499,8 @@ namespace TwitchBot
         private void Message(object Sender, MessageEventArgs e)
         {
             string lowNick = e.NickName.ToLower().Trim();
+            if (Extentions.MyEncoding.check(e.Message))
+                e.Message = Extentions.MyEncoding.decode(e.Message);
             if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
             if (lowNick == Client.Account.Login && e.Message.Contains("‌")) return;
             if (MySave.Current.Bools[6])

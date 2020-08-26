@@ -13,6 +13,7 @@ using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Linq;
 
 namespace TwitchBot
 {
@@ -262,6 +263,43 @@ namespace TwitchBot
             }
             
             return vs.ToArray();
+        }
+
+        public static class MyEncoding
+        {
+            static readonly string[] chars = { "̀", "́", "̂", "̃", "̄", "̅", "̆", "̇", "̈", "̉", "̊", "̋", "̌", "̍", "̎", "̏", "̐", "̑", "ͣ", "ͤ", "ͥ", "ͦ", "ͧ", "ͨ", "ͩ", "ͪ", "ͫ", "ͬ", "ͭ", "ͮ", "ͯ" };
+            static readonly string prefix = "ⁱₐ";
+            static readonly string separator = "′.,:;'₀ ";
+            static readonly string separators = "ҽɳƈσdҽd";
+
+            public static bool check(string t)
+            {
+                return Regex.IsMatch(t, "^" + prefix + "([" + string.Join("", chars) + separator.Replace(" ", "\\s") + separators.Replace(" ", "\\s") + "]*)$", RegexOptions.IgnoreCase);
+            }
+            public static string decode(string ta)
+            {
+                try
+                {
+                    var tz = ta.Substring(prefix.Length);
+                    var t = Regex.Split(tz, "[" + separator.Replace(" ", "\\s") + separators.Replace(" ", "\\s") + "]");//.Split(new RegExp()).clean("")
+                    var xt = t.Select(x => ToNum(x, chars));
+                    string ts = Encoding.UTF8.GetString(xt.ToArray());
+                    return ts.Trim('\0');
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            public static byte ToNum(string a, string[] cc)
+            {
+                double n = 0;
+                for (var i = 0; i < a.Length; i++)
+                {
+                    n += (Array.IndexOf(cc,a.Substring(a.Length - i - 1, 1)) * Math.Pow(cc.Length, i));
+                };
+                return (byte)n;
+            }
         }
     }
 
