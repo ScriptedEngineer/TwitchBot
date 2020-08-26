@@ -9,7 +9,8 @@
 
 ## Скачать
 
-[Google Drive](https://drive.google.com/open?id=1njbVh6DhDaKW85HdIEzst5xULQYcN_Rm)
+[Google Drive](https://drive.google.com/open?id=1njbVh6DhDaKW85HdIEzst5xULQYcN_Rm)<br>
+[GitHub Releases](https://github.com/ScriptedEngineer/TwitchBot/releases)
 
 ## Обновления
 
@@ -18,12 +19,13 @@
 
 ### Скриншоты
 
-![Prewiew](https://sun9-45.userapi.com/Z8B1Xk39SFuRh39iG9URlVrylpXdbMICU9mIyw/K_yK6eq2rmE.jpg "Окно подключения")
-![Prewiew](https://sun9-22.userapi.com/_9cck3rlyrVDXvDsfVBBQX1trw4y_5sW3oTfuw/AACBDlHtqQw.jpg "Вкладка настройки голосования")
-![Prewiew](https://sun9-11.userapi.com/ww7NKsxIX_NtFtsW-QpN__YKnV4AP0AI6Nf-EA/m3weKBJd13E.jpg "Вкладка настройки озвучивания")
-![Prewiew](https://sun9-27.userapi.com/hv6vIS1v0fYGQ0oyGG1zn3YqObbSUIzAEXD35Q/gKFFPDUFKUo.jpg "Вкладка автоматизации наград")
-![Prewiew](https://sun9-30.userapi.com/GBRU7bvh2m8i2CfPC1GhwPKM_WVUK3YWOAjWLQ/1iLHNvaBUiU.jpg "Вкладка настройки своих команд")
-![Prewiew](https://sun9-67.userapi.com/IF_0x-5zCN0WFJDy7IyHzTUtjMvtWE4mV6usWA/BodoCVx0W3c.jpg "Вкладка настроек")
+![Prewiew](https://sun9-61.userapi.com/0_Y2t7DXUbwgi3VT6qpeoSbEEC6asS8Eqz-bbw/8VAKmp-E7v4.jpg "Окно подключения")
+
+![Prewiew](https://sun9-8.userapi.com/gZOIwmVyfY0BD37VZ068CCxzQKIjFkKYpS7TMg/O2iQh1E5pQM.jpg "Вкладка настройки голосования")
+![Prewiew](https://sun9-36.userapi.com/yrHAme9MndS2QJ5fXTnJZ9WNHgy4OtudPPHZjw/xiqp6xJBVAI.jpg "Вкладка настройки озвучивания")
+![Prewiew](https://sun9-64.userapi.com/TeGiMrobk9f_z7HNeAQa8dsDDuPFFdUkQgmXxg/urxdPJWolEo.jpg "Вкладка автоматизации наград")
+![Prewiew](https://sun9-67.userapi.com/q1WesQhgimMd9GhAAjGUdXKJlNf5RDmaEgFUpQ/HtTbsah7wBk.jpg "Вкладка настройки своих команд")
+![Prewiew](https://sun9-59.userapi.com/AlBn-5XWdPVlDeo0ekobvfK1SmZBPsZRP6jWww/di3v-vSDBgk.jpg "Вкладка настроек")
 
 ## Авторы
 
