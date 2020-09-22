@@ -247,6 +247,11 @@ namespace TwitchBot
                                 Thread.Sleep(Kb);
                         }
                         break;
+                    case "Timer":
+                        string[] heh = command.Trim().Split(new char[] { ' ' }, 3);
+                        if(heh.Length > 2) 
+                            WebSockServTimer.SendAll(heh[1], heh[2]);
+                        break;
                 }
             }
             catch (Exception e)

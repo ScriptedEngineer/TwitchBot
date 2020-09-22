@@ -151,6 +151,7 @@ namespace TwitchBot
                 }*/
                 Player.Open(new Uri("F:/lol.mp3"));
                 Player.Open(new Uri(path, UriKind.Absolute));
+                Player.Volume = MySave.Current.Nums[4] / 100d;
                 Player.Play();
             });
             Thread.Sleep(1000);
@@ -268,7 +269,7 @@ namespace TwitchBot
         public static class MyEncoding
         {
             static readonly string[] chars = { "̀", "́", "̂", "̃", "̄", "̅", "̆", "̇", "̈", "̉", "̊", "̋", "̌", "̍", "̎", "̏", "̐", "̑", "ͣ", "ͤ", "ͥ", "ͦ", "ͧ", "ͨ", "ͩ", "ͪ", "ͫ", "ͬ", "ͭ", "ͮ", "ͯ" };
-            static readonly string prefix = "ⁱₐ";
+            public static readonly string prefix = "ⁱₐ";
             static readonly string separator = "′.,:;'₀ ";
             static readonly string separators = "ҽɳƈσdҽd";
 

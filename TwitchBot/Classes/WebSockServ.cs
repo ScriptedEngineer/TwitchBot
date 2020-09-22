@@ -8,10 +8,10 @@ using WebSocketSharp.Server;
 
 namespace TwitchBot
 {
-    public class WebSockServ : WebSocketBehavior
+    public class WebSockServAlert : WebSocketBehavior
     {
-        static WebSockServ Connection;
-        public WebSockServ()
+        static WebSockServAlert Connection;
+        public WebSockServAlert()
         {
             Connection = this;
         }
@@ -24,6 +24,24 @@ namespace TwitchBot
         public static void SendAll(string Event,string Data = "")
         {
             Connection?.Sessions.Broadcast(String.Format("{0}|{1}", Event, Data));
+        }
+    }
+    public class WebSockServTimer : WebSocketBehavior
+    {
+        static WebSockServTimer Connection;
+        public WebSockServTimer()
+        {
+            Connection = this;
+        }
+        protected override void OnMessage(MessageEventArgs e)
+        {
+            if (e.Data == "Ping")
+                Send("Pong");
+        }
+
+        public static void SendAll(string StringTime, string Title)
+        {
+            Connection?.Sessions.Broadcast(String.Format("Add|{0}|{1}", StringTime, Title));
         }
     }
 

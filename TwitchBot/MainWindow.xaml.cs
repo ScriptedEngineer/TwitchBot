@@ -36,6 +36,12 @@ namespace TwitchBot
         static public MainWindow CurrentW;
         public MainWindow()
         {
+            //Автоматические обновления
+            string[] argss = Environment.GetCommandLineArgs();
+            if (!argss.Any(x=> x.Contains("RemindLater") || x.Contains("Updated")))
+            {
+
+            }
             CurrentW = this;
             MySave.Load();
             //Инициализация трей иконки
@@ -82,19 +88,20 @@ namespace TwitchBot
                 LoadVotes(new string[0]);
             }
 
-            //Автоматические обновления
-            new Task(() =>
+            /*new Task(() =>
             {
                 string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
                 if (Vers.Length == 3 && Vers[0] == "0")
                 {
                     Extentions.AsyncWorker(() =>
                     {
-                        new Updater(Vers[1]).Show();
-                        Close();
+                        Process.Start("Updater")
+                        Application.Current.Shutdown();
+                        //new Updater(Vers[1]).Show();
+                        //Close();
                     });
                 }
-            }).Start();
+            }).Start();*/
 
             //Инициализация заготовок
             if (!Directory.Exists("./votings"))
@@ -261,7 +268,8 @@ namespace TwitchBot
 
             //WebSocket сервер визуалки
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
-            WebSocketServer.AddWebSocketService<WebSockServ>("/alert");
+            WebSocketServer.AddWebSocketService<WebSockServAlert>("/alert");
+            WebSocketServer.AddWebSocketService<WebSockServTimer>("/timer");
             WebSocketServer.Start();
 
             //Подключениее к OBS WebSocket
@@ -402,8 +410,8 @@ namespace TwitchBot
                                     Extentions.AsyncWorker(() =>
                                     {
                                         Extentions.Player.Open(new Uri(MySave.Current.DTTSNTFL, UriKind.Absolute));
+                                        Extentions.Player.Volume = MySave.Current.Nums[4] / 100d;
                                         Extentions.Player.Play();
-
                                     });
                                     Thread.Sleep(1000);
                                     Thread.Sleep(MediaDurationMs);
@@ -499,7 +507,7 @@ namespace TwitchBot
         private void Message(object Sender, MessageEventArgs e)
         {
             string lowNick = e.NickName.ToLower().Trim();
-            if (Extentions.MyEncoding.check(e.Message))
+            if (e.Message.StartsWith(Extentions.MyEncoding.prefix) && Extentions.MyEncoding.check(e.Message))
                 e.Message = Extentions.MyEncoding.decode(e.Message);
             if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
             if (lowNick == Client.Account.Login && e.Message.Contains("‌")) return;
@@ -761,6 +769,7 @@ namespace TwitchBot
                                 Extentions.AsyncWorker(() =>
                                 {
                                     Extentions.Player.Open(new Uri(MySave.Current.TTSNTFL, UriKind.Absolute));
+                                    Extentions.Player.Volume = MySave.Current.Nums[4] / 100d;
                                     Extentions.Player.Play();
                                 });
                             }
@@ -865,16 +874,17 @@ namespace TwitchBot
                                     return;
                                 }
                                 Extentions.Player.Open(new Uri(MySave.Current.TTSNTFL, UriKind.Absolute));
+                                Extentions.Player.Volume = MySave.Current.Nums[4] / 100d;
                                 Extentions.Player.Play();
 
                             });
-                            WebSockServ.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
+                            WebSockServAlert.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
                             Thread.Sleep(1000);
                             Thread.Sleep(MediaDurationMs);
                         }
                         else
                         {
-                            WebSockServ.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
+                            WebSockServAlert.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
                             Thread.Sleep(1000);
                         }
 
@@ -882,7 +892,7 @@ namespace TwitchBot
                         {
                             if (!MySave.Current.Bools[0])
                             {
-                                WebSockServ.SendAll("Close");
+                                WebSockServAlert.SendAll("Close");
                                 return;
                             }
                             if (!MySave.Current.Bools[8])
@@ -895,7 +905,7 @@ namespace TwitchBot
                         {
                             Thread.Sleep(100);
                         }
-                        WebSockServ.SendAll("Close");
+                        WebSockServAlert.SendAll("Close");
                         Extentions.SpeechSynth.Rate = TTSrate;
                     }
                 }).Start();
@@ -1378,7 +1388,7 @@ namespace TwitchBot
 
         private void AcSwitch(WinHotKey Key)
         {
-            WebSockServ.SendAll("Close");
+            WebSockServAlert.SendAll("Close");
             Extentions.Player.Stop();
             Extentions.SpeechSynth.SpeakAsyncCancelAll();
             SpeechTask?.Abort();

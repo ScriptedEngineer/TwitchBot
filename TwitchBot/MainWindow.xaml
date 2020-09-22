@@ -81,7 +81,7 @@
                         <ColumnDefinition Width="320"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Rectangle Stroke="Black"/>
+                    <Rectangle Stroke="Black" Margin="0"/>
                     <Rectangle Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="0,0,0,92"/>
                     <CheckBox x:Name="TTSpeech" Content="Озвучивать чат" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="TTSpeech_Checked" Background="White" IsChecked="True" Width="105"/>
                     <RadioButton x:Name="TTSpeechOH" Content="Только выделенные" HorizontalAlignment="Left" Margin="156,30,0,0" VerticalAlignment="Top" IsChecked="True" Checked="AllChat_Checked" Height="15" Width="130"/>
@@ -131,10 +131,11 @@
                         <ComboBoxItem Content="Ермил"/>
                     </ComboBox>
                     <Label Content="Голос (TrueTTS):" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,211" Width="105" Height="16"/>
-                    <Grid x:Name="DonationTTS" Grid.Column="1" Margin="0,2,0,0" IsEnabled="False">
+                    <Rectangle Stroke="Black" Grid.Column="1" Grid.ColumnSpan="2" Margin="-1,0,0,0"/>
+                    <Grid x:Name="DonationTTS" Grid.Column="1" Margin="0,123,0,0" IsEnabled="False">
 
-                        <Rectangle Stroke="Black"/>
-                        <Rectangle Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="0,0,0,92" RenderTransformOrigin="0.5,0.5">
+                        
+                        <Rectangle Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="-1,0,0,92" RenderTransformOrigin="0.5,0.5">
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform ScaleX="-1"/>
@@ -144,12 +145,7 @@
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
                         </Rectangle>
-                        <TextBox x:Name="BadWords" Height="63" Margin="10,50,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TextChanged="BadWords_TextChanged" Grid.Column="1"/>
-                        <Label Content="Доп фильр(через пробел):" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,34,0,0" Width="150" Height="16" Grid.Column="1"/>
-                        <TextBox x:Name="Censor" Height="20" Margin="186,25,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="." TextChanged="Censor_TextChanged" Grid.Column="1"/>
-                        <Label Content="Заменить на:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="186,9,0,0" Width="120" Height="16" Grid.Column="1"/>
-                        <CheckBox x:Name="Filtred" Content="Фильровать слова (600+)" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" Click="Filtred_Click" Width="171"/>
-
+                        
                         <CheckBox x:Name="DATTSEnable" Content="Озвучивать донаты" HorizontalAlignment="Left" Margin="10,0,0,126" VerticalAlignment="Bottom" Background="White" Width="147" Grid.Column="1" Click="DATTSEnable_Click" RenderTransformOrigin="0.5,0.5">
                             <CheckBox.RenderTransform>
                                 <TransformGroup>
@@ -188,6 +184,12 @@
                         <TextBox x:Name="WaitPlease" HorizontalAlignment="Right" Height="20" Margin="0,0,10,125" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="38" TextChanged="WaitPlease_TextChanged"/>
                         <Label Content="Ждать(сек):" HorizontalAlignment="Right" Margin="0,0,53,128" VerticalAlignment="Bottom" Padding="0" Height="16" Width="64"/>
                     </Grid>
+                    <TextBox x:Name="BadWords" Height="63" Margin="10,50,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TextChanged="BadWords_TextChanged" Grid.Column="1"/>
+                    <Label Content="Доп фильр(через пробел):" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,34,0,0" Width="150" Height="16" Grid.Column="1"/>
+                    <TextBox x:Name="Censor" Height="20" Margin="186,25,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="." TextChanged="Censor_TextChanged" Grid.Column="1"/>
+                    <Label Content="Заменить на:" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="186,9,0,0" Width="100" Height="16" Grid.ColumnSpan="2" Grid.Column="1"/>
+                    <CheckBox x:Name="Filtred" Content="Фильровать слова (600+)" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" Click="Filtred_Click" Width="171" Grid.Column="1" Grid.ColumnSpan="2"/>
+
                     <CheckBox x:Name="AllowChTTTSVoice" Content="Разрешить менять" HorizontalAlignment="Left" Margin="10,0,0,169" VerticalAlignment="Bottom" Width="124" Click="AllowChTTTSVoice_Click"/>
                     <CheckBox x:Name="AllTTS" Content="Все зрители" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" Background="White" Click="AllTTS_Click"/>
                     <CheckBox x:Name="VIPTTS" Content="VIP зрители" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White"/>

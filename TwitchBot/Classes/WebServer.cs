@@ -22,7 +22,10 @@ namespace TwitchBot
         {
             switch (request.RawUrl.Split('?').First().Trim('/'))
             {
-
+                case "alert":
+                    return "<script>location.replace('http://wsxz.ru/twitchbot/alerts');</script>";
+                case "timer":
+                    return "<script>location.replace('https://wsxz.ru/twitchbot/timers');</script>";
                 case "control":
                     return "NO";
                 case "twitchcode":
