@@ -19,13 +19,13 @@
 
 ### Скриншоты
 
-![Prewiew](https://sun9-61.userapi.com/0_Y2t7DXUbwgi3VT6qpeoSbEEC6asS8Eqz-bbw/8VAKmp-E7v4.jpg "Окно подключения")
+![Prewiew](https://sun9-46.userapi.com/STdQKlpZkn7xkmLVcgrU8FkCt4690fyXZggfOg/hzZ60q5lW4c.jpg "Окно подключения")
 
-![Prewiew](https://sun9-8.userapi.com/gZOIwmVyfY0BD37VZ068CCxzQKIjFkKYpS7TMg/O2iQh1E5pQM.jpg "Вкладка настройки голосования")
-![Prewiew](https://sun9-36.userapi.com/yrHAme9MndS2QJ5fXTnJZ9WNHgy4OtudPPHZjw/xiqp6xJBVAI.jpg "Вкладка настройки озвучивания")
-![Prewiew](https://sun9-64.userapi.com/TeGiMrobk9f_z7HNeAQa8dsDDuPFFdUkQgmXxg/urxdPJWolEo.jpg "Вкладка автоматизации наград")
-![Prewiew](https://sun9-67.userapi.com/q1WesQhgimMd9GhAAjGUdXKJlNf5RDmaEgFUpQ/HtTbsah7wBk.jpg "Вкладка настройки своих команд")
-![Prewiew](https://sun9-59.userapi.com/AlBn-5XWdPVlDeo0ekobvfK1SmZBPsZRP6jWww/di3v-vSDBgk.jpg "Вкладка настроек")
+![Prewiew](https://sun7-9.userapi.com/CJ7MKDTZZMvESIkZZ4FJh6hyL39zpGRmoW4LWw/YI_V3QoaHbA.jpg "Вкладка настройки голосования")
+![Prewiew](https://sun7-6.userapi.com/M8BmBK0bGjn7dIEDP7qUPAilr_JgUpbDz0cBiQ/XO-uQrqnk84.jpg "Вкладка настройки озвучивания")
+![Prewiew](https://sun7-8.userapi.com/3KrAFFHrWDNWQ2xOUO-oRL-ebY9IIUVK1Mgq-g/JiotPUZRky8.jpg "Вкладка автоматизации наград")
+![Prewiew](https://sun7-8.userapi.com/fwJzhoyyOjaZSUIBeqcEA9H35fOBQb9tbeTNcw/5yuHY_kPTAI.jpg "Вкладка настройки своих команд")
+![Prewiew](https://sun7-6.userapi.com/b57kDY5wocz_Yb1osbn-M8FZUdFKZUj-DTS2IA/tYNVryh0N4k.jpg "Вкладка настроек")
 
 ## Авторы
 
