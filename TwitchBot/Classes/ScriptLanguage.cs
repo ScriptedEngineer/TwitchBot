@@ -17,6 +17,7 @@ namespace TwitchBot
 {
     class ScriptLanguage
     {
+        public static Dictionary<string, string> TimersEnds = new Dictionary<string, string>();
         static public void RunScript(string script)
         {
             if (script == null) return;
@@ -24,11 +25,11 @@ namespace TwitchBot
             int len = functions.Length;
             for (int index = 0; index < len; index++)
             {
-                index = RunCommand(functions[index].Trim(), index);//, len
+                index = RunCommand(functions[index].Trim(), index, functions);//, len
             }
         }
 
-        public static int RunCommand(string command, int index)//, int max
+        public static int RunCommand(string command, int index = 0, string[] script = null)//, int max
         {
             try
             {
@@ -249,8 +250,14 @@ namespace TwitchBot
                         break;
                     case "Timer":
                         string[] heh = command.Trim().Split(new char[] { ' ' }, 3);
-                        if(heh.Length > 2) 
+                        if (heh.Length > 2)
+                        {
+                            heh[2] = heh[2].ToLower();
                             WebSockServTimer.SendAll(heh[1], heh[2]);
+                            index++;
+                            if(!TimersEnds.ContainsKey(heh[2]) && index < script.Length)
+                                TimersEnds.Add(heh[2], script[index]);
+                        }
                         break;
                 }
             }

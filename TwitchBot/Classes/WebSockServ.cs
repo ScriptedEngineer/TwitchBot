@@ -37,6 +37,23 @@ namespace TwitchBot
         {
             if (e.Data == "Ping")
                 Send("Pong");
+            else
+            {
+                string[] Par = e.Data.Split('|');
+                switch (Par[0])
+                {
+                    case "TimerEnd":
+                        if (Par.Length > 1)
+                        {
+                            if (ScriptLanguage.TimersEnds.ContainsKey(Par[1]))
+                            {
+                                ScriptLanguage.RunCommand(ScriptLanguage.TimersEnds[Par[1]]);
+                                ScriptLanguage.TimersEnds.Remove(Par[1]);
+                            }
+                        }
+                        break;
+                }
+            }
         }
 
         public static void SendAll(string StringTime, string Title)

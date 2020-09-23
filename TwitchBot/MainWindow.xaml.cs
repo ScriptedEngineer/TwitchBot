@@ -88,20 +88,20 @@ namespace TwitchBot
                 LoadVotes(new string[0]);
             }
 
-            /*new Task(() =>
+            new Task(() =>
             {
                 string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
                 if (Vers.Length == 3 && Vers[0] == "0")
                 {
                     Extentions.AsyncWorker(() =>
                     {
-                        Process.Start("Updater")
-                        Application.Current.Shutdown();
-                        //new Updater(Vers[1]).Show();
-                        //Close();
+                        //Process.Start("Updater")
+                        //Application.Current.Shutdown();
+                        new Updater(Vers[1]).Show();
+                        Close();
                     });
                 }
-            }).Start();*/
+            }).Start();
 
             //Инициализация заготовок
             if (!Directory.Exists("./votings"))
