@@ -19,9 +19,11 @@ namespace TwitchBot
         public static MySave Current = new MySave();
         public string Streamer { get; set; }
         public string TTSCRID { get; set; }
+        public string SongCRID { get; set; }
         public string TTSNTFL { get; set; }
         public string DTTSNTFL { get; set; }
         public string TTSCRTitle { get; set; }
+        public string SongCRTitle { get; set; }
         public string BadWords { get; set; }
         public string Censor { get; set; }
         public string OBSWSPort { get; set; }

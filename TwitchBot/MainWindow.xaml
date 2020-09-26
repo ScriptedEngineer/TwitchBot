@@ -134,7 +134,7 @@
                     <Rectangle Stroke="Black" Grid.Column="1" Grid.ColumnSpan="2" Margin="-1,0,0,0"/>
                     <Grid x:Name="DonationTTS" Grid.Column="1" Margin="0,123,0,0" IsEnabled="False">
 
-                        
+
                         <Rectangle Stroke="Black" VerticalAlignment="Bottom" Height="29" Margin="-1,0,0,92" RenderTransformOrigin="0.5,0.5">
                             <Rectangle.RenderTransform>
                                 <TransformGroup>
@@ -145,7 +145,7 @@
                                 </TransformGroup>
                             </Rectangle.RenderTransform>
                         </Rectangle>
-                        
+
                         <CheckBox x:Name="DATTSEnable" Content="Озвучивать донаты" HorizontalAlignment="Left" Margin="10,0,0,126" VerticalAlignment="Bottom" Background="White" Width="147" Grid.Column="1" Click="DATTSEnable_Click" RenderTransformOrigin="0.5,0.5">
                             <CheckBox.RenderTransform>
                                 <TransformGroup>
@@ -253,29 +253,77 @@
                     <Label x:Name="CmdEvLabel_Copy" Content="Кто может использовать" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="3,41,0,0" Grid.Column="1"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Список дел" Visibility="Collapsed">
+            <TabItem Header="Песни" Visibility="Visible">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Rectangle Margin="0" Stroke="Black" Grid.ColumnSpan="2"/>
-                    <ListView x:Name="Doings" Margin="1,1,0,30">
+                    <ListView x:Name="Doings" Margin="1,1,0,60" SelectionMode="Single">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="Дело" DisplayMemberBinding="{Binding Nickname}" Width="200" />
-                                <GridViewColumn Header="Таймер" DisplayMemberBinding="{Binding Vote}" Width="80" />
+                                <GridViewColumn Header="Мой список" Width="260" >
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBox MinWidth="120" Height="18" Text="{Binding Strings[0]}" Uid="{Binding ID}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <Button Content=" ⮐ " Uid="{Binding ID}" Click="Button_Click_17"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <ListView x:Name="Doings2" Margin="0,1,1,30" Grid.Column="1">
+                    <ListView x:Name="Doings2" Margin="0,1,1,73" Grid.Column="1">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="Дело" DisplayMemberBinding="{Binding Nickname}" Width="200" />
-                                <GridViewColumn Header="Время" DisplayMemberBinding="{Binding Vote}" Width="80" />
+                                <GridViewColumn Header="Предложения" Width="230" >
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBox MinWidth="120" Height="18" Text="{Binding Strings[0]}" Uid="{Binding ID}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <Button Content=" 🗑 " Uid="{Binding ID}" Click="Button_Click_18"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <Button Content=" ⮐ " Uid="{Binding ID}" Click="Button_Click_19"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>
+                    <Button Content="Добавить" Margin="10,0,0,35" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80" Height="20" Click="Button_Click_20"/>
+                    <Button Content="Удалить" Margin="95,0,0,35" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="65" Height="20" Click="Button_Click_21"/>
+                    <TextBox x:Name="CustomRewardID2" Height="23" Margin="116,0,10,30" TextWrapping="NoWrap" VerticalAlignment="Bottom" Grid.Column="1" TextChanged="CustomRewardID2_TextChanged"/>
+                    <Button x:Name="RewardTrap2" Content="Сканировать товар" Margin="116,0,10,10" VerticalAlignment="Bottom" Height="20" Grid.Column="1" Click="RewardTrap2_Click"/>
+                    <TextBlock x:Name="RewardName2" Margin="116,0,10,53" TextWrapping="Wrap" Text="Определено пользователем" FontSize="10" Grid.Column="1" VerticalAlignment="Bottom" Height="20"/>
+                    <Button Content="Очистить виджет" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="106" Height="20" Click="Button_Click_22"/>
+                    <Button Content="Скопировать адрес виджета" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="177" Click="Button_Click_23"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Пожертвования" Width="0">

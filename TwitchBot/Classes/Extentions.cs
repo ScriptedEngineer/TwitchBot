@@ -106,10 +106,11 @@ namespace TwitchBot
                 response = reqGetUser.GetResponse();
                 Stream receiveStream = response.GetResponseStream();
                 if (File.Exists("YAPI.wav")) File.Delete("YAPI.wav");
-                using (var fileStream = File.Create("YAPI.wav"))
+                TempFileID++;
+                using (FileStream tempfile = new FileStream(Path.GetTempPath() + "/YAPI" + TempFileID + ".wav", FileMode.OpenOrCreate))
                 {
-                    WriteWavHeader(fileStream, false, 1, 16, 48000, -1);
-                    CopyStream(receiveStream, fileStream);
+                    WriteWavHeader(tempfile, false, 1, 16, 48000, -1);
+                    CopyStream(receiveStream, tempfile);
                 }
                 TrueTTSReady = true;
             }
@@ -134,22 +135,23 @@ namespace TwitchBot
             }
         }
         static bool TrueTTSReady = false;
+        static int TempFileID = 0;
         public static void TrueTTS(string Text, string Voice = "")
         {
-            if (!TrueTTSReady)
+            string path = Path.GetTempPath() + "/YAPI" + TempFileID + ".wav";
+            if (!TrueTTSReady || !File.Exists(path))
             {
                 TextToSpeech(Text, Voice);
                 return;
             }
             AsyncWorker(() =>
             {
-                string path = Path.GetDirectoryName(AppFile) + "\\YAPI.wav";
+                Console.WriteLine(path);
                 //Uri File = new Uri(path, UriKind.Absolute);
                 /*if (!MySave.Current.Bools[0])
                 {
                     return;
                 }*/
-                Player.Open(new Uri("F:/lol.mp3"));
                 Player.Open(new Uri(path, UriKind.Absolute));
                 Player.Volume = MySave.Current.Nums[4] / 100d;
                 Player.Play();
@@ -160,6 +162,7 @@ namespace TwitchBot
             {
                 Player.Close();
             });
+            if(File.Exists(path)) File.Delete(path);
             TrueTTSReady = false;
         }
         public static void CopyStream(Stream input, Stream output)
@@ -269,13 +272,17 @@ namespace TwitchBot
         public static class MyEncoding
         {
             static readonly string[] chars = { "̀", "́", "̂", "̃", "̄", "̅", "̆", "̇", "̈", "̉", "̊", "̋", "̌", "̍", "̎", "̏", "̐", "̑", "ͣ", "ͤ", "ͥ", "ͦ", "ͧ", "ͨ", "ͩ", "ͪ", "ͫ", "ͬ", "ͭ", "ͮ", "ͯ" };
-            public static readonly string prefix = "ⁱₐ";
+            static readonly string prefix = "ⁱₐ";
             static readonly string separator = "′.,:;'₀ ";
             static readonly string separators = "ҽɳƈσdҽd";
-
+            static readonly string regex = "";
+            static MyEncoding()
+            {
+                regex = "^" + prefix + "([" + string.Join("", chars) + separator.Replace(" ", "\\s") + separators.Replace(" ", "\\s") + "]*)$";
+            }
             public static bool check(string t)
             {
-                return Regex.IsMatch(t, "^" + prefix + "([" + string.Join("", chars) + separator.Replace(" ", "\\s") + separators.Replace(" ", "\\s") + "]*)$", RegexOptions.IgnoreCase);
+                return Regex.IsMatch(t, regex, RegexOptions.IgnoreCase);
             }
             public static string decode(string ta)
             {
@@ -292,7 +299,7 @@ namespace TwitchBot
                     return null;
                 }
             }
-            public static byte ToNum(string a, string[] cc)
+            private static byte ToNum(string a, string[] cc)
             {
                 double n = 0;
                 for (var i = 0; i < a.Length; i++)

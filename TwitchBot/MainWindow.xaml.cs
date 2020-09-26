@@ -87,6 +87,7 @@ namespace TwitchBot
             {
                 LoadVotes(new string[0]);
             }
+            LoadDoings();
 
             new Task(() =>
             {
@@ -135,7 +136,9 @@ namespace TwitchBot
             Censor.Text = MySave.Current.Censor;
             Streamer.Text = MySave.Current.Streamer;
             CustomRewardID.Text = MySave.Current.TTSCRID;
-            RewardName.Text = MySave.Current.TTSCRTitle;
+            if (!string.IsNullOrEmpty(MySave.Current.TTSCRTitle)) RewardName.Text = MySave.Current.TTSCRTitle;
+            CustomRewardID2.Text = MySave.Current.SongCRID;
+            if (!string.IsNullOrEmpty(MySave.Current.SongCRTitle)) RewardName2.Text = MySave.Current.SongCRTitle;
             OBS_port.Text = MySave.Current.OBSWSPort;
             OBSRmPass.Password = MySave.Current.OBSWSPass;
             Voices_TTTS.SelectedIndex = (int)MySave.Current.YPV;
@@ -270,6 +273,7 @@ namespace TwitchBot
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
             WebSocketServer.AddWebSocketService<WebSockServAlert>("/alert");
             WebSocketServer.AddWebSocketService<WebSockServTimer>("/timer");
+            WebSocketServer.AddWebSocketService<WebSockServ>("/widgets");
             WebSocketServer.Start();
 
             //Подключениее к OBS WebSocket
@@ -507,13 +511,16 @@ namespace TwitchBot
         private void Message(object Sender, MessageEventArgs e)
         {
             string lowNick = e.NickName.ToLower().Trim();
-            if (e.Message.StartsWith(Extentions.MyEncoding.prefix) && Extentions.MyEncoding.check(e.Message))
-                e.Message = Extentions.MyEncoding.decode(e.Message);
             if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
             if (lowNick == Client.Account.Login && e.Message.Contains("‌")) return;
+            if (Extentions.MyEncoding.check(e.Message))
+            {
+                e.Message = Extentions.MyEncoding.decode(e.Message);
+            }
+            string eMessage = e.Message;
             if (MySave.Current.Bools[6])
-                e.Message = MyCensor.CensoreIT(e.Message);
-            
+                eMessage = MyCensor.CensoreIT(e.Message);
+
             UserRights permlvl = UserRights.Зритель;
             if (lowNick == Client.Streamer)
                 permlvl |= UserRights.All;
@@ -537,7 +544,7 @@ namespace TwitchBot
                 IfVoteAdd(e);
             try
             {
-                string[] taste = e.Message.Split(new char[] { '>' },2);
+                string[] taste = eMessage.Split(new char[] { '>' },2);
                 if (taste.Length == 2)
                 {
                     string[] args = taste[1].Trim('\r', '\n').Split(new char[] { ' ' });
@@ -799,13 +806,13 @@ namespace TwitchBot
                             if (comandEvents != null && permlvl.HasFlag(comandEvents.Right))
                                 comandEvents.Invoke(e);
                             else
-                                Speech(e);
+                                Speech(e, eMessage);
                             break;
                     }
                 }
                 else
                 {
-                    Speech(e);
+                    Speech(e, eMessage);
                 }
             }
             catch
@@ -815,19 +822,18 @@ namespace TwitchBot
             //Console.WriteLine(e.CustomRewardID);
         }
         int TTSrate;
-        private void Speech(MessageEventArgs e)
+        private void Speech(MessageEventArgs e, string eMessage)
         {
-            if (!MySave.Current.Bools[0])
-                return;
             bool highlight = e.Flags.HasFlag(ExMsgFlag.Highlighted);
             bool speech = MySave.Current.Bools[0];
+            bool reward = !string.IsNullOrEmpty(e.CustomRewardID);
             switch (MySave.Current.Nums[1])
             {
                 case 1:
                     speech &= highlight;
                     break;
                 case 2:
-                    speech &= e.CustomRewardID == MySave.Current.TTSCRID;
+                    speech &= reward && e.CustomRewardID == MySave.Current.TTSCRID;
                     break;
             }
             if(UsersTTSRules != UsersTTS.All)
@@ -848,21 +854,21 @@ namespace TwitchBot
                             return;
                         Queue.Remove(e.ID);
                         Current = (e.ID, e.NickName.ToLower());
-                        if (!MySave.Current.Bools[0] || (e.Message.Length >= MySave.Current.Nums[3] && MySave.Current.Bools[4]))
+                        if (!MySave.Current.Bools[0] || (eMessage.Length >= MySave.Current.Nums[3] && MySave.Current.Bools[4]))
                             return;
                         SpeechTask = Thread.CurrentThread;
                         TTSrate = Extentions.SpeechSynth.Rate;
-                        if (e.Message.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
+                        if (eMessage.Length >= MySave.Current.Nums[3] && !MySave.Current.Bools[4])
                             Extentions.SpeechSynth.Rate = 10;
-                        string[] VoiceNText = e.Message.Split(new char[] { '|' }, 2);
+                        string[] VoiceNText = eMessage.Split(new char[] { '|' }, 2);
                         string voice = MySave.Current.YPV.ToString();
                         if (MySave.Current.Bools[13])
                             if (VoiceNText.Length >= 2 && Enum.TryParse(VoiceNText[0], out YVoices dVoice))
                             {
-                                e.Message = VoiceNText[1];
+                                eMessage = VoiceNText[1];
                                 voice = dVoice.ToString();
                             }
-                        string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {e.Message}" : e.Message;
+                        string Text = MySave.Current.Bools[3] ? $"{e.NickName} написал {eMessage}" : eMessage;
                         if (MySave.Current.Bools[8])
                             Extentions.GetTrueTTSReady(Text, voice);
                         if (TTSNotify && File.Exists(MySave.Current.TTSNTFL))
@@ -878,13 +884,13 @@ namespace TwitchBot
                                 Extentions.Player.Play();
 
                             });
-                            WebSockServAlert.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
+                            WebSockServAlert.SendAll("Alert", string.Format("{0}|{1}", e.NickName, eMessage));
                             Thread.Sleep(1000);
                             Thread.Sleep(MediaDurationMs);
                         }
                         else
                         {
-                            WebSockServAlert.SendAll("Alert", string.Format("{0}|{1}", e.NickName, e.Message));
+                            WebSockServAlert.SendAll("Alert", string.Format("{0}|{1}", e.NickName, eMessage));
                             Thread.Sleep(1000);
                         }
 
@@ -909,6 +915,14 @@ namespace TwitchBot
                         Extentions.SpeechSynth.Rate = TTSrate;
                     }
                 }).Start();
+            }else if(reward && e.CustomRewardID == MySave.Current.SongCRID)
+            {
+                Extentions.AsyncWorker(() =>
+                {
+                    ListElement xkl = new ListElement(Doings2.Items.Count, 1, 0);
+                    xkl.Strings[0] = e.Message;
+                    Doings2.Items.Add(xkl);
+                });
             }
         }
         int VoteMax = 1;
@@ -1074,6 +1088,34 @@ namespace TwitchBot
             {
                 ClientSendMessage("Голосование не ведется.");
             }
+        }
+        private void LoadDoings()
+        {
+            string filename = "./songs.txt";
+            if (!File.Exists(filename))
+                return;
+            string data = File.ReadAllText(filename);
+            string[] votes = data.Split('\n');
+            Doings.Items.Clear();
+            foreach (string x in votes)
+            {
+                ListElement item = new ListElement(Doings.Items.Count, 2, 1);
+                item.Strings[0] = x.Trim('\r', '\n', ' ');
+                Doings.Items.Add(item);
+            }
+        }
+        private void SaveDoings()
+        {
+            StringBuilder votesave = new StringBuilder();
+            bool xolof = false;
+            foreach (ListElement x in Doings.Items)
+            {
+                if (xolof)
+                    votesave.Append("\n");
+                votesave.Append(x.Strings[0]);
+                xolof = true;
+            }
+            File.WriteAllText("./songs.txt", votesave.ToString());
         }
         private void SetVotes(string[] votes)
         {
@@ -1497,6 +1539,7 @@ namespace TwitchBot
             SaveEvents();
             if (VotingSelect.SelectedIndex != -1)
                 SaveVotes("./votings/" + VotingSelect.Items[lastselected] + ".txt");
+            SaveDoings();
             ni.Visible = false;
             //Application.Current.Shutdown();
         }
@@ -1580,12 +1623,12 @@ namespace TwitchBot
         }
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            TextBox X = (TextBox)sender;
+            /*TextBox X = (TextBox)sender;
             if (int.TryParse(X.Uid, out int ID) && VotingList.Items.Count > ID)
             {
                 ListElement Y = (ListElement)VotingList.Items[ID];
                 Y.Strings[0] = X.Text;
-            }
+            }*/
         }
 
 
@@ -2017,6 +2060,110 @@ namespace TwitchBot
                     RewEv.Right = UserRights.Зритель;
                     break;
             }
+        }
+
+        private void Button_Click_17(object sender, RoutedEventArgs e)
+        {
+            Button Sender = (Button)sender;
+            if (int.TryParse(Sender.Uid, out int ID) && Doings.Items.Count > ID)
+            {
+                ListElement selected = (ListElement)Doings.Items[ID];
+                WebSockServ.SendAll("todo.Add", selected.Strings[0]);
+            }
+        }
+
+        private void Button_Click_18(object sender, RoutedEventArgs e)
+        {
+            Button Sender = (Button)sender;
+            Doings2.Items.Remove(Doings2.Items[int.Parse(Sender.Uid)]);
+            FixListElementsInListView(Doings2);
+        }
+
+        private void Button_Click_19(object sender, RoutedEventArgs e)
+        {
+            Button Sender = (Button)sender;
+            if (int.TryParse(Sender.Uid, out int ID) && Doings2.Items.Count > ID)
+            {
+                ListElement selected = (ListElement)Doings2.Items[ID];
+                WebSockServ.SendAll("todo.Add", selected.Strings[0]);
+                Doings2.Items.RemoveAt(ID);
+            }
+            
+            FixListElementsInListView(Doings2);
+        }
+
+        private void Button_Click_20(object sender, RoutedEventArgs e)
+        {
+            var x = new ListElement(Doings.Items.Count, 1, 0);
+            x.Strings[0] = "Новый";
+            Doings.Items.Add(x);
+        }
+
+        private void Button_Click_21(object sender, RoutedEventArgs e)
+        {
+            if (Doings.SelectedIndex != -1)
+                Doings.Items.RemoveAt(Doings.SelectedIndex);
+            else if (Doings.Items.Count > 0)
+                Doings.Items.RemoveAt(Doings.Items.Count - 1);
+
+            FixListElementsInListView(Doings);
+        }
+
+        private void FixListElementsInListView(ListView someList)
+        {
+            List<ListElement> somes = new List<ListElement>();
+            for (int x = 0; x < someList.Items.Count; x++)
+            {
+                ListElement Xo = (ListElement)someList.Items[x];
+                Xo.ID = x;
+                somes.Add(Xo);
+            }
+            someList.Items.Clear();
+            foreach (ListElement k in somes)
+            {
+                someList.Items.Add(k);
+            }
+        }
+
+        private void Button_Click_22(object sender, RoutedEventArgs e)
+        {
+            WebSockServ.SendAll("todo.Clear");
+        }
+
+        private void RewardTrap2_Click(object sender, RoutedEventArgs e)
+        {
+            if (RewardTrap2.Content.ToString() == "Отмена")
+            {
+                RewardTrap2.Content = "Сканировать товар";
+                RewardTrapHatch -= SongsRewardTrap;
+            }
+            else
+            {
+                RewardTrap2.Content = "Отмена";
+                RewardTrapHatch += SongsRewardTrap;
+            }
+        }
+        private void SongsRewardTrap(object sender, RewardEventArgs e)
+        {
+            Extentions.AsyncWorker(() =>
+            {
+                CustomRewardID2.Text = e.CustomRewardID;
+                MySave.Current.SongCRID = e.CustomRewardID;
+                RewardTrap2.Content = "Сканировать товар";
+                RewardName2.Text = e.Title;
+                MySave.Current.SongCRTitle = e.Title;
+                RewardTrapHatch -= SongsRewardTrap;
+            });
+        }
+
+        private void CustomRewardID2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MySave.Current.SongCRID = CustomRewardID2.Text;
+        }
+
+        private void Button_Click_23(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText("https://wsxz.ru/twitchbot/todo");
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)
