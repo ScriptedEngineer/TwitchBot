@@ -44,7 +44,7 @@ namespace TwitchBot
                 {"item",Source},
                 {"rotation",angle}
             });
-            SendTransition();
+            //SendTransition();
         }
         public static void SetSourcePosition(string Source, string x, string y)
         {
@@ -53,7 +53,7 @@ namespace TwitchBot
                 {"item",Source},
                 {"position","{\"x\":"+x+",\"y\":"+y+"}"}
             });
-            SendTransition();
+            //SendTransition();
         }
         public static void SetScene(string Scene)
         {
@@ -61,7 +61,7 @@ namespace TwitchBot
             SendPackage("SetCurrentScene", new Dictionary<string, string>() {
                 {"scene-name",Scene}
             });
-            SendTransition();
+            //SendTransition();
         }
         public static void SetSourceMute(string Source, bool Enabled)
         {
@@ -85,7 +85,7 @@ namespace TwitchBot
             foreach(var pp in parames)
             {
                 bool isstring = true;
-                if(isstring == true) isstring = !int.TryParse(pp.Value, out int n1);
+                if (isstring == true) isstring = !int.TryParse(pp.Value, out int n1);
                 if (isstring == true) isstring = !bool.TryParse(pp.Value, out bool n2);
                 if (isstring == true) isstring = !pp.Value.StartsWith("{");
                 parameters += $"\"{pp.Key}\":"+(isstring?$"\"{pp.Value}\",":$"{pp.Value},");

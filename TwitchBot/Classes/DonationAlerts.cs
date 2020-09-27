@@ -9,9 +9,12 @@ namespace TwitchBot.Classes
 {
     public class DonationAlerts
     {
-        string Token,Refresh_token;
+        private readonly string Token;
+#pragma warning disable IDE0052 // Удалить непрочитанные закрытые члены
+        private readonly string Refresh_token;
+#pragma warning restore IDE0052 // Удалить непрочитанные закрытые члены
         public EventHandler<DonationEventArgs> OnDonation;
-        WebSocket WSock;
+        readonly WebSocket WSock;
         string UserID, CentClID;
         string SockTocken;
         public bool Connected { get; private set; }
@@ -202,12 +205,13 @@ namespace TwitchBot.Classes
     }
     public class DonationEventArgs
     {
-        public string NickName, Message, Amount, MessageType, Currency;
+        public string NickName, Message, MessageType, Currency;
+        public int Amount;
         public DonationEventArgs(string nickName, string message, string amount, string type, string currency)
         {
             NickName = nickName;
             Message = message;
-            Amount = amount;
+            int.TryParse(amount, out Amount);
             MessageType = type;
             Currency = currency;
         }

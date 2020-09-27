@@ -183,6 +183,7 @@
                         <Label Content="Голос:" HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="0" Margin="0,0,46,71" Width="105" Height="16" Grid.Column="1"/>
                         <TextBox x:Name="WaitPlease" HorizontalAlignment="Right" Height="20" Margin="0,0,10,125" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="38" TextChanged="WaitPlease_TextChanged"/>
                         <Label Content="Ждать(сек):" HorizontalAlignment="Right" Margin="0,0,53,128" VerticalAlignment="Bottom" Padding="0" Height="16" Width="64"/>
+                        <TextBox x:Name="MinDon" HorizontalAlignment="Left" Height="23" Margin="10,0,0,10" TextWrapping="Wrap" Text="10" VerticalAlignment="Bottom" Width="112" TextChanged="TextBox_TextChanged_3"/>
                     </Grid>
                     <TextBox x:Name="BadWords" Height="63" Margin="10,50,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TextChanged="BadWords_TextChanged" Grid.Column="1"/>
                     <Label Content="Доп фильр(через пробел):" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="10,34,0,0" Width="150" Height="16" Grid.Column="1"/>
@@ -195,6 +196,7 @@
                     <CheckBox x:Name="VIPTTS" Content="VIP зрители" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White"/>
                     <CheckBox x:Name="ModTTS" Content="Модераторы" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White"/>
                     <CheckBox x:Name="SubTTS" Content="Подписчики" HorizontalAlignment="Left" Margin="10,143,0,0" VerticalAlignment="Top" Click="AllTTS_Click" Background="White"/>
+                    <Label x:Name="SpeedLabel_Copy3" Content="Минимальная сумма" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="10,0,0,33" Height="16" Width="115" Grid.Column="1"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Награды">
@@ -251,6 +253,30 @@
                         <ComboBoxItem Content="Все"/>
                     </ComboBox>
                     <Label x:Name="CmdEvLabel_Copy" Content="Кто может использовать" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="3,41,0,0" Grid.Column="1"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Донаты">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="190"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="240"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Stroke="Black" Grid.ColumnSpan="4"/>
+                    <ListBox x:Name="DonEvList" Margin="10,10,10,35" SelectionChanged="DonEvList_SelectionChanged"/>
+                    <Button Content="Добавить" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="86" Height="20" Click="Button_Click_24"/>
+                    <TextBox x:Name="DonName" Height="23" Margin="3,13,1,0" TextWrapping="Wrap" Text="Новое событие" VerticalAlignment="Top" IsEnabled="False" Grid.Column="1" Grid.ColumnSpan="2" TextChanged="DonName_TextChanged"/>
+                    <Button Content="Удалить" HorizontalAlignment="Left" Margin="101,0,0,10" VerticalAlignment="Bottom" Width="69" Height="20" Click="Button_Click_25"/>
+                    <Label Content="Примеры" Grid.Column="3" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Padding="0"/>
+                    <TextBlock x:Name="DonThanks_Copy" Margin="3,0,1,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Grid.Column="1" Grid.ColumnSpan="2"><Hyperlink NavigateUri="https://github.com/ScriptedEngineer/TwitchBot/wiki/6.Как-писать-алгоритмы-для-автоматизации-наград" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Гайд по алгоритму"/></Hyperlink></TextBlock>
+                    <Button Content="Написать в чат" Grid.Column="3" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="220" ToolTip="Send %NICK%, задонатил %AMOUNT% %CURRENCY% со словами %TEXT%!" Click="Button_Click_26"/>
+                    <Label x:Name="DonEvLabel" Content="Алгоритм выполнения" VerticalAlignment="Top" Padding="0" Margin="4,84,0,0" Grid.Column="1" Grid.ColumnSpan="2"/>
+                    <TextBox x:Name="DonScript" Margin="3,100,1,40" TextWrapping="Wrap" AcceptsReturn="True" IsEnabled="False" Grid.Column="1" Grid.ColumnSpan="2" TextChanged="DonScript_TextChanged"/>
+                    <TextBox x:Name="DonMin" Height="24" Margin="3,55,7,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" IsEnabled="False" Grid.Column="1" TextChanged="DonMin_TextChanged"/>
+                    <TextBox x:Name="DonMax" Height="24" Margin="9,55,1,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" IsEnabled="False" Grid.Column="2" TextChanged="DonMax_TextChanged"/>
+                    <Label x:Name="DonEvLabel_Copy" Content="От (Руб)" VerticalAlignment="Top" Padding="0" Margin="3,39,7,0" Grid.Column="1"/>
+                    <Label x:Name="DonEvLabel_Copy1" Content="До (Руб)" VerticalAlignment="Top" Padding="0" Margin="9,38,1,0" Grid.Column="2"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Песни" Visibility="Visible">

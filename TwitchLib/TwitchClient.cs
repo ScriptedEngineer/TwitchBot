@@ -22,7 +22,7 @@ namespace TwitchLib
         public string Streamer, ConnectMessage, About;
         public string StreamerID = null;
         public TwitchAccount Account;
-        bool Listener;
+        readonly bool Listener;
         string SendedMessage;
         public TwitchClient(TwitchAccount account, string Stream, string connectMessage = "", string about = "", bool listener = false, bool pubsub = false)
         {
@@ -418,7 +418,7 @@ namespace TwitchLib
                         //Console.WriteLine(e.Data);
                     }
                 }
-                catch (NullReferenceException ex)
+                catch (NullReferenceException)
                 {
 
                 }
@@ -433,8 +433,7 @@ namespace TwitchLib
             WSock1.OnOpen += WSock1_Opened;
             WSock1.Connect();
         }
-        private IDictionary<string, object> OP(object x)=> (IDictionary<string, object>)x;
-        
+
         public void Close()
         {
             Part();
@@ -442,7 +441,7 @@ namespace TwitchLib
             WSock1?.Close();
         }
 
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
         private static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

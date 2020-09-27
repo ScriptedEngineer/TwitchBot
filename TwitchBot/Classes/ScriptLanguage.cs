@@ -248,15 +248,28 @@ namespace TwitchBot
                                 Thread.Sleep(Kb);
                         }
                         break;
+
+                    //Многострочные команды
                     case "Timer":
                         string[] heh = command.Trim().Split(new char[] { ' ' }, 3);
                         if (heh.Length > 2)
                         {
                             heh[2] = heh[2].ToLower();
                             WebSockServTimer.SendAll(heh[1], heh[2]);
-                            index++;
-                            if(!TimersEnds.ContainsKey(heh[2]) && index < script.Length)
-                                TimersEnds.Add(heh[2], script[index]);
+                            if (script != null)
+                            {
+                                index++;
+                                if (!TimersEnds.ContainsKey(heh[2]) && index < script.Length)
+                                    TimersEnds.Add(heh[2], script[index]);
+                            }
+                        }
+                        break;
+                    case "Random":
+                        if(int.TryParse(param[1],out int rnd) && script != null)
+                        {
+                            int random = Extentions.TrueRandom(1, rnd)+ index;
+                            RunCommand(script[random]);
+                            index += rnd;
                         }
                         break;
                 }

@@ -224,10 +224,10 @@ namespace TwitchBot
             // Sub-chunk 2 size.
             stream.Write(BitConverter.GetBytes((bitDepth / 8) * totalSampleCount), 0, 4);
         }
+        public static int TrueRandom(int min, int max) => TrueRandom(min, max,1)[0];
         public static int[] TrueRandom(int min, int max, int count = 1)
         {
             List<int> vs = new List<int>();
-            string lol = "";
             if (min > max)
             {
                 int p = max;
@@ -238,7 +238,7 @@ namespace TwitchBot
                 using (var client = new System.Net.WebClient())
                 {
                     client.Encoding = Encoding.UTF8;
-                    lol = client.DownloadString($"https://www.random.org/integers/?num={count}&min={min}&max={max}&col=1&base=10&format=plain&rnd=new");
+                    string lol = client.DownloadString($"https://www.random.org/integers/?num={count}&min={min}&max={max}&col=1&base=10&format=plain&rnd=new");
                     foreach (string num in lol.Split('\n'))
                     {
                         if (string.IsNullOrEmpty(num)) continue;
@@ -280,11 +280,11 @@ namespace TwitchBot
             {
                 regex = "^" + prefix + "([" + string.Join("", chars) + separator.Replace(" ", "\\s") + separators.Replace(" ", "\\s") + "]*)$";
             }
-            public static bool check(string t)
+            public static bool Check(string t)
             {
                 return Regex.IsMatch(t, regex, RegexOptions.IgnoreCase);
             }
-            public static string decode(string ta)
+            public static string Decode(string ta)
             {
                 try
                 {

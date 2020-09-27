@@ -14,7 +14,7 @@ namespace TwitchBot
     public class MySave
     {
         const int BL = 14;
-        const int NL = 8;
+        const int NL = 9;
 
         public static MySave Current = new MySave();
         public string Streamer { get; set; }
@@ -31,7 +31,7 @@ namespace TwitchBot
         public YVoices YPV { get; set; }
         public YVoices DYPV { get; set; }
         public string YPT { get; set; }
-        private static Random Rand = new Random();
+        private static readonly Random Rand = new Random();
         public bool[] Bools { get; set; }
         public int[] Nums { get; set; }
         public string[] Strings { get; set; }

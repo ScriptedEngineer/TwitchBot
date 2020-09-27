@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using TwitchBot.Classes;
 using TwitchLib;
 
 namespace TwitchBot
@@ -69,6 +70,40 @@ namespace TwitchBot
                     scripd = scripd.Replace("%NICK%", e.NickName.Replace("\n", "").Trim());
                 //if (scripd.Contains("%TEXT%"))
                 //  scripd = scripd.Replace("%TEXT%", e.Text.Replace("\n", ""));
+            }
+            ScriptLanguage.RunScript(scripd);
+            Runing = false;
+        }
+    }
+    public class DonationEvent
+    {
+        public int MinLimit = 0, MaxLimit = 100;
+        public string Script, Name = "Новый";
+        private bool Runing;
+        public DonationEvent()
+        {
+
+        }
+        public bool Check(DonationEventArgs e)
+        {
+            return e.Amount > MinLimit && e.Amount < MaxLimit;
+        }
+        public void Invoke(DonationEventArgs e)
+        {
+            while (Runing)
+                Thread.Sleep(100);
+            Runing = true;
+            string scripd = Script;
+            if (scripd.Contains("%"))
+            {
+                if (scripd.Contains("%TEXT%"))
+                    scripd = scripd.Replace("%TEXT%", e.Message.Replace("\n", "").Trim());
+                if (scripd.Contains("%NICK%"))
+                    scripd = scripd.Replace("%NICK%", e.NickName.Replace("\n", "").Trim());
+                if (scripd.Contains("%AMOUNT%"))
+                    scripd = scripd.Replace("%AMOUNT%", e.Amount.ToString());
+                if (scripd.Contains("%CURRENCY%"))
+                    scripd = scripd.Replace("%CURRENCY%", e.Currency.Replace("\n", "").Trim());
             }
             ScriptLanguage.RunScript(scripd);
             Runing = false;

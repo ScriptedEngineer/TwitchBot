@@ -388,26 +388,34 @@ namespace TwitchBot
         (string, string) Current;
         private void Donation(object Sender, DonationEventArgs e)
         {
-            if(MySave.Current.Bools[9])
-            switch (e.MessageType)
+            if (MySave.Current.Bools[6])
             {
-                case "text":
+                e.Message = MyCensor.CensoreIT(e.Message);
+                e.NickName = MyCensor.CensoreIT(e.NickName);
+            }
+            new Task(() => { 
+                foreach(DonationEvent x in DonationEvents)
+                {
+                    if (x.Check(e))
+                    {
+                        x.Invoke(e);
+                    }
+                }
+            }).Start();
+            if (MySave.Current.Bools[9] && MySave.Current.Nums[8] < e.Amount)
+                switch (e.MessageType)
+                {
+                    case "text":
                         new Thread(() =>
                         {
-                            if (MySave.Current.Bools[6])
-                            {
-                                e.Message = MyCensor.CensoreIT(e.Message);
-                                e.NickName = MyCensor.CensoreIT(e.NickName);
-                            }
                             lock (Extentions.SpeechSynth)
                             {
                                 SpeechTask = Thread.CurrentThread;
-                                int.TryParse(e.Amount, out int amnt);
-                                string Text = (MySave.Current.Bools[11] ? $"{e.NickName} задонатил " : "") + (MySave.Current.Bools[12] ? $"{MoneyText(amnt, e.Currency)} со словами " : (MySave.Current.Bools[11] ? $" со словами " : "")) + e.Message;
+                                string Text = (MySave.Current.Bools[11] ? $"{e.NickName} задонатил " : "") + (MySave.Current.Bools[12] ? $"{MoneyText(e.Amount, e.Currency)} со словами " : (MySave.Current.Bools[11] ? $" со словами " : "")) + e.Message;
                                 Extentions.GetTrueTTSReady(Text, MySave.Current.DYPV.ToString());
-                                if(MySave.Current.Nums[6] > 0)
+                                if (MySave.Current.Nums[6] > 0)
                                 {
-                                    Thread.Sleep(MySave.Current.Nums[6]*1000);
+                                    Thread.Sleep(MySave.Current.Nums[6] * 1000);
                                 }
                                 if (MySave.Current.Bools[10] && File.Exists(MySave.Current.DTTSNTFL))
                                 {
@@ -428,11 +436,11 @@ namespace TwitchBot
                                 }
                             }
                         }).Start();
-                    break;
-                case "sound":
-                    
-                    break;
-            }
+                        break;
+                    case "sound":
+
+                        break;
+                }
         }
 
         string MoneyText(int number, string concu)
@@ -513,9 +521,9 @@ namespace TwitchBot
             string lowNick = e.NickName.ToLower().Trim();
             if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
             if (lowNick == Client.Account.Login && e.Message.Contains("‌")) return;
-            if (Extentions.MyEncoding.check(e.Message))
+            if (Extentions.MyEncoding.Check(e.Message))
             {
-                e.Message = Extentions.MyEncoding.decode(e.Message);
+                e.Message = Extentions.MyEncoding.Decode(e.Message);
             }
             string eMessage = e.Message;
             if (MySave.Current.Bools[6])
@@ -1559,6 +1567,13 @@ namespace TwitchBot
             {
                 formatster.Serialize(fs, Svrkghksdfsjn);
             }
+            DonationEvent[] Svrkghksdfsjsn = DonationEvents.ToArray();
+            XmlSerializer formatsterw = new XmlSerializer(typeof(DonationEvent[]));
+            if (File.Exists("donations.xml")) File.Delete("donations.xml");
+            using (FileStream fs = new FileStream("donations.xml", FileMode.OpenOrCreate))
+            {
+                formatsterw.Serialize(fs, Svrkghksdfsjsn);
+            }
         }
         private void LoadEvents()
         {
@@ -1585,6 +1600,18 @@ namespace TwitchBot
             foreach (var x in ComandsEvents)
             {
                 CmdEvList.Items.Add(x.Comand);
+            }
+            if (File.Exists("donations.xml"))
+            {
+                XmlSerializer formatter = new XmlSerializer(typeof(DonationEvent[]));
+                using (FileStream fs = new FileStream("donations.xml", FileMode.OpenOrCreate))
+                {
+                    DonationEvents = ((DonationEvent[])formatter.Deserialize(fs)).ToList();
+                }
+            }
+            foreach (var x in DonationEvents)
+            {
+                DonEvList.Items.Add(x.Name);
             }
         }
 
@@ -1634,6 +1661,7 @@ namespace TwitchBot
 
         List<RewardEvent> RewEvents = new List<RewardEvent>();
         List<ComandEvent> ComandsEvents = new List<ComandEvent>();
+        List<DonationEvent> DonationEvents = new List<DonationEvent>();
         private void EventRewardTrap_Click(object sender, RoutedEventArgs e)
         {
             if (EventRewardTrap.Content.ToString() == "Отмена")
@@ -2164,6 +2192,102 @@ namespace TwitchBot
         private void Button_Click_23(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText("https://wsxz.ru/twitchbot/todo");
+        }
+
+        private void Button_Click_24(object sender, RoutedEventArgs e)
+        {
+            DonationEvents.Add(new DonationEvent());
+            DonEvList.Items.Add("Новый");
+        }
+
+        private void Button_Click_25(object sender, RoutedEventArgs e)
+        {
+            if (DonEvList == null || DonEvList.SelectedIndex == -1)
+                return;
+            DonationEvents.RemoveAt(DonEvList.SelectedIndex);
+            DonEvList.Items.RemoveAt(DonEvList.SelectedIndex);
+        }
+
+        private void DonEvList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DonEvList == null || DonEvList.SelectedIndex == -1)
+            {
+                DonMax.IsEnabled = false;
+                DonMin.IsEnabled = false;
+                DonName.IsEnabled = false;
+                DonScript.IsEnabled = false;
+                return;
+            }
+            DonMax.IsEnabled = true;
+            DonMin.IsEnabled = true;
+            DonName.IsEnabled = true;
+            DonScript.IsEnabled = true;
+            DonationEvent RewEv = DonationEvents[DonEvList.SelectedIndex];
+            DonName.Text = RewEv.Name;
+            DonMin.Text = RewEv.MinLimit.ToString();
+            DonMax.Text = RewEv.MaxLimit.ToString();
+            DonScript.Text = RewEv.Script;
+        }
+
+        private void DonName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (DonEvList == null || DonEvList.SelectedIndex == -1)
+                return;
+            DonationEvent RewEv = DonationEvents[DonEvList.SelectedIndex];
+            RewEv.Name = DonName.Text;
+            int ind = DonEvList.SelectedIndex;
+            DonEvList.Items[ind] = DonName.Text;
+            DonEvList.SelectedIndex = ind;
+        }
+
+        private void DonMax_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (DonEvList == null || DonEvList.SelectedIndex == -1)
+                return;
+            DonationEvent RewEv = DonationEvents[DonEvList.SelectedIndex];
+            int.TryParse(DonMax.Text, out RewEv.MaxLimit);
+            DonMax.Text = RewEv.MaxLimit.ToString();
+            DonMax.CaretIndex = DonMax.Text.Length;
+        }
+
+        private void DonMin_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (DonEvList == null || DonEvList.SelectedIndex == -1)
+                return;
+            DonationEvent RewEv = DonationEvents[DonEvList.SelectedIndex];
+            int.TryParse(DonMin.Text, out RewEv.MinLimit);
+            DonMin.Text = RewEv.MinLimit.ToString();
+            DonMin.CaretIndex = DonMin.Text.Length;
+        }
+
+        private void DonScript_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (DonEvList == null || DonEvList.SelectedIndex == -1)
+                return;
+            DonationEvent RewEv = DonationEvents[DonEvList.SelectedIndex];
+            RewEv.Script = DonScript.Text;
+        }
+
+        private void Button_Click_26(object sender, RoutedEventArgs e)
+        {
+            if (DonScript.IsEnabled)
+                if (string.IsNullOrEmpty(DonScript.Text))
+                {
+                    Button Sender = (Button)sender;
+                    DonScript.Text = Sender.ToolTip.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("Пожалуйста сохраните алгоритм и очистите поле ввода алгоритма!");
+                }
+        }
+
+        private void TextBox_TextChanged_3(object sender, TextChangedEventArgs e)
+        {
+            int.TryParse(MinDon.Text, out int minDon);
+            MySave.Current.Nums[8] = minDon;
+            MinDon.Text = minDon.ToString();
+            MinDon.CaretIndex = MinDon.Text.Length;
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)

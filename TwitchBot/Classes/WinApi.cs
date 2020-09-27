@@ -11,6 +11,7 @@ namespace TwitchBot
 {
     class WinApi
     {
+#pragma warning disable IDE1006 // Стили именования
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
@@ -25,8 +26,7 @@ namespace TwitchBot
         private static extern bool GetCursorPos(out MousePoint lpMousePoint);
         public static MousePoint GetCursorPosition()
         {
-            MousePoint currentMousePoint;
-            var gotPoint = GetCursorPos(out currentMousePoint);
+            var gotPoint = GetCursorPos(out MousePoint currentMousePoint);
             if (!gotPoint) { currentMousePoint = new MousePoint(0, 0); }
             return currentMousePoint;
         }
@@ -214,7 +214,6 @@ namespace TwitchBot
             }
 
         }
-
         public enum GetWindow_Cmd : uint
         {
             GW_HWNDFIRST = 0,
@@ -508,5 +507,6 @@ namespace TwitchBot
                 return handle + ", " + msg + ", " + wParam + ", " + lParam + ", " + time + ", " + p;
             }
         }
+#pragma warning restore IDE1006 // Стили именования
     }
 }
