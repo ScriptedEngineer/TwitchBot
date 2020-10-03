@@ -120,13 +120,13 @@ namespace TwitchBot.Classes
                     return token;
                 }
             }
-            catch (WebException e)
+            catch //(WebException e)
             {
-                WebResponse response = e.Response;
-                Stream receiveStream = response.GetResponseStream();
-                StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+                //WebResponse response = e.Response;
+                //Stream receiveStream = response.GetResponseStream();
+                //StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
                 File.Delete("da.txt");
-                Console.WriteLine(readStream.ReadToEnd());
+                //Console.WriteLine(readStream.ReadToEnd());
                 return token;
             }
         }
@@ -154,13 +154,13 @@ namespace TwitchBot.Classes
                 {
                 }
             }
-            catch (WebException e)
+            catch //(WebException e)
             {
-                WebResponse response = e.Response;
-                Stream receiveStream = response.GetResponseStream();
-                StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+                //WebResponse response = e.Response;
+                //Stream receiveStream = response.GetResponseStream();
+                //StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
                 //File.Delete("da.txt");
-                Console.WriteLine(readStream.ReadToEnd());
+                //Console.WriteLine(readStream.ReadToEnd());
             }
         }
         public string SubscribeOnPChan()
@@ -192,13 +192,13 @@ namespace TwitchBot.Classes
                     return null;
                 }
             }
-            catch (WebException e)
+            catch //(WebException e)
             {
-                WebResponse response = e.Response;
-                Stream receiveStream = response.GetResponseStream();
-                StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+                //WebResponse response = e.Response;
+                //Stream receiveStream = response.GetResponseStream();
+                //StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
                 //File.Delete("da.txt");
-                Console.WriteLine(readStream.ReadToEnd());
+                //Console.WriteLine(readStream.ReadToEnd());
                 return null;
             }
         }

@@ -255,7 +255,7 @@
                     <Label x:Name="CmdEvLabel_Copy" Content="Кто может использовать" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="3,41,0,0" Grid.Column="1"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Донаты">
+            <TabItem x:Name="Donationg" Header="Донаты" IsEnabled="False">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="190"/>
@@ -365,7 +365,7 @@
                     </Grid.ColumnDefinitions>
                     <Rectangle Stroke="Black" Grid.ColumnSpan="2"/>
                     <Rectangle Stroke="Black"/>
-                    <Rectangle Stroke="Black" VerticalAlignment="Top" Height="170" Margin="0,51,0,0"/>
+                    <Rectangle Stroke="Black" VerticalAlignment="Top" Height="170" Margin="0,52,0,0"/>
                     <CheckBox x:Name="MinimizeToTray" Content="Сворачивать в трей" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="CheckBox_Click" IsChecked="True" Height="16" Width="129"/>
                     <TextBox x:Name="OBS_port" HorizontalAlignment="Left" Height="23" Margin="131,85,0,0" TextWrapping="Wrap" Text="4444" VerticalAlignment="Top" Width="120" TextChanged="OBS_port_TextChanged"/>
                     <CheckBox x:Name="OBSRemEn" Content="Включить управление обс (OBS WebSocket)" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" IsChecked="True" Click="OBSRemEn_Click" Width="260"/>
@@ -378,6 +378,8 @@
                     <Button Content="Отключится" HorizontalAlignment="Left" Margin="10,230,0,0" VerticalAlignment="Top" Width="116" Click="Button_Click_13"/>
                     <Button x:Name="DAConnect" Content="Подключить DonationAlerts" HorizontalAlignment="Right" Margin="0,255,10,0" VerticalAlignment="Top" Width="185" Click="DAConnect_Click"/>
                     <TextBlock x:Name="Thanks" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="311" Margin="10,0,0,10"><Run Text="Спасибо за использование! "/><Hyperlink NavigateUri="https://www.donationalerts.com/r/scriptedengineer" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Поддержать разработчика"/></Hyperlink></TextBlock>
+                    <Button Content="Перезапустить" HorizontalAlignment="Left" Margin="10,255,0,0" VerticalAlignment="Top" Width="116" Click="Button_Click_27"/>
+                    <CheckBox x:Name="AllowWatchKeys" Content="Разрешить следить за клавиатурой и мышью" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Height="16" Width="311" Click="AllowWatchKeys_Click"/>
 
                 </Grid>
             </TabItem>

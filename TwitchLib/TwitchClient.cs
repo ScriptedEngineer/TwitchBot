@@ -92,14 +92,14 @@ namespace TwitchLib
                     WebResponse response = reqFollow.GetResponse();
                     Stream receiveStream = response.GetResponseStream();
                     StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    Console.WriteLine(readStream.ReadToEnd());
+                    //Console.WriteLine(readStream.ReadToEnd());
                 }
                 catch(WebException e)
                 {
                     WebResponse response = e.Response;
                     Stream receiveStream = response.GetResponseStream();
                     StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    Console.WriteLine(readStream.ReadToEnd());
+                    //Console.WriteLine(readStream.ReadToEnd());
                 }
             }).Start();
             //string content3 = Web.GetResponse();
@@ -145,11 +145,11 @@ namespace TwitchLib
                 StreamerID = Channel.Groups[1].Value;
                 return StreamerID;
             }
-            catch (WebException ex)
+            catch //(WebException ex)
             {
-                response = (ex.Response as WebResponse);
-                if (response != null)
-                    Console.WriteLine(Web.GetResponse(response));
+                //response = (ex.Response as WebResponse);
+                //if (response != null)
+                    //Console.WriteLine(Web.GetResponse(response));
                 return "0";
             }
         }

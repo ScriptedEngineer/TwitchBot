@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,7 +15,6 @@ namespace TwitchBot
     class OBSWebSock
     {
         static WebSocket WSock = null;
-        //static string CurrentScene = null;
         static int MSGID = 0;
         public OBSWebSock()
         {
@@ -30,53 +31,51 @@ namespace TwitchBot
 
         public static void SetSourceEnabled(string Source, bool Enabled)
         {
-            //if (Scene == null) Scene = CurrentScene;
             SendPackage("SetSceneItemProperties", new Dictionary<string, string>() {
                 {"item",Source},
                 {"visible",(Enabled?"true":"false")} 
             });
-            SendTransition();
         }
         public static void SetSourceRotation(string Source, string angle)
         {
-            //if (Scene == null) Scene = CurrentScene;
             SendPackage("SetSceneItemProperties", new Dictionary<string, string>() {
                 {"item",Source},
                 {"rotation",angle}
             });
-            //SendTransition();
         }
         public static void SetSourcePosition(string Source, string x, string y)
         {
-            //if (Scene == null) Scene = CurrentScene;
             SendPackage("SetSceneItemProperties", new Dictionary<string, string>() {
                 {"item",Source},
                 {"position","{\"x\":"+x+",\"y\":"+y+"}"}
             });
-            //SendTransition();
         }
         public static void SetScene(string Scene)
         {
-            //if (Scene == null) Scene = CurrentScene;
             SendPackage("SetCurrentScene", new Dictionary<string, string>() {
                 {"scene-name",Scene}
             });
-            //SendTransition();
         }
         public static void SetSourceMute(string Source, bool Enabled)
         {
-            //if (Scene == null) Scene = CurrentScene;
             SendPackage("SetMute", new Dictionary<string, string>() {
                 {"source",Source},
                 {"mute",(Enabled?"true":"false")}
             });
         }
-
-        private static void SendTransition()
+        public static void SendTransition()
         {
-            //if (Scene == null) Scene = CurrentScene;
             SendPackage("TransitionToProgram", new Dictionary<string, string>());
         }
+
+        public static void ReAuth()
+        {
+            if (WSock == null || !WSock.IsAlive)
+                return;
+            MSGID++;
+            WSock.Send(@"{""request-type"":""GetAuthRequired"",""message-id"":""-2""}");
+        }
+
         private static void SendPackage(string Type,Dictionary<string,string> parames)
         {
             if (!WSock.IsAlive) 
@@ -93,15 +92,6 @@ namespace TwitchBot
             MSGID++;
             WSock.Send(@"{""request-type"":"""+ Type + @"""," + parameters + @"""message-id"":""" + MSGID + @"""}");
         }
-
-        public static void ReAuth()
-        {
-            if (WSock == null || !WSock.IsAlive)
-                return;
-            MSGID++;
-            WSock.Send(@"{""request-type"":""GetAuthRequired"",""message-id"":""-2""}");
-        }
-
         private void WSock_OnOpen(object sender, EventArgs e)
         {
             MSGID++;
@@ -162,7 +152,7 @@ namespace TwitchBot
                 }
                 MSGID++;
                 WSock.Send(@"{""request-type"":""SetHeartbeat"",""enable"":false,""message-id"":""" + MSGID + @"""}");
-                Console.WriteLine(xds.ToString());
+                //Console.WriteLine(xds.ToString());
 
             }
             else

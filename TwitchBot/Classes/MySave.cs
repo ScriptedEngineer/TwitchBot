@@ -13,7 +13,7 @@ namespace TwitchBot
 {
     public class MySave
     {
-        const int BL = 14;
+        const int BL = 15;
         const int NL = 9;
 
         public static MySave Current = new MySave();

@@ -42,11 +42,49 @@ namespace TwitchBot
                 return "Error(Api unavailable)";
             }
         }
+        public static string HttpGet(string Url)
+        {
+            try
+            {
+                using (var client = new System.Net.WebClient())
+                {
+                    client.Encoding = Encoding.UTF8;
+                    return client.DownloadString(Url);
+                }
+            }
+            catch(Exception e)
+            {
+                return e.Message;
+            }
+        }
         public static string AppFile = System.Reflection.Assembly.GetExecutingAssembly().Location;
         public static void CloseAllWindows()
         {
             for (int intCounter = Application.Current.Windows.Count - 1; intCounter >= 0; intCounter--)
                 Application.Current.Windows[intCounter].Hide();
+        }
+        public static string RegexMatch(string source, string regex)
+        {
+            Match Mxx = Regex.Match(source, regex);
+            if (Mxx.Success) return Mxx.Groups[1].Value;
+            else return null;
+        }
+        public static bool CheckVersion(string newest, string current)
+        {
+            if (string.IsNullOrEmpty(current)) return true;
+            string[] VFc = current.Split('.');
+            string[] VFl = newest.Split('.');
+            bool oldVer = false;
+            for (int i = 0; i < VFc.Length; i++)
+            {
+                if (VFc[i] != VFl[i])
+                {
+                    int.TryParse(VFc[i], out int VFci);
+                    int.TryParse(VFl[i], out int VFli);
+                    if (VFli > VFci) oldVer = true;
+                }
+            }
+            return oldVer;
         }
         public static void TextToSpeech(string Text, string Voice = "")
         {
@@ -146,7 +184,6 @@ namespace TwitchBot
             }
             AsyncWorker(() =>
             {
-                Console.WriteLine(path);
                 //Uri File = new Uri(path, UriKind.Absolute);
                 /*if (!MySave.Current.Bools[0])
                 {

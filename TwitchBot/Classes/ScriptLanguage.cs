@@ -231,6 +231,17 @@ namespace TwitchBot
                                         break;
                                 }
                                 break;
+                            case "Audio":
+                                switch (param[2])
+                                {
+                                    case "On":
+                                        OBSWebSock.SetSourceMute(Regex.Replace(command, "^OBS Audio On ", "").Trim(), true);
+                                        break;
+                                    case "Off":
+                                        OBSWebSock.SetSourceMute(Regex.Replace(command, "^OBS Audio Off ", "").Trim(), false);
+                                        break;
+                                }
+                                break;
                             case "Scene":
                                 {
                                     OBSWebSock.SetScene(Regex.Replace(command, "^OBS Scene ", "").Trim());
@@ -255,7 +266,7 @@ namespace TwitchBot
                         if (heh.Length > 2)
                         {
                             heh[2] = heh[2].ToLower();
-                            WebSockServTimer.SendAll(heh[1], heh[2]);
+                            WebSockServ.SendAll("timer.Add", heh[1], heh[2]);
                             if (script != null)
                             {
                                 index++;
@@ -274,9 +285,9 @@ namespace TwitchBot
                         break;
                 }
             }
-            catch (Exception e)
+            catch //(Exception e)
             {
-                Console.WriteLine(e.Message);
+                //Console.WriteLine(e.Message);
             }
             return index;
         }

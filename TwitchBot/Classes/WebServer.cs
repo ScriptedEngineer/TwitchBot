@@ -87,7 +87,7 @@ namespace TwitchBot
                             WebResponse response = e.Response;
                             Stream receiveStream = response.GetResponseStream();
                             StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                            Console.WriteLine(readStream.ReadToEnd());
+                            //Console.WriteLine(readStream.ReadToEnd());
                         }
                         //
                     }).Start();
