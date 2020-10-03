@@ -154,6 +154,7 @@ namespace TwitchBot
             DTTSNicks.IsChecked = MySave.Current.Bools[11];
             DTTSAmount.IsChecked = MySave.Current.Bools[12];
             AllowChTTTSVoice.IsChecked = MySave.Current.Bools[13];
+            AllowWatchKeys.IsChecked = MySave.Current.Bools[14];
             BadWords.Text = MySave.Current.BadWords;
             Censor.Text = MySave.Current.Censor;
             Streamer.Text = MySave.Current.Streamer;
