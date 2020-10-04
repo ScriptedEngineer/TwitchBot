@@ -265,13 +265,26 @@ namespace TwitchBot
                         string[] heh = command.Trim().Split(new char[] { ' ' }, 3);
                         if (heh.Length > 2)
                         {
-                            heh[2] = heh[2].ToLower();
+                            Match mtch = Regex.Match(heh[2], @"\s(\d+)$");
+                            string count = mtch.Groups.Count > 1 ? mtch.Groups[1].Value:"0";
+                            heh[2] = heh[2].ToLower().Replace(count,"").Trim();
+                            
                             WebSockServ.SendAll("timer.Add", heh[1], heh[2]);
                             if (script != null)
                             {
-                                index++;
-                                if (!TimersEnds.ContainsKey(heh[2]) && index < script.Length)
-                                    TimersEnds.Add(heh[2], script[index]);
+                                int.TryParse(count, out int kek);
+                                string SubScript = "";
+                                for (int i = 0; i < kek; i++)
+                                {
+                                    index++;
+                                    if(index < script.Length) 
+                                        SubScript += script[index]+"\n";
+                                }
+                                if (!TimersEnds.ContainsKey(heh[2]))
+                                    TimersEnds.Add(heh[2], SubScript);
+                                else
+                                    TimersEnds[heh[2]] = SubScript;
+
                             }
                         }
                         break;

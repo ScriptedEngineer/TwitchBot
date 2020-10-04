@@ -86,7 +86,7 @@ namespace TwitchBot
         }
         public bool Check(DonationEventArgs e)
         {
-            return e.Amount > MinLimit && e.Amount < MaxLimit;
+            return e.Amount >= MinLimit && e.Amount <= MaxLimit;
         }
         public void Invoke(DonationEventArgs e)
         {

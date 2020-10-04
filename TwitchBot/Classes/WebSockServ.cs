@@ -31,7 +31,7 @@ namespace TwitchBot
                         {
                             if (ScriptLanguage.TimersEnds.ContainsKey(Par[1]))
                             {
-                                ScriptLanguage.RunCommand(ScriptLanguage.TimersEnds[Par[1]]);
+                                ScriptLanguage.RunScript(ScriptLanguage.TimersEnds[Par[1]]);
                                 ScriptLanguage.TimersEnds.Remove(Par[1]);
                             }
                         }
@@ -111,8 +111,8 @@ namespace TwitchBot
                                 }
                                 if (KeyStates[i] != presed)
                                 {
-                                    SendAll(presed ? "Active" : "Deactive", i.ToString());
                                     KeyStates[i] = presed;
+                                    SendAll(presed ? "Active" : "Deactive", i.ToString());
                                 }
                             }
                         }
