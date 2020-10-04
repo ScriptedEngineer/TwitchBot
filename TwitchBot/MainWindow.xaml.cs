@@ -35,51 +35,6 @@ namespace TwitchBot
         static public MainWindow CurrentW;
         public MainWindow()
         {
-            //Автоматические обновления
-            string[] argss = Environment.GetCommandLineArgs();
-            if (!argss.Any(x=> x.Contains("RemindLater") || x.Contains("Updated")))
-            {
-                new Task(() =>
-                {
-                    string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
-                    if (Vers.Length == 3 && Vers[0] == "0")
-                    {
-                        Extentions.AsyncWorker(() =>
-                        {
-                            //Process.Start("Updater")
-                            //Application.Current.Shutdown();
-                            Extentions.AsyncWorker(() => new Updater().Show());
-                            Hide();
-                        });
-                    }
-                    /*
-                    string downloadURL = null, lastVersion, git_ingo;
-                    using (var client = new System.Net.WebClient())
-                    {
-                        client.Headers.Add("User-Agent", "TwitchBot");
-                        client.Encoding = Encoding.UTF8;
-                        git_ingo = client.DownloadString("https://api.github.com/repos/ScriptedEngineer/TwitchBot/releases");
-                        lastVersion = Extentions.RegexMatch(git_ingo, @"""tag_name"":""([^""]*)""");
-                        downloadURL = Extentions.RegexMatch(git_ingo, @"""browser_download_url"":""([^""]*)""");
-                    }
-                    if (!string.IsNullOrEmpty(downloadURL))
-                    {
-                        if (Extentions.CheckVersion(lastVersion, Extentions.Version))
-                        {
-                            Extentions.AsyncWorker(() => new Updater().Show());
-                        }
-                    }*/
-                }).Start();
-                /*try
-                {
-                    new Updater().Show();
-                    Hide();
-                }
-                catch
-                {
-
-                }*/
-            }
             CurrentW = this;
             MySave.Load();
             //Инициализация трей иконки
@@ -214,6 +169,52 @@ namespace TwitchBot
             LoadEvents();
 
             MyCensor.Init();
+
+            //Автоматические обновления
+            string[] argss = Environment.GetCommandLineArgs();
+            if (!argss.Any(x => x.Contains("RemindLater") || x.Contains("Updated")))
+            {
+                new Task(() =>
+                {
+                    string[] Vers = Extentions.ApiServer(ApiServerAct.CheckVersion).Split(' ');
+                    if (Vers.Length == 3 && Vers[0] == "0")
+                    {
+                        Extentions.AsyncWorker(() =>
+                        {
+                            //Process.Start("Updater")
+                            //Application.Current.Shutdown();
+                            Extentions.AsyncWorker(() => new Updater().Show());
+                            Hide();
+                        });
+                    }
+                    /*
+                    string downloadURL = null, lastVersion, git_ingo;
+                    using (var client = new System.Net.WebClient())
+                    {
+                        client.Headers.Add("User-Agent", "TwitchBot");
+                        client.Encoding = Encoding.UTF8;
+                        git_ingo = client.DownloadString("https://api.github.com/repos/ScriptedEngineer/TwitchBot/releases");
+                        lastVersion = Extentions.RegexMatch(git_ingo, @"""tag_name"":""([^""]*)""");
+                        downloadURL = Extentions.RegexMatch(git_ingo, @"""browser_download_url"":""([^""]*)""");
+                    }
+                    if (!string.IsNullOrEmpty(downloadURL))
+                    {
+                        if (Extentions.CheckVersion(lastVersion, Extentions.Version))
+                        {
+                            Extentions.AsyncWorker(() => new Updater().Show());
+                        }
+                    }*/
+                }).Start();
+                /*try
+                {
+                    new Updater().Show();
+                    Hide();
+                }
+                catch
+                {
+
+                }*/
+            }
 
             //Постupdate инициализация
             if (File.Exists("udpateprotocol"))
