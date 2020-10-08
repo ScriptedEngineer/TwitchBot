@@ -64,7 +64,7 @@ namespace TwitchBot
         }
         public void DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            Process.Start(UpdaterPath, "/DarkTheme /WhatNew \"Что нового:\" /Available \"Доступна версия\" /Current \"Установленная версия\" /RemindLater \"Напомнить позже\" /UpdateNow \"Обновить сейчас\" /DownloadingFile \"Загрузка обновления\" /ExtractingUpdate \"Распаковка обновления\" /PleaseWait \"Пожалуйста подождите...\" /GitHub \"ScriptedEngineer/TwitchBot\" /RunApp \"" + Extentions.AppFile + "\"");
+            Process.Start(UpdaterPath, "/DarkTheme /WhatNew \"Что нового:\" /Available \"Доступна версия\" /Current \"Установленная версия\" /RemindLater \"Напомнить позже\" /UpdateNow \"Обновить сейчас\" /DownloadingFile \"Загрузка обновления\" /ExtractingUpdate \"Распаковка обновления\" /PleaseWait \"Пожалуйста подождите...\" /GitHub \"ScriptedEngineer/TwitchBot\" /RunApp \"" + Extentions.AppFile + "\" /JustDownload");
             Application.Current.Shutdown();
         }
     }

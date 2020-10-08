@@ -276,7 +276,7 @@
                     <TextBox x:Name="DonMin" Height="24" Margin="3,55,7,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" IsEnabled="False" Grid.Column="1" TextChanged="DonMin_TextChanged"/>
                     <TextBox x:Name="DonMax" Height="24" Margin="9,55,1,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" IsEnabled="False" Grid.Column="2" TextChanged="DonMax_TextChanged"/>
                     <Label x:Name="DonEvLabel_Copy" Content="От (Руб)" VerticalAlignment="Top" Padding="0" Margin="3,39,7,0" Grid.Column="1"/>
-                    <Label x:Name="DonEvLabel_Copy1" Content="До (Руб)" VerticalAlignment="Top" Padding="0" Margin="9,38,1,0" Grid.Column="2"/>
+                    <Label x:Name="DonEvLabel_Copy1" Content="До (Руб) (0=∞)" VerticalAlignment="Top" Padding="0" Margin="9,38,1,0" Grid.Column="2"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Песни" Visibility="Visible">
