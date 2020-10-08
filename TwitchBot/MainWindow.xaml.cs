@@ -838,7 +838,7 @@ namespace TwitchBot
                                     "|N:"+ EvList.Items.Count +
                                     "|C:" + CmdEvList.Items.Count +
                                     "|D:" + DonEvList.Items.Count+
-                                    "|OBS:"+ OBSRemEn.IsChecked+
+                                    "  OBS:"+ OBSRemEn.IsChecked+
                                     "|Mod:"+ !GetModBtt.IsEnabled+
                                     "|Don:"+ !DAConnect.IsEnabled, true);
                                 });
