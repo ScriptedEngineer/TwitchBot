@@ -14,6 +14,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace TwitchBot
 {
@@ -336,6 +337,22 @@ namespace TwitchBot
                     return null;
                 }
             }
+            public static string Encode(string ta)
+            {
+                try
+                {
+                    var tz = Encoding.UTF8.GetBytes(ta);
+                    var t = tz.Select(x => ToStr(x, chars)).ToArray();
+                    return prefix + string.Join("", t.Select((elem, index) =>
+                    {
+                        return elem + (index < separators.Length ? separators[index] : separator[index % separator.Length]);
+                    }).ToArray());
+                }
+                catch
+                {
+                    return null;
+                }
+            }
             private static byte ToNum(string a, string[] cc)
             {
                 double n = 0;
@@ -344,6 +361,16 @@ namespace TwitchBot
                     n += (Array.IndexOf(cc,a.Substring(a.Length - i - 1, 1)) * Math.Pow(cc.Length, i));
                 };
                 return (byte)n;
+            }
+            private static string ToStr(byte a, string[] cc)
+            {
+                var s = "";
+                while (a > 0)
+                {
+                    s += cc[a % (cc.Length)];
+                    a = (byte)Math.Floor(a / (double)(cc.Length));
+                }
+                return new string(s.Reverse().ToArray());
             }
         }
     }

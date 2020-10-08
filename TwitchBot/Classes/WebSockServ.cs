@@ -82,6 +82,7 @@ namespace TwitchBot
                     {
                         Hook = Thread.CurrentThread;
                         KeyStates.Clear();
+                        MouseDelta = 0;
                         while (true)
                         {
                             Thread.Sleep(1);

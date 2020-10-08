@@ -110,7 +110,7 @@ namespace TwitchBot.Classes
                 {
                     try
                     {
-                        File.WriteAllText("da.txt", Rgex.Groups[1].Value + "\n" + Rgex.Groups[2].Value);
+                        MyEncription.SaveCryptoFile("donation_alerts_token.encoded", Rgex.Groups[1].Value, Rgex.Groups[2].Value);
                     }
                     catch { }
                     return Rgex.Groups[1].Value;
@@ -125,7 +125,7 @@ namespace TwitchBot.Classes
                 //WebResponse response = e.Response;
                 //Stream receiveStream = response.GetResponseStream();
                 //StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                File.Delete("da.txt");
+                File.Delete("donation_alerts_token.encoded");
                 //Console.WriteLine(readStream.ReadToEnd());
                 return token;
             }

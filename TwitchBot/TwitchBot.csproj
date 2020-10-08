@@ -112,6 +112,7 @@
     <Compile Include="Classes\OBSConnections.cs" />
     <Compile Include="Classes\RewardEvent.cs" />
     <Compile Include="Classes\ScriptLanguage.cs" />
+    <Compile Include="Classes\MyEncription.cs" />
     <Compile Include="Classes\UserInput.cs" />
     <Compile Include="Classes\Voter.cs" />
     <Compile Include="Classes\WebServer.cs" />

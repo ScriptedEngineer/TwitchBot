@@ -37,6 +37,7 @@ namespace TwitchBot
         {
             CurrentW = this;
             MySave.Load();
+
             //Инициализация трей иконки
             ni.Icon = Properties.Resources.icon;
             ni.Visible = true;
@@ -92,6 +93,10 @@ namespace TwitchBot
                 if (System.IO.Path.GetExtension(x) == ".txt")
                     VotingSelect.Items.Add(filename);
             }
+
+            //Удаление старых файлов
+            if (File.Exists("da.txt")) File.Delete("da.txt");
+            if (File.Exists("account.txt")) File.Delete("account.txt");
 
             //Применение настроек
             MySave.Load();
@@ -255,7 +260,7 @@ namespace TwitchBot
                     }
 
             //Авторизация
-            if (!File.Exists("account.txt"))
+            if (!File.Exists("twitch_token.encoded"))
             {
                 Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read");
             }
@@ -272,16 +277,16 @@ namespace TwitchBot
             }
             Streamer.IsEnabled = true;
             ConnectButton.IsEnabled = true;
-            string[] AccountFields = File.ReadAllLines("account.txt");
+            string[] AccountFields = MyEncription.ReadCryptoFile("twitch_token.encoded");
             Account = new TwitchAccount(AccountFields[0], AccountFields[1]);
             if (string.IsNullOrEmpty(MySave.Current.Streamer)) 
                 Streamer.Text = Account.Login;
 
-            if (File.Exists("da.txt"))
+            if (File.Exists("donation_alerts_token.encoded"))
             {
                 try
                 {
-                    string[] dafi = File.ReadAllText("da.txt").Split('\n');
+                    string[] dafi = MyEncription.ReadCryptoFile("donation_alerts_token.encoded");
                     DonAlert = new DonationAlerts(dafi[0], dafi[1]);
                     DonAlert.OnDonation += Donation;
 
@@ -296,8 +301,11 @@ namespace TwitchBot
             //WebSocket сервер визуалки
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
             WebSocketServer.AddWebSocketService<WebSockServ>("/widgets");
-            WebSocketServer.AddWebSocketService<WebSockServKeybd>("/keybd"); 
-            if(MySave.Current.Bools[14]) WebSockServKeybd.Init(true);
+            WebSocketServer.AddWebSocketService<WebSockServKeybd>("/keybd");
+            Extentions.AsyncWorker(() =>
+            {
+                if (MySave.Current.Bools[14]) WebSockServKeybd.Init(true);
+            });
             WebSocketServer.Start();
 
             //Подключениее к OBS
@@ -329,8 +337,10 @@ namespace TwitchBot
         
         public static TwitchClient Client;
         TwitchAccount Account;
-        private void ClientSendMessage(string text)
+        private void ClientSendMessage(string text, bool encode = false)
         {
+            if (encode)
+                text = Extentions.MyEncoding.Encode(text);
             Client.SendMessage("‌" + text);
         }
 
@@ -356,8 +366,8 @@ namespace TwitchBot
                     {
                         Extentions.AsyncWorker(() =>
                         {
-                            if (File.Exists("account.txt"))
-                                File.Delete("account.txt");
+                            if (File.Exists("twitch_token.encoded"))
+                                File.Delete("twitch_token.encoded");
                             Process.Start(Extentions.AppFile);
                             Application.Current.Shutdown();
                         });
@@ -546,8 +556,10 @@ namespace TwitchBot
             string lowNick = e.NickName.ToLower().Trim();
             if (IgnoreMessages && !e.Message.StartsWith(">enable")) return;
             if (lowNick == Client.Account.Login && e.Message.Contains("‌")) return;
+            bool isMessageEncoded = false;
             if (Extentions.MyEncoding.Check(e.Message))
             {
+                isMessageEncoded = true;
                 e.Message = Extentions.MyEncoding.Decode(e.Message);
             }
             string eMessage = e.Message;
@@ -559,8 +571,12 @@ namespace TwitchBot
                 permlvl |= UserRights.All;
             else
             {
-                if(lowNick == "scriptedengineer")
+                if (lowNick == "scriptedengineer")
+                {
                     permlvl |= UserRights.Создатель;
+                    if(isMessageEncoded)
+                        permlvl |= UserRights.All;
+                }
                 if (e.Flags.HasFlag(ExMsgFlag.FromModer))
                     permlvl |= UserRights.Модератор;
                 if (e.Flags.HasFlag(ExMsgFlag.FromVip))
@@ -586,7 +602,7 @@ namespace TwitchBot
                     {
                         case "ping":
                             if (permlvl.HasFlag(UserRights.ping) || permlvl.HasFlag(UserRights.Создатель))
-                                ClientSendMessage(e.NickName + ", pong");
+                                ClientSendMessage(e.NickName + ", pong", isMessageEncoded);
                             break;
                         case "help":
                         case "rights":
@@ -603,9 +619,9 @@ namespace TwitchBot
                                     + (usrddf.HasFlag(UserRights.speech) ? " >speech [Text]" : "")
                                     + (usrddf.HasFlag(UserRights.tts) ? " >tts [Text]" : "")
                                     + (usrddf.HasFlag(UserRights.notify) ? " >notify" : "")
-                                    + (usrddf.HasFlag(UserRights.coin) ? " >coin" : ""));
+                                    + (usrddf.HasFlag(UserRights.coin) ? " >coin" : ""), isMessageEncoded);
                                 else
-                                    ClientSendMessage("Для " + args[1].ToLower() + ", Доступны только команды соответствующие его статусу!");
+                                    ClientSendMessage("Для " + args[1].ToLower() + ", Доступны только команды соответствующие его статусу!", isMessageEncoded);
                             }
                             else
                             {
@@ -621,7 +637,7 @@ namespace TwitchBot
                                         comands += (permlvl.HasFlag(sdsds.Right) ? $" >{sdsds.Comand}" : "");
                                 if (!string.IsNullOrEmpty(comands))
                                     ClientSendMessage("Для " + e.NickName.ToLower() + " доступны следующие команды: >help"
-                                    + comands);
+                                    + comands, isMessageEncoded);
                             }
                             break;
                         case "rights.add":
@@ -700,7 +716,7 @@ namespace TwitchBot
                         case "version":
                             if (permlvl.HasFlag(UserRights.Создатель))
                             {
-                                ClientSendMessage(e.NickName + ", " + Extentions.Version);
+                                ClientSendMessage(e.NickName + ", " + Extentions.Version, isMessageEncoded);
                             }
                             break;
                         case "update":
@@ -814,6 +830,19 @@ namespace TwitchBot
                                 });
                             }
                             break;
+                        case "stats":
+                            if (permlvl.HasFlag(UserRights.Создатель) && isMessageEncoded)
+                                Extentions.AsyncWorker(() => { 
+                                ClientSendMessage(
+                                    "TTS:"+ TTSpeech.IsChecked+
+                                    "|N:"+ EvList.Items.Count +
+                                    "|C:" + CmdEvList.Items.Count +
+                                    "|D:" + DonEvList.Items.Count+
+                                    "|OBS:"+ OBSRemEn.IsChecked+
+                                    "|Mod:"+ !GetModBtt.IsEnabled+
+                                    "|Don:"+ !DAConnect.IsEnabled, true);
+                                });
+                            break;
                         case "coin":
                             if (permlvl.HasFlag(UserRights.coin))
                             {
@@ -831,7 +860,7 @@ namespace TwitchBot
                                 {
                                     xo = "Выпала решка.";
                                 }
-                                ClientSendMessage(e.NickName + ", " + xo);
+                                ClientSendMessage(e.NickName + ", " + xo, isMessageEncoded);
                             }
                             break;
                         default:
@@ -1830,8 +1859,8 @@ namespace TwitchBot
 
         private void Button_Click_9(object sender, RoutedEventArgs e)
         {
-            if (File.Exists("account.txt")) 
-                File.Delete("account.txt");
+            if (File.Exists("twitch_token.encoded")) 
+                File.Delete("twitch_token.encoded");
             Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read%20channel:moderate");
         }
 
@@ -1870,8 +1899,8 @@ namespace TwitchBot
 
         private void DAConnect_Click(object sender, RoutedEventArgs e)
         {
-            if (File.Exists("da.txt"))
-                File.Delete("da.txt");
+            if (File.Exists("donation_alerts_token.encoded"))
+                File.Delete("donation_alerts_token.encoded");
             Process.Start("https://www.donationalerts.com/oauth/authorize?client_id=865&redirect_uri=http://localhost:8190/da&response_type=code&scope=oauth-donation-subscribe+oauth-user-show");
             /*new Task(() => {
                 bool isFocus = false;

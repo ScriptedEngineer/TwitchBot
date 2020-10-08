@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -33,7 +34,7 @@ namespace TwitchBot
                 case "twithctoken":
                     string token = request.QueryString.Get("access_token");
                     string login = TwitchAccount.GetLogin(token);
-                    File.WriteAllLines("account.txt", new string[] { login, token });
+                    MyEncription.SaveCryptoFile("twitch_token.encoded", login, token);
                     new Task(() =>
                     {
                         Thread.Sleep(500);
@@ -66,7 +67,7 @@ namespace TwitchBot
                             Match Rgex = Regex.Match(readStream.ReadToEnd(), @"""access_token"":""([^""]*)"".*""refresh_token"":""([^""]*)""");
                             try
                             {
-                                File.WriteAllText("da.txt", Rgex.Groups[1].Value + "\n" + Rgex.Groups[2].Value);
+                                MyEncription.SaveCryptoFile("donation_alerts_token.encoded", Rgex.Groups[1].Value , Rgex.Groups[2].Value);
                                 new Task(() =>
                                 {
                                     Thread.Sleep(500);
