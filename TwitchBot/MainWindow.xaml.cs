@@ -95,8 +95,16 @@ namespace TwitchBot
             }
 
             //Удаление старых файлов
-            if (File.Exists("da.txt")) File.Delete("da.txt");
-            if (File.Exists("account.txt")) File.Delete("account.txt");
+            if (File.Exists("da.txt"))
+            {
+                MyEncription.SaveCryptoFile("donation_alerts_token.encoded", File.ReadAllLines("da.txt"));
+                File.Delete("da.txt");
+            }
+            if (File.Exists("account.txt"))
+            {
+                MyEncription.SaveCryptoFile("twitch_token.encoded", File.ReadAllLines("account.txt"));
+                File.Delete("account.txt");
+            }
 
             //Применение настроек
             MySave.Load();
