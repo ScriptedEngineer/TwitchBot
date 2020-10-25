@@ -19,8 +19,10 @@ namespace TwitchBot
             EventName = "Новый",
             Script;
         public bool DeferredRun = false;
+        private bool runEveryTime = false;
         private bool Runing;
         private List<string> Deferred = new List<string>();
+        private string DefereData = "";
         public RewardEvent()
         {
 
@@ -41,19 +43,23 @@ namespace TwitchBot
                 if (scripd.Contains("%TITLE%"))
                     scripd = scripd.Replace("%TITLE%", e.Title.Replace("\n", "").Trim());
             }
-            if (DeferredRun)
+            if (DeferredRun && !runEveryTime)
             {
                 Deferred.Add(scripd);
                 Runing = false;
             }
             else
             {
+                if (scripd.Contains("%DATA%"))
+                    scripd = scripd.Replace("%DATA%", DefereData);
                 ScriptLanguage.RunScript(scripd);
+                if(DeferredRun) Thread.Sleep(1000);
                 Runing = false;
             }
         }
         public void InvokeDeferred(string data)
         {
+            DefereData = data;
             new Task(() => {
                 while (Runing)
                     Thread.Sleep(100);
@@ -69,6 +75,8 @@ namespace TwitchBot
                 Runing = false;
             }).Start();
         }
+        public void SetET(bool ET) => runEveryTime = ET;
+        public bool GetET() => runEveryTime;
     }
     public class ComandEvent
     {

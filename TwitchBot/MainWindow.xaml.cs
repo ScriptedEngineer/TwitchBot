@@ -2405,7 +2405,21 @@ namespace TwitchBot
             RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
             if (RewEv.DeferredRun)
             {
-                RewEv.InvokeDeferred(DefeData.Text);
+                if (RewEv.GetET()) 
+                {
+                    RewEv.SetET(false);
+                    DefeButton.Content = "Запустить";
+                    DefeData.IsEnabled = true;
+                    DefeRun.IsEnabled = true;
+                }
+                else
+                {
+                    RewEv.SetET(true);
+                    RewEv.InvokeDeferred(DefeData.Text);
+                    DefeButton.Content = "Остановить";
+                    DefeData.IsEnabled = false;
+                    DefeRun.IsEnabled = false;
+                }
             }
             else
             {
