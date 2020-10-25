@@ -1780,6 +1780,9 @@ namespace TwitchBot
                 EvName.IsEnabled = false;
                 EventRewardName.IsEnabled = false;
                 Script.IsEnabled = false;
+                DefeRun.IsEnabled = false;
+                DefeButton.IsEnabled = false;
+                DefeData.IsEnabled = false;
                 return;
             }
             CustomEventRewardID.IsEnabled = true;
@@ -1787,11 +1790,19 @@ namespace TwitchBot
             EvName.IsEnabled = true;
             EventRewardName.IsEnabled = true;
             Script.IsEnabled = true;
+            DefeRun.IsEnabled = true;
             RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
             CustomEventRewardID.Text = RewEv.CustomRewardID;
             EvName.Text = RewEv.EventName;
             EventRewardName.Text = RewEv.RewardName;
             Script.Text = RewEv.Script;
+            DefeRun.IsChecked = RewEv.DeferredRun;
+            if (RewEv.DeferredRun)
+            {
+                DefeButton.IsEnabled = true;
+                DefeData.IsEnabled = true;
+            }
+
         }
         private void Button_Click_8(object sender, RoutedEventArgs e)
         {
@@ -1869,7 +1880,7 @@ namespace TwitchBot
         {
             if (File.Exists("twitch_token.encoded")) 
                 File.Delete("twitch_token.encoded");
-            Process.Start("https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=v1wv59aw5a8w2reoyq1i5j6mwb1ixm&redirect_uri=http://localhost:8190/twitchcode&scope=chat:edit%20chat:read%20channel:moderate");
+            Process.Start("http://wsxz.ru/content/TwitchBotToken");
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -2367,6 +2378,40 @@ namespace TwitchBot
         {
             MySave.Current.Bools[14] = AllowWatchKeys.IsChecked.Value;
             WebSockServKeybd.Init(MySave.Current.Bools[14]);
+        }
+
+        private void DefeRun_Click(object sender, RoutedEventArgs e)
+        {
+            if (EvList.SelectedIndex == -1)
+                return;
+            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+            RewEv.DeferredRun = DefeRun.IsChecked.Value;
+            if (RewEv.DeferredRun)
+            {
+                DefeData.IsEnabled = true;
+                DefeButton.IsEnabled = true;
+            }
+            else
+            {
+                DefeData.IsEnabled = false;
+                DefeButton.IsEnabled = false;
+            }
+        }
+
+        private void Button_Click_28(object sender, RoutedEventArgs e)
+        {
+            if (EvList.SelectedIndex == -1)
+                return;
+            RewardEvent RewEv = RewEvents[EvList.SelectedIndex];
+            if (RewEv.DeferredRun)
+            {
+                RewEv.InvokeDeferred(DefeData.Text);
+            }
+            else
+            {
+                DefeData.IsEnabled = false;
+                DefeButton.IsEnabled = false;
+            }
         }
 
         private void CustomEventRewardID_TextChanged(object sender, TextChangedEventArgs e)

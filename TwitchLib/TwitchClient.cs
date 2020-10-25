@@ -50,84 +50,6 @@ namespace TwitchLib
             WSock.SetProxy(addr, user, pass);
         }
 
-        public bool IsFollow(string StreamerID)
-        {
-            try
-            {
-                HttpWebRequest reqFollow = (HttpWebRequest)WebRequest.Create($"https://api.twitch.tv/kraken/users/{Account.UserID}/follows/channels/{StreamerID}");
-                reqFollow.Method = "GET";
-                reqFollow.Accept = "application/vnd.twitchtv.v5+json";
-                reqFollow.Headers["Client-ID"] = Account.ClientID;
-                reqFollow.Headers["Authorization"] = $"OAuth {Account.Token}";
-                string content = Web.GetResponse(reqFollow.GetResponse());
-                if (Regex.IsMatch(content, @"created_at"))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        public void Follow(string StreamerID)
-        {
-            new Task(() =>
-            {
-                if (IsFollow(StreamerID))
-                return;
-                HttpWebRequest reqFollow = (HttpWebRequest)WebRequest.Create($"https://api.twitch.tv/kraken/users/{Account.UserID}/follows/channels/{StreamerID}");
-                //reqFollow.Timeout = 10;
-                reqFollow.Method = "PUT";
-                reqFollow.Accept = "application/vnd.twitchtv.v5+json";
-                reqFollow.ContentType = "application/json";
-                reqFollow.Headers["Client-ID"] = Account.ClientID;
-                reqFollow.Headers["Authorization"] = $"OAuth {Account.Token}";
-                try
-                {
-                    WebResponse response = reqFollow.GetResponse();
-                    Stream receiveStream = response.GetResponseStream();
-                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    //Console.WriteLine(readStream.ReadToEnd());
-                }
-                catch(WebException e)
-                {
-                    WebResponse response = e.Response;
-                    Stream receiveStream = response.GetResponseStream();
-                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    //Console.WriteLine(readStream.ReadToEnd());
-                }
-            }).Start();
-            //string content3 = Web.GetResponse();
-            //Console.WriteLine(content3);
-        }
-        public void Unfollow(string StreamerID)
-        {
-            new Task(() =>
-            {
-                if (!IsFollow(StreamerID))
-                return;
-                HttpWebRequest reqFollow = (HttpWebRequest)WebRequest.Create($"https://api.twitch.tv/kraken/users/{Account.UserID}/follows/channels/{StreamerID}");
-                reqFollow.Timeout = 10;
-                reqFollow.Method = "DELETE";
-                reqFollow.Accept = "application/vnd.twitchtv.v5+json";
-                reqFollow.Headers["Client-ID"] = Account.ClientID;
-                reqFollow.Headers["Authorization"] = $"OAuth {Account.Token}";
-                try
-                {
-                    reqFollow.GetResponse();
-                }
-                catch
-                {
-
-                }
-            }).Start();
-        }
-
         public string GetStreamerID()
         {
             while (Account.ClientID == null)
@@ -153,28 +75,6 @@ namespace TwitchLib
                 return "0";
             }
         }
-
-        public void Host()
-        {
-            new Task(() =>
-            {
-                TwitchClient x = new TwitchClient(Account, Account.Login, $"/host {Streamer}", "", false);
-                x.Connect();
-                Thread.Sleep(6000);
-                x.Close();
-            }).Start();
-        }
-        public void Unhost()
-        {
-            new Task(() =>
-            {
-                TwitchClient x = new TwitchClient(Account, Account.Login, $"/unhost", "", false);
-                x.Connect();
-                Thread.Sleep(6000);
-                x.Close();
-            }).Start();
-        }
-
 
         public void ConnectToOther(string streamer)
         {
