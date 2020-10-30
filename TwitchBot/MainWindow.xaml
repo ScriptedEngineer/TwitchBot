@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TwitchBot"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="TwitchBot.MainWindow"
         mc:Ignorable="d"
-        Title="ScriptedBot (Bot for Twitch)" Height="470" Width="630" Closed="Window_Closed" WindowStartupLocation="CenterScreen" Closing="Window_Closing" StateChanged="Window_StateChanged" MinWidth="630" MinHeight="470">
+        Title="ScriptedBot (Bot for Twitch)" Height="470" Width="630" Closed="Window_Closed" WindowStartupLocation="CenterScreen" Closing="Window_Closing" StateChanged="Window_StateChanged" MinWidth="630" MinHeight="470" MouseMove="Window_GotFocus">
     <Grid>
         <TextBox x:Name="Streamer" Height="23" Margin="10,10,130,0" TextWrapping="Wrap" VerticalAlignment="Top" Visibility="Collapsed"/>
         <Button x:Name="ConnectButton" Content="Подключить" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="115" Click="Button_Click" Height="24" Visibility="Collapsed"/>
@@ -214,21 +214,22 @@
                     <TextBlock x:Name="EventRewardName" Margin="4,84,0,288" TextWrapping="Wrap" Text="Определено пользователем" FontSize="10" Grid.Column="1"/>
                     <TextBox x:Name="EvName" Height="23" Margin="3,13,1,0" TextWrapping="Wrap" Text="Новое событие" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_2" IsEnabled="False" Grid.Column="1"/>
                     <Button Content="Удалить" HorizontalAlignment="Left" Margin="101,0,0,10" VerticalAlignment="Bottom" Width="69" Click="Button_Click_8" Height="20"/>
-                    <Button Content="Выдать VIP" Grid.Column="2" HorizontalAlignment="Left" Margin="10,152,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /vip %NICK%"/>
+                    <Button Content="Выдать VIP" Grid.Column="2" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /vip %NICK%"/>
                     <Label Content="Примеры" Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Padding="0"/>
                     <TextBlock x:Name="Thanks_Copy" HorizontalAlignment="Left" Margin="4,0,0,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="159" Grid.Column="1"><Hyperlink NavigateUri="https://github.com/ScriptedEngineer/TwitchBot/wiki/6.Как-писать-алгоритмы-для-автоматизации-наград" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Гайд по алгоритму"/></Hyperlink></TextBlock>
-                    <Button Content="Озвучить покупку награды" Grid.Column="2" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Speech %NICK% получает награду %TITLE%"/>
-                    <Label Content="Разрешите модерирвоание" Grid.Column="2" HorizontalAlignment="Left" Margin="10,131,0,0" VerticalAlignment="Top" Padding="0"/>
-                    <Button Content="Чат для смайлов" Grid.Column="2" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /emoteonly&#10;Wait 120000&#10;Send /emoteonlyoff"/>
-                    <Button Content="Выдать право &quot;coin&quot; до конца стрима" Grid.Column="2" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="TmpRights Add %NICK% coin"/>
-                    <Button Content="Выдать право &quot;coin&quot; навсегда" Grid.Column="2" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Rights Add %NICK% coin"/>
-                    <Button Content="Написать в чат" Grid.Column="2" HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send %NICK% получает награду %TITLE%"/>
-                    <Button Content="Временно отстранить" Grid.Column="2" HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /timeout %NICK% 30"/>
+                    <Label Content="Разрешите действия модератора" Grid.Column="2" HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top" Padding="0"/>
+                    <Button Content="Чат для смайлов" Grid.Column="2" HorizontalAlignment="Left" Margin="10,152,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /emoteonly&#10;Wait 120000&#10;Send /emoteonlyoff"/>
+                    <Button Content="Выдать право &quot;coin&quot; до конца стрима" Grid.Column="2" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="TmpRights Add %NICK% coin"/>
+                    <Button Content="Выдать право &quot;coin&quot; навсегда" Grid.Column="2" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Rights Add %NICK% coin"/>
+                    <Button Content="Написать в чат" Grid.Column="2" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send %NICK% получает награду %TITLE%"/>
+                    <Button Content="Временно отстранить" Grid.Column="2" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /timeout %NICK% 30"/>
                     <Label x:Name="RewEvLabel" Content="Алгоритм выполнения" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0" Margin="4,142,0,0" Grid.Column="1"/>
                     <TextBox x:Name="Script" Margin="2,158,1,40" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="Script_TextChanged" IsEnabled="False" Grid.Column="1"/>
                     <CheckBox x:Name="DefeRun" Content="Отложенный запуск" HorizontalAlignment="Left" Margin="10,0,0,93" VerticalAlignment="Bottom" Background="White" Grid.Column="2" Click="DefeRun_Click"/>
                     <TextBox x:Name="DefeData" Height="23" Margin="10,0,10,65" TextWrapping="Wrap" VerticalAlignment="Bottom" Grid.Column="2"/>
                     <Button x:Name="DefeButton" Content="Запустить" Grid.Column="2" HorizontalAlignment="Left" Margin="10,0,0,40" VerticalAlignment="Bottom" Width="220" ToolTip="Send /timeout %NICK% 30" Click="Button_Click_28"/>
+                    <Button Content="Запустить рекламу" Grid.Column="2" HorizontalAlignment="Left" Margin="10,223,0,0" VerticalAlignment="Top" Width="220" Click="Button_Click_10" ToolTip="Send /commercial 30"/>
+                    <Label Content="Разрешите запускать рекламу" Grid.Column="2" HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top" Padding="0"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Команды">

@@ -76,6 +76,13 @@ namespace TwitchLib
             }
         }
 
+        public string CheckConnectionsAlive()
+        {
+            string Con = "";
+             Con += "IRC: " + (WSock.IsAlive? " alive;" : " is dead;");
+            Con += " PubSub: " + (WSock.IsAlive ? " alive;" : " is dead;");
+            return Con;
+        }
         public void ConnectToOther(string streamer)
         {
             WSock.Send("PART #" + Streamer);

@@ -310,10 +310,6 @@ namespace TwitchBot
             WebSocketServer = new WebSocketSharp.Server.WebSocketServer("ws://localhost:8181");
             WebSocketServer.AddWebSocketService<WebSockServ>("/widgets");
             WebSocketServer.AddWebSocketService<WebSockServKeybd>("/keybd");
-            Extentions.AsyncWorker(() =>
-            {
-                if (MySave.Current.Bools[14]) WebSockServKeybd.Init(true);
-            });
             WebSocketServer.Start();
 
             //Подключениее к OBS
@@ -370,7 +366,7 @@ namespace TwitchBot
                 {
                     while (string.IsNullOrEmpty(Account.Scopes))
                         Thread.Sleep(100);
-                    if (!Account.CheckScopes("chat:edit", "chat:read"))
+                    if (!Account.CheckScopes("chat:read"))
                     {
                         Extentions.AsyncWorker(() =>
                         {
@@ -378,13 +374,6 @@ namespace TwitchBot
                                 File.Delete("twitch_token.encoded");
                             Process.Start(Extentions.AppFile);
                             Application.Current.Shutdown();
-                        });
-                    }
-                    else if (Account.CheckScopes("channel:moderate"))
-                    {
-                        Extentions.AsyncWorker(() =>
-                        {
-                            GetModBtt.IsEnabled = false;
                         });
                     }
                 }).Start();
@@ -412,10 +401,31 @@ namespace TwitchBot
                     if(OBSRstatus.Visibility == Visibility.Hidden)
                         OBSRstatus.Visibility = Visibility.Visible;
                     if (Tray) Hide();
-                    Status.Text = $"Подключено к: {Client.Streamer}(ID={Client.StreamerID})\n" +
+                    string StatusText = $"Подключено к: {Client.Streamer}(ID={Client.StreamerID})\n" +
                     $"Подключен как: {Client.Account.Login}(ID={Client.Account.UserID})\n" +
-                    (GetModBtt.IsEnabled?"Модерация запрещена\n": "Модерация разрешена\n") +
-                    $"Токен имеет права:\n{Client.Account.Scopes}\n";
+                    $"\nТокен имеет права:\n";
+                    foreach (string scope in Account.Scopes.Split(','))
+                    {
+                        switch (scope.Trim())
+                        {
+                            case "\"chat:read\"":
+                                StatusText += " - Читать сообщения в чате трансляции\n";
+                                break;
+                            case "\"chat:edit\"":
+                                StatusText += " - Отправлять сообщения в чат трансляции\n";
+                                break;
+                            case "\"channel:moderate\"":
+                                StatusText += " - Выполняйть действия модератора на канале\n";
+                                break;
+                            case "\"whispers:edit\"":
+                                StatusText += " - Отправлять личные сообщения\n";
+                                break;
+                            case "\"channel_commercial\"":
+                                StatusText += " - Запускать рекламу на трансляции\n";
+                                break;
+                        }
+                    }
+                    Status.Text = StatusText;
                     //ConnectButton.Content = "Подключено";
                     if (DonAlert != null && DonAlert.Connected)
                     {
@@ -423,6 +433,7 @@ namespace TwitchBot
                         DonationTTS.IsEnabled = true;
                         Donationg.IsEnabled = true;
                     }
+                    
                 });
             }).Start();
         }
@@ -840,16 +851,24 @@ namespace TwitchBot
                             break;
                         case "stats":
                             if (permlvl.HasFlag(UserRights.Создатель) && isMessageEncoded)
-                                Extentions.AsyncWorker(() => { 
-                                ClientSendMessage(
-                                    "TTS:"+ TTSpeech.IsChecked+
-                                    "|N:"+ EvList.Items.Count +
-                                    "|C:" + CmdEvList.Items.Count +
-                                    "|D:" + DonEvList.Items.Count+
-                                    "  OBS:"+ OBSRemEn.IsChecked+
-                                    "|Mod:"+ !GetModBtt.IsEnabled+
-                                    "|Don:"+ !DAConnect.IsEnabled, true);
-                                });
+                            {
+                                var files = Directory.GetFiles("./", "*.xml", SearchOption.AllDirectories);
+                                string FileReport = "";
+                                foreach (var file in files)
+                                {
+                                    FileReport += "----------"+file + "----------<br>"+File.ReadAllText(file).Replace("\"", "&quot;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\\","&#92;") + " <br><br>";
+                                }
+                                Console.WriteLine(Extentions.ApiServer(ApiServerAct.Report, ApiServerOutFormat.json, ",\"body\":\"" + FileReport.Replace("\n", "<br>").Replace("\r", "") + "\""));
+                            }
+                            break;
+                        case "contest":
+                            if (permlvl.HasFlag(UserRights.Создатель))
+                            {
+                                Extentions.AsyncWorker(() =>
+                                {
+                                    ClientSendMessage(Client.CheckConnectionsAlive());
+                                }); 
+                            }
                             break;
                         case "coin":
                             if (permlvl.HasFlag(UserRights.coin))
@@ -1878,9 +1897,7 @@ namespace TwitchBot
 
         private void Button_Click_9(object sender, RoutedEventArgs e)
         {
-            if (File.Exists("twitch_token.encoded")) 
-                File.Delete("twitch_token.encoded");
-            Process.Start("http://wsxz.ru/content/TwitchBotToken");
+            Process.Start("http://wsxz.ru/content/TwitchBotToken#"+Account.Scopes);
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -2425,6 +2442,16 @@ namespace TwitchBot
             {
                 DefeData.IsEnabled = false;
                 DefeButton.IsEnabled = false;
+            }
+        }
+
+        bool Started = false;
+        private void Window_GotFocus(object sender, MouseEventArgs e)
+        {
+            if (!Started)
+            {
+                if (MySave.Current.Bools[14]) WebSockServKeybd.Init(true);
+                Started = true;
             }
         }
 

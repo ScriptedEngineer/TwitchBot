@@ -26,16 +26,16 @@ namespace TwitchBot
         public static List<Prompt> Speechs = new List<Prompt>();
         public static string Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static void AsyncWorker(Action act) => _ = Application.Current?.Dispatcher?.BeginInvoke(DispatcherPriority.Background, act);
-        public static string ApiServer(ApiServerAct Actione, ApiServerOutFormat Formate = ApiServerOutFormat.@string)
+        public static string ApiServer(ApiServerAct Actione, ApiServerOutFormat Formate = ApiServerOutFormat.@string, string JsonData = "")
         {
             try
             {
                 using (var client = new System.Net.WebClient())
                 {
+                    string json = "{\"token\":\"ynWOXOWBviuL8QQDbYFcLi8wm2G1u3N0\",\"app\":\"TwitchBot\",\"version\":\"" +
+                         Version + "\"" + JsonData + ",\"streamer\":\"" + MySave.Current.Streamer + "\"}";
                     client.Encoding = Encoding.UTF8;
-                    return client.UploadString("https://wsxz.ru/api/" + Actione.ToString() + "/" + Formate.ToString(),
-                        "{\"token\":\"ynWOXOWBviuL8QQDbYFcLi8wm2G1u3N0\",\"app\":\"TwitchBot\",\"version\":\"" +
-                         Version + "\",\"streamer\":\"" + MySave.Current.Streamer + "\"}");
+                    return client.UploadString("https://wsxz.ru/api/" + Actione.ToString() + "/" + Formate.ToString(), json);
                 }
             }
             catch
@@ -378,7 +378,8 @@ namespace TwitchBot
     public enum ApiServerAct
     {
         CheckVersion,
-        GetUpdateLog
+        GetUpdateLog,
+        Report
     }
     public enum ApiServerOutFormat
     {

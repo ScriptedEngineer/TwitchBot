@@ -21,7 +21,7 @@ namespace TwitchBot
         public bool DeferredRun = false;
         private bool runEveryTime = false;
         private bool Runing;
-        private List<string> Deferred = new List<string>();
+        private readonly List<string> Deferred = new List<string>();
         private string DefereData = "";
         public RewardEvent()
         {
