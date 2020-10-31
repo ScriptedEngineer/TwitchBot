@@ -24,49 +24,15 @@ namespace TwitchBot
     {
         public Startup()
         {
-            //Заметаем следы обновления
-            if (File.Exists("update.vbs"))
-            {
-                File.Delete("update.vbs");
-                while (File.Exists("TwitchLib.dll"))
-                {
-                    try
-                    {
-                        File.Delete("TwitchLib.dll");
-                    }
-                    catch
-                    {
-                        Thread.Sleep(1000);
-                    }
-                }
-            }
             //Загрузка зависимостей программы
-            if (!File.Exists("TwitchLib.dll"))
+            if (!File.Exists("TwitchLib.dll") || !File.Exists("websocket-sharp.dll"))
             {
-                try
-                {
-                    WebClient web = new WebClient();
-                    web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/TwitchLib.dll"), "TwitchLib.dll");
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message, "Ошибка загрузки TwitchLib.dll", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                new Updater().Show();
             }
-
-            if (!File.Exists("websocket-sharp.dll"))
+            else
             {
-                try
-                {
-                    WebClient web = new WebClient();
-                    web.DownloadFile(new Uri(@"https://wsxz.ru/downloads/websocket-sharp.dll"), "websocket-sharp.dll");
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message, "Ошибка загрузки websocket-sharp.dll", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                new MainWindow().Show();
             }
-            new MainWindow().Show();
             InitializeComponent();
             Close();
         }

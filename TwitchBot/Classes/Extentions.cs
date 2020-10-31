@@ -21,7 +21,7 @@ namespace TwitchBot
     public static class Extentions
     {
         public static MediaPlayer Player = new MediaPlayer();
-       // public static SoundPlayer WavePlayer = new SoundPlayer();
+        // public static SoundPlayer WavePlayer = new SoundPlayer();
         public static SpeechSynthesizer SpeechSynth = new SpeechSynthesizer();
         public static List<Prompt> Speechs = new List<Prompt>();
         public static string Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -53,7 +53,7 @@ namespace TwitchBot
                     return client.DownloadString(Url);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return e.Message;
             }
@@ -106,23 +106,23 @@ namespace TwitchBot
         {
             if (SpeechSynth.Rate == 0)
                 return 1;
-            else if(SpeechSynth.Rate > 0)
+            else if (SpeechSynth.Rate > 0)
             {
-                return (float)(1+(SpeechSynth.Rate * 0.1));
+                return (float)(1 + (SpeechSynth.Rate * 0.1));
             }
             else
             {
-                return (float)(1-((SpeechSynth.Rate*-1d)/20d));
+                return (float)(1 - ((SpeechSynth.Rate * -1d) / 20d));
             }
         }
 
         public static void GetTrueTTSReady(string Text, string Voice = @"alena")
         {
             string Setts = @"{
-""message"":""" + Text.Replace(@"""",@".").Replace(@"\",@"\\") + @""",
+""message"":""" + Text.Replace(@"""", @".").Replace(@"\", @"\\") + @""",
 ""language"":""ru-RU"",
-""speed"":" + RateToSpeed().ToString().Replace(",",".") + @",
-""voice"":"""+ Voice + @""",
+""speed"":" + RateToSpeed().ToString().Replace(",", ".") + @",
+""voice"":""" + Voice + @""",
 ""emotion"":""good"",
 ""format"":""lpcm""
 }";
@@ -133,7 +133,7 @@ namespace TwitchBot
             reqGetUser.ContentType = "application/json;charset=UTF-8";
             reqGetUser.Method = "POST";
             reqGetUser.Headers["x-csrf-token"] = MySave.Current.YPT;
-            reqGetUser.Headers["Cookie"] = @"XSRF-TOKEN="+HttpUtility.UrlEncode(MySave.Current.YPT);
+            reqGetUser.Headers["Cookie"] = @"XSRF-TOKEN=" + HttpUtility.UrlEncode(MySave.Current.YPT);
             reqGetUser.ContentLength = byteArray.Length;
             Stream dataStream = reqGetUser.GetRequestStream();
             dataStream.Write(byteArray, 0, byteArray.Length);
@@ -141,12 +141,11 @@ namespace TwitchBot
             WebResponse response;
             try
             {
-                
                 response = reqGetUser.GetResponse();
                 Stream receiveStream = response.GetResponseStream();
-                if (File.Exists("YAPI.wav")) File.Delete("YAPI.wav");
-                TempFileID++;
-                using (FileStream tempfile = new FileStream(Path.GetTempPath() + "/YAPI" + TempFileID + ".wav", FileMode.OpenOrCreate))
+                string FileX = Path.GetTempPath() + "/TwitchBot-TrueTTS.wav";
+                if (File.Exists(FileX)) File.Delete(FileX);
+                using (FileStream tempfile = new FileStream(FileX, FileMode.OpenOrCreate))
                 {
                     WriteWavHeader(tempfile, false, 1, 16, 48000, -1);
                     CopyStream(receiveStream, tempfile);
@@ -174,10 +173,9 @@ namespace TwitchBot
             }
         }
         static bool TrueTTSReady = false;
-        static int TempFileID = 0;
         public static void TrueTTS(string Text, string Voice = "")
         {
-            string path = Path.GetTempPath() + "/YAPI" + TempFileID + ".wav";
+            string path = Path.GetTempPath() + "/TwitchBot-TrueTTS.wav";
             if (!TrueTTSReady || !File.Exists(path))
             {
                 TextToSpeech(Text, Voice);
@@ -200,7 +198,7 @@ namespace TwitchBot
             {
                 Player.Close();
             });
-            if(File.Exists(path)) File.Delete(path);
+            if (File.Exists(path)) File.Delete(path);
             TrueTTSReady = false;
         }
         public static void CopyStream(Stream input, Stream output)
@@ -262,7 +260,7 @@ namespace TwitchBot
             // Sub-chunk 2 size.
             stream.Write(BitConverter.GetBytes((bitDepth / 8) * totalSampleCount), 0, 4);
         }
-        public static int TrueRandom(int min, int max) => TrueRandom(min, max,1)[0];
+        public static int TrueRandom(int min, int max) => TrueRandom(min, max, 1)[0];
         public static int[] TrueRandom(int min, int max, int count = 1)
         {
             List<int> vs = new List<int>();
@@ -284,7 +282,7 @@ namespace TwitchBot
                         while (vs.Contains(ret))
                         {
                             ret++;
-                            if (ret > max && max-min >= count) 
+                            if (ret > max && max - min >= count)
                                 ret = min;
                         }
                         vs.Add(ret);
@@ -292,18 +290,18 @@ namespace TwitchBot
                 }
             else
             {
-                for (int s = 0; s < count;s++)
+                for (int s = 0; s < count; s++)
                 {
                     while (vs.Contains(min))
                     {
                         min++;
                         //if (min > max && max - min >= count)
-                         //   min = min;
+                        //   min = min;
                     }
                     vs.Add(min);
                 }
             }
-            
+
             return vs.ToArray();
         }
 
@@ -358,7 +356,7 @@ namespace TwitchBot
                 double n = 0;
                 for (var i = 0; i < a.Length; i++)
                 {
-                    n += (Array.IndexOf(cc,a.Substring(a.Length - i - 1, 1)) * Math.Pow(cc.Length, i));
+                    n += (Array.IndexOf(cc, a.Substring(a.Length - i - 1, 1)) * Math.Pow(cc.Length, i));
                 };
                 return (byte)n;
             }
@@ -372,6 +370,16 @@ namespace TwitchBot
                 }
                 return new string(s.Reverse().ToArray());
             }
+        }
+    }
+
+    public class T2S
+    {
+        public string V1, V2;
+        public T2S(string v1,string v2)
+        {
+            V1 = v1;
+            V2 = v2;
         }
     }
 

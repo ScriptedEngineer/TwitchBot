@@ -439,7 +439,7 @@ namespace TwitchBot
         }
 
         readonly Dictionary<string, string> Queue = new Dictionary<string, string>();
-        (string, string) Current;
+        T2S Current;
         private void Donation(object Sender, DonationEventArgs e)
         {
             if (MySave.Current.Bools[6])
@@ -535,7 +535,7 @@ namespace TwitchBot
             {
                 case BanType.BanOrTimeout:
                     string Nick = e.NickName.ToLower();
-                    if (Current.Item2 == Nick)
+                    if (Current.V2 == Nick)
                         Extentions.AsyncWorker(() => AcSwitch(null));
                     foreach (var item in Queue.Where(kvp => kvp.Value == Nick).ToList())
                     {
@@ -543,7 +543,7 @@ namespace TwitchBot
                     }
                     break;
                 case BanType.MsgDelete:
-                    if (Current.Item1 == e.MessageID)
+                    if (Current.V1 == e.MessageID)
                         Extentions.AsyncWorker(() => AcSwitch(null));
                     if (Queue.ContainsKey(e.MessageID))
                         Queue.Remove(e.MessageID);
@@ -942,7 +942,7 @@ namespace TwitchBot
                         if (!Queue.ContainsKey(e.ID))
                             return;
                         Queue.Remove(e.ID);
-                        Current = (e.ID, e.NickName.ToLower());
+                        Current = new T2S(e.ID, e.NickName.ToLower());
                         if (!MySave.Current.Bools[0] || (eMessage.Length >= MySave.Current.Nums[3] && MySave.Current.Bools[4]))
                             return;
                         SpeechTask = Thread.CurrentThread;
@@ -1055,7 +1055,7 @@ namespace TwitchBot
         }
 
         readonly Dictionary<int, string> Votes = new Dictionary<int, string>();
-        private (string, string) GetVotes(bool addVotes = false)
+        private T2S GetVotes(bool addVotes = false)
         {
             int Winner = -1;
             Dictionary<int, int> voting = new Dictionary<int, int>();
@@ -1092,7 +1092,7 @@ namespace TwitchBot
             {
                 kvpo += "[" + (Votes.ContainsKey(kvpe.Key) ? Votes[kvpe.Key] : kvpe.Key.ToString()) + " = " + ((float)kvpe.Value / (float)Votings.Count()).ToString("0.0%") + "];   ";
             }*/
-            return (win, (string.IsNullOrEmpty(end) ? "" : end) + " Проголосовало: " + Votings.Count);
+            return new T2S(win, (string.IsNullOrEmpty(end) ? "" : end) + " Проголосовало: " + Votings.Count);
         }
         private void DisplayVotes()
         {
@@ -1140,7 +1140,7 @@ namespace TwitchBot
                     bTimer?.Close();
                     var x = GetVotes(true);
                     if (!IsGame)
-                        ClientSendMessage($"Голосование окончено. {x.Item1} Результаты: {x.Item2}");
+                        ClientSendMessage($"Голосование окончено. {x.V1} Результаты: {x.V2}");
                     else
                     {
                         int.TryParse(WinCount.Text, out int countsdvin);
@@ -1169,7 +1169,7 @@ namespace TwitchBot
             if (IsVoting)
             {
                 if (Votings.Count > 0)
-                    ClientSendMessage("Голосование на текуший момент: " + GetVotes().Item2);
+                    ClientSendMessage("Голосование на текуший момент: " + GetVotes().V2);
                 else
                     ClientSendMessage("Еще никто не проголосавал.");
             }

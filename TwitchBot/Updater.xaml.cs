@@ -25,13 +25,13 @@ namespace TwitchBot
     public partial class Updater : Window
     {
         readonly string UpdaterPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Updater.exe");
-        public Updater()
+        public Updater(bool force = false)
         {
             InitializeComponent();
             string lastVersion, downloadURL;
             using (var client = new System.Net.WebClient())
             {
-                client.Headers.Add("User-Agent", "SE-BlueprintEditor");
+                client.Headers.Add("User-Agent", "TwitchBot");
                 client.Encoding = Encoding.UTF8;
                 string git_ingo = client.DownloadString("https://api.github.com/repos/ScriptedEngineer/AutoUpdater/releases");
                 lastVersion = Extentions.RegexMatch(git_ingo, @"""tag_name"":""([^""]*)""");
