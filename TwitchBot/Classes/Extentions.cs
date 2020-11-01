@@ -188,6 +188,7 @@ namespace TwitchBot
                 {
                     return;
                 }*/
+                Player.Open(new Uri("./TwitchBot-TrueTTS.wav", UriKind.Relative));
                 Player.Open(new Uri(path, UriKind.Absolute));
                 Player.Volume = MySave.Current.Nums[4] / 100d;
                 Player.Play();
@@ -198,6 +199,12 @@ namespace TwitchBot
             {
                 Player.Close();
             });
+            if (File.Exists(path)) File.Delete(path);
+            TrueTTSReady = false;
+        }
+        public static void ClearTrueTTSFiles()
+        {
+            string path = Path.GetTempPath() + "/TwitchBot-TrueTTS.wav";
             if (File.Exists(path)) File.Delete(path);
             TrueTTSReady = false;
         }

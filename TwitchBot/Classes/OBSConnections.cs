@@ -29,6 +29,7 @@ namespace TwitchBot
             }
         }
 
+        //Controll
         public static void SetSourceEnabled(string Source, bool Enabled)
         {
             SendPackage("SetSceneItemProperties", new Dictionary<string, string>() {
@@ -50,6 +51,13 @@ namespace TwitchBot
                 {"position","{\"x\":"+x+",\"y\":"+y+"}"}
             });
         }
+        public static void SetSourceScale(string Source, string x, string y)
+        {
+            SendPackage("SetSceneItemProperties", new Dictionary<string, string>() {
+                {"item",Source},
+                {"scale","{\"x\":"+x+",\"y\":"+y+"}"}
+            });
+        }
         public static void SetScene(string Scene)
         {
             SendPackage("SetCurrentScene", new Dictionary<string, string>() {
@@ -68,6 +76,7 @@ namespace TwitchBot
             SendPackage("TransitionToProgram", new Dictionary<string, string>());
         }
 
+        //Tech Met
         public static void ReAuth()
         {
             if (WSock == null || !WSock.IsAlive)
@@ -75,7 +84,6 @@ namespace TwitchBot
             MSGID++;
             WSock.Send(@"{""request-type"":""GetAuthRequired"",""message-id"":""-2""}");
         }
-
         private static void SendPackage(string Type,Dictionary<string,string> parames)
         {
             if (!WSock.IsAlive) 
@@ -92,6 +100,8 @@ namespace TwitchBot
             MSGID++;
             WSock.Send(@"{""request-type"":"""+ Type + @"""," + parameters + @"""message-id"":""" + MSGID + @"""}");
         }
+        
+        //WebSocket Methods
         private void WSock_OnOpen(object sender, EventArgs e)
         {
             MSGID++;

@@ -1526,6 +1526,7 @@ namespace TwitchBot
             Extentions.SpeechSynth.SpeakAsyncCancelAll();
             SpeechTask?.Abort();
             Extentions.SpeechSynth.Rate = TTSrate;
+            Extentions.ClearTrueTTSFiles();
         }
 
         WinHotKey SwitcherKey;

@@ -229,6 +229,13 @@ namespace TwitchBot
                                                 OBSWebSock.SetSourcePosition(rc[0].Trim(), rc[1].Trim(), rc[2].Trim());
                                         }
                                         break;
+                                    case "Scale":
+                                        {
+                                            string[] rc = Regex.Replace(command, "^OBS Source Scale ", "").Trim().Split('.');
+                                            if (rc.Length >= 3)
+                                                OBSWebSock.SetSourceScale(rc[0].Trim(), rc[1].Trim(), rc[2].Trim());
+                                        }
+                                        break;
                                 }
                                 break;
                             case "Audio":
@@ -245,6 +252,11 @@ namespace TwitchBot
                             case "Scene":
                                 {
                                     OBSWebSock.SetScene(Regex.Replace(command, "^OBS Scene ", "").Trim());
+                                }
+                                break;
+                            case "Transition":
+                                {
+                                    OBSWebSock.SendTransition();
                                 }
                                 break;
                         }
